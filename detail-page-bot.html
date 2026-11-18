@@ -256,6 +256,25 @@
     .modal-body textarea{ min-height:34vh; }
   }
 
+  /* ---------- image generation ---------- */
+  .img-fields{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:2px; }
+  @media (max-width:640px){ .img-fields{ grid-template-columns:1fr; } }
+  #imgPrompt{ min-height:170px; }
+  .img-hint{ font-size:11.5px; color:var(--muted); margin:8px 0 0; line-height:1.55; }
+  .img-run{
+    display:flex; align-items:center; gap:9px; margin:12px 0 0;
+    background:var(--brand-soft); border:1px solid #ffd9cd; color:#8a2c14;
+    border-radius:10px; padding:9px 12px; font-size:12.5px; font-weight:600;
+  }
+  .img-run[hidden]{ display:none; }
+  .img-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; }
+  @media (max-width:640px){ .img-grid{ grid-template-columns:1fr; } }
+  .img-item{ border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#fcfcfd; display:flex; flex-direction:column; }
+  .img-item img{ width:100%; max-height:420px; object-fit:contain; background:#f1f2f5; display:block; }
+  .img-meta{ padding:9px 11px 0; font-size:11.5px; color:var(--muted); line-height:1.5; }
+  .img-tools{ display:flex; gap:6px; flex-wrap:wrap; padding:8px 11px 11px; margin-top:auto; }
+  .img-tools a.btn{ text-decoration:none; color:#272b33; }
+
   /* ---------- generation status ---------- */
   .runbar{ margin-top:12px; display:none; }
   .runbar.show{ display:block; }
@@ -690,6 +709,7 @@
             <button class="btn btn-ghost" id="clearFormBtn">입력 초기화</button>
             <div class="spacer"></div>
             <button class="btn" id="promptOnlyBtn" title="API 키 없이 다른 AI에 붙여넣을 프롬프트를 복사합니다">프롬프트만 복사</button>
+            <button class="btn" id="imageBtn" title="Gemini 이미지 모델로 상세페이지용 상품컷을 만듭니다">🎨 이미지 생성</button>
             <button class="btn btn-primary" id="generateBtn">기획서 생성</button>
             <button class="btn" id="stopBtn" style="display:none">중단</button>
           </div>
@@ -721,6 +741,7 @@
           <div class="out-tools">
             <button class="btn btn-sm" id="copyAllBtn">전체 복사</button>
             <button class="btn btn-sm" id="copyPromptBtn">프롬프트만 복사</button>
+            <button class="btn btn-sm" id="imgTopBtn">🎨 상세 이미지 생성</button>
             <button class="btn btn-sm" id="dlHtmlBtn">HTML 다운로드</button>
             <button class="btn btn-sm" id="dlMdBtn">텍스트(.md) 다운로드</button>
             <button class="btn btn-sm btn-ghost" id="printBtn">인쇄</button>
@@ -743,6 +764,18 @@
           <div class="big">📄</div>
           상품 정보를 입력하고 <b>기획서 생성</b>을 누르면<br>
           7개 섹션의 카피·이미지 지시가 여기에 정리됩니다.
+        </div>
+      </section>
+
+      <section class="card" id="imgCard" style="display:none">
+        <div class="card-head">
+          <h2>🖼 생성 이미지</h2>
+          <span class="sub" id="imgCount">0장</span>
+          <div class="spacer"></div>
+          <button class="btn btn-sm btn-ghost" id="imgClearBtn">전체 지우기</button>
+        </div>
+        <div class="card-body">
+          <div class="img-grid" id="imgGrid"></div>
         </div>
       </section>
 
@@ -781,6 +814,58 @@
     <div class="modal-foot">
       <button class="btn btn-ghost" type="button" id="importCancelBtn">취소</button>
       <button class="btn btn-primary" type="button" id="importApplyBtn">적용하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="imgModal" hidden>
+  <div class="modal-backdrop" data-img-close="1"></div>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="imgTitle">
+    <div class="modal-head">
+      <h2 id="imgTitle">🎨 상세 이미지 생성</h2>
+      <button class="btn btn-sm btn-ghost x" type="button" id="imgCloseBtn" aria-label="닫기">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="img-fields">
+        <div class="field">
+          <label class="lbl" for="imgShot">컷 종류</label>
+          <select id="imgShot">
+            <option value="hero">Hero 메인 배너</option>
+            <option value="lifestyle">포즈 · 라이프스타일 컷</option>
+            <option value="detail">소재·디테일 클로즈업</option>
+            <option value="usage">사용 장면</option>
+            <option value="package">패키지 · 구성품</option>
+            <option value="compare">전/후 비교 컷</option>
+            <option value="custom">직접 입력 (프롬프트만 사용)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="lbl" for="imgAspect">비율</label>
+          <select id="imgAspect">
+            <option value="">모델 기본 (1:1)</option>
+            <option value="4:3">4:3 가로</option>
+            <option value="3:4">3:4 세로</option>
+            <option value="16:9">16:9 배너</option>
+            <option value="9:16">9:16 모바일</option>
+            <option value="1:1">1:1 정사각</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl" for="imgPrompt">프롬프트 <span class="hint">영어가 잘 먹습니다 · 비우면 상품 정보로 자동 작성</span></label>
+        <textarea id="imgPrompt" rows="8" spellcheck="false" autocomplete="off"></textarea>
+      </div>
+      <p class="img-hint">위 상품 정보 칸의 값(상품명·특징·타깃·톤)을 그대로 씁니다. 기본 프롬프트는 이미지에 <b>글자·로고가 들어가지 않게</b> 요청합니다. 결과는 아래 <b>🖼 생성 이미지</b>에 모입니다.</p>
+      <div class="img-run" id="imgRun" hidden>
+        <span class="spinner" id="imgSpin"></span>
+        <span id="imgRunText">생성 준비 중…</span>
+        <span style="margin-left:auto; font-variant-numeric:tabular-nums" id="imgElapsed">0초</span>
+      </div>
+      <p class="import-error" id="imgError" role="alert" hidden></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" type="button" id="imgCancelBtn">취소</button>
+      <button class="btn btn-primary" type="button" id="imgGenBtn">이미지 생성</button>
     </div>
   </div>
 </div>
@@ -2734,6 +2819,431 @@
     renderHistory();
     toast('기록을 모두 삭제했습니다.');
   });
+
+  /* =========================================================
+     Image generation — Gemini image models
+     Uses the same key list as the planner, with key failover.
+     ========================================================= */
+  var IMG_MODELS = ['gemini-2.5-flash-image', 'gemini-2.0-flash-preview-image-generation'];
+
+  var SHOT_PRESETS = {
+    hero: {
+      label: 'Hero 메인 배너',
+      text: 'Main hero image for the top of a Korean e-commerce detail page. The product is the clear hero, placed on a clean seamless background with a soft gradient and generous negative space at the top for a headline later.'
+    },
+    lifestyle: {
+      label: '포즈 · 라이프스타일 컷',
+      text: 'Lifestyle shot of one real person who matches the target customer using or holding the product in a bright, natural home or office setting. Candid and warm, shallow depth of field, the product clearly visible.'
+    },
+    detail: {
+      label: '소재·디테일 클로즈업',
+      text: 'Macro close-up of the material and craftsmanship details of the product (texture, stitching, finish). Dramatic side light, shallow depth of field, premium feel.'
+    },
+    usage: {
+      label: '사용 장면',
+      text: 'Practical usage scene: hands interacting with the product in a realistic setting, showing how it is used step by step, natural daylight, simple and believable.'
+    },
+    package: {
+      label: '패키지 · 구성품',
+      text: 'Flat-lay of the full package contents on a clean surface: the product, its accessories, quick guide and gift box. Neat top-down composition with soft shadows.'
+    },
+    compare: {
+      label: '전/후 비교 컷',
+      text: 'Split composition suggesting the before and after of using the product, the same angle and lighting on both sides, without any text or labels.'
+    },
+    custom: { label: '직접 입력', text: '' }
+  };
+
+  var gallery = [];
+  var imgBusy = false;
+  var imgAbort = null;
+  var imgElapsedTimer = null;
+  var imgStartedAt = 0;
+
+  function buildImagePrompt(shotKey) {
+    var f = readForm();
+    var shot = SHOT_PRESETS[shotKey] || SHOT_PRESETS.hero;
+    var lines = [
+      'Create a high-end commercial product photograph for a Korean e-commerce detail page.',
+      ''
+    ];
+    if (f.fProduct) lines.push('PRODUCT: ' + f.fProduct);
+    if (f.fCategory) lines.push('CATEGORY: ' + f.fCategory);
+    if (f.fFeatures) lines.push('KEY FEATURES / SPECS: ' + f.fFeatures);
+    if (f.fTarget) lines.push('TARGET CUSTOMER: ' + f.fTarget);
+    if (f.fTone) lines.push('BRAND TONE: ' + f.fTone);
+    if (shot.text) {
+      lines.push('');
+      lines.push('SHOT: ' + shot.text);
+    }
+    lines.push('');
+    lines.push('STYLE: realistic commercial photography, crisp focus, soft natural light, premium Korean D2C brand look, high resolution.');
+    lines.push('RULES: Do not render any text, letters, numbers, logos, watermarks or UI elements inside the image. No products other than the one described. Keep the product exactly as described.');
+    return lines.join('\n');
+  }
+
+  function refreshImagePrompt(force) {
+    var ta = $('imgPrompt');
+    if (!ta) return;
+    if (!force && ta.getAttribute('data-auto') === '0') return;
+    ta.value = buildImagePrompt($('imgShot').value);
+    ta.setAttribute('data-auto', '1');
+  }
+
+  function showImgError(msg) {
+    var el = $('imgError');
+    if (!el) return;
+    el.textContent = msg;
+    el.hidden = false;
+  }
+
+  function hideImgError() {
+    var el = $('imgError');
+    if (!el) return;
+    el.textContent = '';
+    el.hidden = true;
+  }
+
+  function openImgModal() {
+    if (imgBusy) return;
+    hideImgError();
+    refreshImagePrompt(false);
+    if (!$('imgPrompt').value) refreshImagePrompt(true);
+    $('imgModal').hidden = false;
+    document.body.style.overflow = 'hidden';
+    setTimeout(function () { try { $('imgGenBtn').focus(); } catch (e) { /* ignore */ } }, 30);
+  }
+
+  function closeImgModal() {
+    $('imgModal').hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  function setImgRunning(on, text) {
+    imgBusy = on;
+    $('imgRun').hidden = !on;
+    $('imgGenBtn').disabled = on;
+    $('imgGenBtn').textContent = on ? '생성 중…' : '이미지 생성';
+    $('imgSpin').style.display = on ? '' : 'none';
+    if (on) {
+      $('imgRunText').textContent = text || '생성 중…';
+      imgStartedAt = Date.now();
+      $('imgElapsed').textContent = '0초';
+      clearInterval(imgElapsedTimer);
+      imgElapsedTimer = setInterval(function () {
+        $('imgElapsed').textContent = fmtRelative(Date.now() - imgStartedAt);
+      }, 1000);
+    } else {
+      clearInterval(imgElapsedTimer);
+      imgElapsedTimer = null;
+    }
+  }
+
+  function imageDataUrl(im) {
+    var mime = im.mime || 'image/png';
+    return 'data:' + mime + ';base64,' + im.data;
+  }
+
+  function addImagesToGallery(images, meta) {
+    images.forEach(function (im) {
+      var mime = im.mime || 'image/png';
+      gallery.unshift({
+        id: uid(),
+        src: imageDataUrl(im),
+        mime: mime,
+        ext: mime.indexOf('jpeg') >= 0 || mime.indexOf('jpg') >= 0 ? 'jpg' : 'png',
+        label: meta.label || '상세 이미지',
+        product: meta.product || '',
+        model: meta.model || '',
+        keyLabel: meta.keyLabel || '',
+        prompt: meta.prompt || '',
+        at: nowISO()
+      });
+    });
+    if (gallery.length > 12) gallery.length = 12;
+    renderGallery();
+  }
+
+  function renderGallery() {
+    var grid = $('imgGrid'), card = $('imgCard');
+    if (!grid || !card) return;
+    card.style.display = gallery.length ? '' : 'none';
+    $('imgCount').textContent = gallery.length + '장';
+    if (!gallery.length) { grid.innerHTML = ''; return; }
+    grid.innerHTML = gallery.map(function (g, i) {
+      var fname = safeFileName((g.product || '상품') + '_' + g.label + '_' + todayStamp()) + '_' + (i + 1) + '.' + g.ext;
+      return '<div class="img-item" data-id="' + g.id + '">' +
+        '<img src="' + g.src + '" alt="' + escapeHtml(g.label) + '">' +
+        '<div class="img-meta">' + escapeHtml(g.label) +
+          (g.model ? ' · ' + escapeHtml(g.model) : '') +
+          ' · ' + escapeHtml(fmtDate(g.at)) + '</div>' +
+        '<div class="img-tools">' +
+          '<a class="btn btn-sm" href="' + g.src + '" download="' + escapeHtml(fname) + '">이미지 다운로드 (.' + g.ext + ')</a>' +
+          '<button class="btn btn-sm btn-ghost btn-danger-ghost" type="button" data-act="del-img">삭제</button>' +
+        '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  /* one image request; retries without imageConfig when an older model rejects it */
+  function callGeminiImage(apiKey, model, prompt, aspect, signal) {
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/' +
+      encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(apiKey);
+
+    function body(withAspect) {
+      var gc = { responseModalities: ['IMAGE', 'TEXT'] };
+      if (withAspect && aspect) gc.imageConfig = { aspectRatio: aspect };
+      return JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: gc
+      });
+    }
+
+    function send(withAspect) {
+      return fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: body(withAspect),
+        signal: signal
+      }).then(function (res) {
+        return res.text().then(function (t) { return { res: res, text: t }; });
+      }).then(function (r) {
+        var json = null;
+        try { json = JSON.parse(r.text); } catch (e) { json = null; }
+        if (!r.res.ok) {
+          var msg = (json && json.error && json.error.message) ? json.error.message : r.text;
+          var err = new Error(msg || ('HTTP ' + r.res.status));
+          err.httpStatus = r.res.status;
+          err.detail = msg;
+          throw err;
+        }
+        if (!json) {
+          var e2 = new Error('응답을 해석하지 못했습니다. (JSON 아님)');
+          e2.httpStatus = 0;
+          e2.detail = r.text.slice(0, 200);
+          throw e2;
+        }
+        if (json.promptFeedback && json.promptFeedback.blockReason) {
+          var e3 = new Error('요청이 안전 정책으로 차단되었습니다: ' + json.promptFeedback.blockReason);
+          e3.httpStatus = 0;
+          e3.detail = json.promptFeedback.blockReason;
+          throw e3;
+        }
+        var cands = json.candidates || [];
+        var images = [], texts = [];
+        cands.forEach(function (cand) {
+          var parts = (cand && cand.content && cand.content.parts) ? cand.content.parts : [];
+          parts.forEach(function (p) {
+            if (!p) return;
+            var inline = p.inlineData || p.inline_data;
+            if (inline && inline.data) {
+              images.push({ mime: inline.mimeType || inline.mime_type || 'image/png', data: inline.data });
+            } else if (p.text && !p.thought) {
+              texts.push(p.text);
+            }
+          });
+        });
+        if (!images.length) {
+          var e4 = new Error(texts.length
+            ? ('이미지 없이 텍스트만 돌아왔습니다: ' + texts.join(' ').slice(0, 160))
+            : '이미지를 받지 못했습니다.');
+          e4.httpStatus = 0;
+          e4.detail = texts.join(' ').slice(0, 200);
+          throw e4;
+        }
+        return { images: images, text: texts.join(' ').trim(), finishReason: (cands[0] && cands[0].finishReason) || '' };
+      });
+    }
+
+    return send(!!aspect).catch(function (err) {
+      var d = String(err.detail || err.message || '');
+      if (aspect && err.httpStatus === 400 && /imageconfig|aspect/i.test(d)) return send(false);
+      throw err;
+    });
+  }
+
+  function generateImage() {
+    if (imgBusy) return;
+    hideImgError();
+
+    var prompt = ($('imgPrompt').value || '').trim();
+    if (!prompt) { showImgError('프롬프트가 비어 있습니다. 컷 종류를 고르거나 직접 입력해 주세요.'); return; }
+
+    var f = readForm();
+    if (!f.fProduct) { showImgError('상품명을 먼저 채워 주세요. (상품 정보 칸)'); return; }
+
+    var order = usableKeys();
+    if (!keys.length) { showImgError('Gemini API 키를 먼저 추가해 주세요. 왼쪽 1번 칸에서 붙여넣고 [+ 키 추가].'); return; }
+    if (!order.length) { showImgError('모든 키가 한도초과/만료 상태입니다. [상태 초기화]를 누르거나 새 키를 추가해 주세요.'); return; }
+
+    var shotKey = $('imgShot').value;
+    var shotLabel = (SHOT_PRESETS[shotKey] || SHOT_PRESETS.hero).label;
+    var aspect = $('imgAspect').value || '';
+
+    var attempts = [];
+    order.forEach(function (k) {
+      IMG_MODELS.forEach(function (m) { attempts.push({ key: k, model: m }); });
+    });
+
+    var idx = 0, lastNote = '', lastDetail = '', sawQuota = false, sawModel = false;
+    imgAbort = new AbortController();
+    setImgRunning(true, '요청 준비 중…');
+
+    function finishWithError(msg) {
+      setImgRunning(false);
+      showImgError(msg);
+    }
+
+    function next() {
+      if (abortReason === 'img-user') { setImgRunning(false); return; }
+      if (idx >= attempts.length) {
+        var msg;
+        if (sawQuota) {
+          msg = '이미지 생성 한도에 걸렸습니다(429). Gemini 무료 등급은 이미지 생성이 제한될 수 있습니다 — 결제가 연결된 Google 계정 키를 추가하거나 잠시 뒤 다시 시도해 주세요.';
+        } else if (sawModel) {
+          msg = '이미지 모델을 사용할 수 없습니다(' + IMG_MODELS.join(' / ') + '). 키의 권한·리전을 확인해 주세요.';
+        } else {
+          msg = '이미지를 만들지 못했습니다. ' + (lastNote || '잠시 뒤 다시 시도해 주세요.');
+        }
+        finishWithError(msg + (lastDetail ? '\n(' + lastDetail.slice(0, 220) + ')' : ''));
+        return;
+      }
+
+      var a = attempts[idx];
+      var k = a.key, model = a.model;
+      $('imgRunText').textContent = model + ' · ' + k.label + ' 시도 중 (' + (idx + 1) + '/' + attempts.length + ')';
+      k.status = 'active';
+      saveKeys();
+      renderKeys();
+
+      var timer = setTimeout(function () { try { imgAbort.abort(); } catch (e) {} }, 180000);
+
+      callGeminiImage(k.key, model, prompt, aspect, imgAbort.signal)
+        .then(function (result) {
+          clearTimeout(timer);
+          k.status = 'idle';
+          k.uses = (k.uses || 0) + 1;
+          k.lastUsed = nowISO();
+          k.note = '마지막 사용 ' + fmtDate(nowISO());
+          saveKeys();
+          renderKeys();
+
+          addImagesToGallery(result.images, {
+            label: shotLabel, product: f.fProduct, model: model, keyLabel: k.label, prompt: prompt
+          });
+          setImgRunning(false);
+          closeImgModal();
+          toast('이미지 ' + result.images.length + '장을 만들었습니다. 아래 🖼 생성 이미지에서 다운로드하세요.');
+          try { $('imgCard').scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { /* ignore */ }
+        })
+        .catch(function (err) {
+          clearTimeout(timer);
+          if (abortReason === 'img-user') { setImgRunning(false); return; }
+          if (err && err.name === 'AbortError') {
+            k.status = 'error';
+            k.note = '응답 시간 초과(180초)';
+            lastNote = k.note;
+            lastDetail = 'timeout';
+            saveKeys();
+            renderKeys();
+            idx++;
+            setTimeout(next, 200);
+            return;
+          }
+
+          var status = err.httpStatus || 0;
+          var cls = classifyError(status, err.detail || err.message || '');
+          lastDetail = String(err.detail || err.message || '');
+
+          if (status === 404 && /model|not found|not supported/i.test(lastDetail + ' ' + model)) {
+            sawModel = true;
+            k.status = 'idle';
+            saveKeys();
+            renderKeys();
+            idx++;
+            setTimeout(next, 200);
+            return;
+          }
+          if (status === 400 && cls.status !== 'invalid') {
+            k.status = 'idle';
+            saveKeys();
+            renderKeys();
+            finishWithError('요청이 거절되었습니다(400). ' + lastDetail.slice(0, 240));
+            return;
+          }
+
+          k.status = cls.status === 'invalid' ? 'invalid' : (cls.status === 'quota' ? 'quota' : 'error');
+          k.note = cls.note;
+          if (cls.status === 'quota') sawQuota = true;
+          lastNote = cls.note;
+          saveKeys();
+          renderKeys();
+          idx++;
+          setTimeout(next, 350);
+        });
+    }
+
+    next();
+  }
+
+  function stopImage() {
+    if (!imgBusy) return;
+    abortReason = 'img-user';
+    if (imgAbort) { try { imgAbort.abort(); } catch (e) { /* ignore */ } }
+    setImgRunning(false);
+    showImgError('이미지 생성을 취소했습니다.');
+  }
+
+  (function wireImages() {
+    if (!$('imgGenBtn')) return;
+
+    function openFromBar() { openImgModal(); }
+    $('imageBtn').addEventListener('click', openFromBar);
+    $('imgTopBtn').addEventListener('click', openFromBar);
+
+    $('imgShot').addEventListener('change', function () { refreshImagePrompt(true); });
+    $('imgPrompt').addEventListener('input', function () {
+      $('imgPrompt').setAttribute('data-auto', '0');
+      hideImgError();
+    });
+    $('imgGenBtn').addEventListener('click', generateImage);
+    $('imgCancelBtn').addEventListener('click', function () {
+      if (imgBusy) { stopImage(); return; }
+      closeImgModal();
+    });
+    $('imgCloseBtn').addEventListener('click', function () {
+      if (imgBusy) { stopImage(); return; }
+      closeImgModal();
+    });
+    $('imgModal').addEventListener('click', function (e) {
+      if (e.target && e.target.getAttribute && e.target.getAttribute('data-img-close') && !imgBusy) closeImgModal();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && $('imgModal') && !$('imgModal').hidden) {
+        if (imgBusy) stopImage(); else closeImgModal();
+      }
+    });
+
+    $('imgGrid').addEventListener('click', function (e) {
+      var btn = e.target.closest ? e.target.closest('button[data-act="del-img"]') : null;
+      if (!btn) return;
+      var item = btn.closest('.img-item');
+      if (!item) return;
+      var id = item.getAttribute('data-id');
+      gallery = gallery.filter(function (g) { return g.id !== id; });
+      renderGallery();
+    });
+
+    $('imgClearBtn').addEventListener('click', function () {
+      if (!gallery.length) return;
+      if (!window.confirm('생성한 이미지 ' + gallery.length + '장을 모두 지울까요?')) return;
+      gallery = [];
+      renderGallery();
+      toast('이미지를 모두 지웠습니다.');
+    });
+
+    renderGallery();
+  })();
 
   /* =========================================================
      Buttons
