@@ -1640,6 +1640,7 @@
     pain: 'fPain', pains: 'fPain', 'pain point': 'fPain', 'pain points': 'fPain',
     problem: 'fPain', problems: 'fPain', complaints: 'fPain',
     fpain: 'fPain', '불편': 'fPain', '고통': 'fPain', '문제': 'fPain', '불편사항': 'fPain', '페인': 'fPain',
+    '고객의 불편': 'fPain', '고객의 고통': 'fPain', '고객 불편': 'fPain', '불편·고통': 'fPain',
 
     proof: 'fProof', evidence: 'fProof', usp: 'fProof', differentiator: 'fProof', differentiators: 'fProof',
     'proof points': 'fProof', fproof: 'fProof',
@@ -1656,7 +1657,7 @@
   var TONE_OPTIONS = ['강력한 세일즈', '프리미엄', '친근함', '전문가형'];
 
   function normalizeKey(k) {
-    return String(k == null ? '' : k).toLowerCase().replace(/[\s_\-\/.,:]+/g, '');
+    return String(k == null ? '' : k).toLowerCase().replace(/[\s_\-\/.,:·]+/g, '');
   }
 
   var IMPORT_LOOKUP = (function () {
@@ -1992,7 +1993,8 @@
       hideImportError();
       var res = applyImportPayload($('importText').value, {
         inline: true,
-        clear: !!($('importClear') && $('importClear').checked)
+        clear: !!($('importClear') && $('importClear').checked),
+        title: '붙여넣은 정보로 상품 정보를 채웠습니다.'
       });
       if (res.ok) {
         closeImportModal();
