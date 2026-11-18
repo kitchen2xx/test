@@ -1,0 +1,2665 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script>
+  /* Apply the saved unlock state before first paint, so an unlocked tab
+     never flashes the lock screen. */
+  (function () {
+    try {
+      if (window.sessionStorage.getItem('rp.lock.v1') === 'unlocked') {
+        document.documentElement.className += ' rp-unlocked';
+      }
+    } catch (e) { /* storage blocked: stay locked until the password is entered */ }
+  })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#FAF8F5">
+<title>DutchWhy · 더치와이 — 네덜란드어 단어는 조각으로 읽는다</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="DutchWhy 프로토타입 — 네덜란드어 B1·B2 필수 어휘를 접두사·어근 하나로 꿰는 어원 학습 앱">
+<style>
+/* ============================================================
+   DutchWhy (더치와이) — single-card · 360×780 zero-scroll
+   Layout language borrowed from VocaWhy Option C
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --paper:#FAF8F5;
+  --paper-2:#F2EDE5;
+  --ink:#1B2838;
+  --ink-2:#54626E;
+  --ink-3:#8D99A4;
+  --blue:#1E3A5F;
+  --blue-2:#2F567F;
+  --blue-wash:#ECF1F7;
+  --blue-line:#D9E3EF;
+  --line:#E6DFD4;
+  --line-2:#EFE9E0;
+  --seal:#C9622B;
+  --seal-soft:#FBEEE6;
+  --ok:#2F7A55;
+  --ok-soft:#EFF8F2;
+  --sans:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --shadow:0 10px 24px rgba(30,58,95,.07), 0 2px 5px rgba(30,58,95,.04);
+  --shadow-sm:0 2px 6px rgba(30,58,95,.05);
+}
+html,body{height:100%;margin:0}
+body{
+  font-family:var(--sans);color:var(--ink);
+  background:#E9E4DC;background-image:radial-gradient(130% 80% at 50% -10%,#F7F3ED 0%,#E5DFD6 58%,#DDD6CB 100%);
+  display:flex;align-items:center;justify-content:center;
+  -webkit-font-smoothing:antialiased;overflow:hidden;
+  -webkit-text-size-adjust:100%;
+}
+button{font-family:inherit;-webkit-tap-highlight-color:transparent;color:inherit}
+button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
+::selection{background:#D8E4F1}
+
+/* ---------- phone frame ---------- */
+.phone{
+  position:relative;isolation:isolate;
+  width:100%;max-width:none;height:100vh;height:100dvh;
+  background:var(--paper);display:flex;flex-direction:column;overflow:hidden;
+}
+@media (min-width:430px){
+  body{padding:18px}
+  .phone{
+    width:390px;max-width:390px;
+    height:min(844px,calc(100dvh - 36px));border-radius:38px;
+    box-shadow:0 40px 90px -34px rgba(20,35,52,.48),0 0 0 1px rgba(20,35,52,.07),inset 0 0 0 1px rgba(255,255,255,.7);
+  }
+}
+
+/* ---------- top ---------- */
+.progress{flex:none;height:3px;background:#E8E2D9;position:relative;overflow:hidden;z-index:2}
+.progress i{position:absolute;inset:0 auto 0 0;width:4%;background:linear-gradient(90deg,#E3A47B,var(--seal));border-radius:0 3px 3px 0;transition:width .5s cubic-bezier(.3,.8,.3,1)}
+.topline{flex:none;display:flex;align-items:center;gap:5px;padding:8px 12px 4px}
+.brand{display:flex;align-items:center;gap:6px;min-width:0}
+.brand .seal{
+  width:23px;height:23px;border-radius:7px;background:var(--blue);color:#fff;flex:none;
+  display:grid;place-items:center;font-size:9.5px;font-weight:800;letter-spacing:.01em;
+  box-shadow:0 2px 0 rgba(20,40,60,.15),inset 0 1px 0 rgba(255,255,255,.2);
+}
+.brand b{font-size:13.8px;font-weight:800;color:var(--blue);letter-spacing:-.03em;white-space:nowrap}
+.brand span.tld{font-size:7.6px;font-weight:800;color:var(--seal);letter-spacing:.02em;margin-top:6px;white-space:nowrap;
+  background:var(--seal-soft);border-radius:4px;padding:1px 3px}
+.topline .meta{margin-left:auto;display:flex;align-items:center;gap:2px}
+.counter{
+  font-size:9.8px;font-weight:800;color:var(--blue);background:var(--blue-wash);
+  border:1px solid var(--blue-line);padding:4px 7px;border-radius:999px;white-space:nowrap;letter-spacing:-.01em;
+}
+.iconbtn{
+  width:26px;height:26px;border-radius:8px;border:1px solid transparent;background:transparent;
+  color:var(--ink-2);font-size:13px;line-height:1;display:grid;place-items:center;cursor:pointer;transition:.15s;
+}
+.iconbtn:active{background:var(--paper-2);transform:scale(.94)}
+
+/* ---------- level chips ---------- */
+.levels{flex:none;display:flex;gap:4px;padding:0 12px 5px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.levels::-webkit-scrollbar{display:none}
+.chip{
+  flex:none;display:inline-flex;align-items:center;gap:2px;font-size:9.6px;font-weight:800;letter-spacing:-.02em;
+  padding:4px 8px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink-2);
+  cursor:pointer;line-height:1.2;transition:.15s;white-space:nowrap;
+}
+.chip:active{transform:scale(.96)}
+.chip.on{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 3px 8px -3px rgba(30,58,95,.6)}
+.chip.locked{color:#AC9F8E;background:#F6F2EB;border-style:dashed}
+.chip.locked.on{background:#8C7C68;border-color:#8C7C68;color:#fff}
+
+/* ---------- stage ---------- */
+.stage{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;padding:0 10px 6px}
+.deck{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:7px}
+
+/* ---------- single card ---------- */
+.card{
+  position:relative;flex:1 1 auto;min-height:0;max-height:480px;
+  display:flex;flex-direction:column;
+  background:#fff;border:1px solid var(--line);border-radius:20px;
+  box-shadow:var(--shadow);overflow:hidden;
+  will-change:transform,opacity;
+}
+.card.anim-next{animation:slideL .3s cubic-bezier(.2,.8,.3,1)}
+.card.anim-prev{animation:slideR .3s cubic-bezier(.2,.8,.3,1)}
+@keyframes slideL{from{opacity:.2;transform:translateX(20px)}to{opacity:1;transform:none}}
+@keyframes slideR{from{opacity:.2;transform:translateX(-20px)}to{opacity:1;transform:none}}
+
+.card-head{flex:none;display:flex;align-items:center;gap:5px;padding:10px 11px 0}
+.pos{
+  font-size:9.8px;font-weight:800;color:var(--blue);background:var(--blue-wash);
+  border:1px solid var(--blue-line);padding:3px 7px;border-radius:6px;letter-spacing:-.02em;white-space:nowrap;
+}
+.sep{
+  font-size:8.4px;font-weight:800;color:var(--seal);background:var(--seal-soft);
+  border:1px solid #F1D9C9;padding:2.5px 5px;border-radius:5px;letter-spacing:-.02em;white-space:nowrap;
+}
+.art{
+  font-size:9px;font-weight:800;color:var(--ink-2);background:#F4EFE6;
+  border:1px solid #E9E0D2;padding:2.5px 6px;border-radius:5px;letter-spacing:.01em;white-space:nowrap;
+}
+.lvl{font-size:8.8px;font-weight:800;color:var(--ink-3);letter-spacing:.02em;white-space:nowrap}
+.star{
+  margin-left:auto;width:28px;height:28px;border-radius:50%;border:none;background:transparent;
+  color:#D3C8B6;font-size:15px;line-height:1;display:grid;place-items:center;cursor:pointer;transition:.2s;
+}
+.star.on{color:var(--seal);transform:scale(1.06);text-shadow:0 2px 6px rgba(201,98,43,.25)}
+
+/* hero */
+.hero{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:2px 14px 4px;overflow:hidden}
+.word{
+  font-family:var(--sans);font-weight:800;line-height:1;color:var(--blue);
+  letter-spacing:-.035em;white-space:nowrap;
+  transition:filter .2s,opacity .2s;
+}
+.pron{
+  display:inline-flex;align-items:center;gap:6px;max-width:100%;
+  background:var(--paper-2);border-radius:9px;padding:4px 5px 4px 9px;
+}
+.pron .ipa{font-family:var(--serif);font-size:11.5px;color:var(--ink-2);letter-spacing:.01em;white-space:nowrap}
+.pron .dot{color:#CFC5B6;font-size:9px}
+.pron .syl{font-size:9.4px;font-weight:800;color:var(--ink-3);letter-spacing:.03em;white-space:nowrap}
+.speak{
+  flex:none;width:23px;height:23px;border-radius:7px;border:none;background:#fff;
+  color:var(--blue);font-size:11px;display:grid;place-items:center;cursor:pointer;
+  box-shadow:0 1px 3px rgba(30,58,95,.12);transition:.15s;
+}
+.speak:active{transform:scale(.9);background:var(--blue-wash)}
+.krhint{font-size:9.3px;font-weight:700;color:var(--ink-3);letter-spacing:-.01em;margin-top:-3px}
+.krhint b{color:var(--seal);font-weight:800}
+.core{
+  font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.04em;text-align:center;line-height:1.3;
+  transition:filter .2s,opacity .2s;
+}
+.core small{display:block;font-size:9.4px;font-weight:700;color:var(--ink-3);letter-spacing:0;margin-top:2px}
+
+/* etymology bar inside the card */
+.formula{
+  flex:none;border-top:1px solid var(--line-2);padding:8px 11px 10px;
+  background:linear-gradient(180deg,#FFFDFA,#FBF8F2);
+}
+.fhead{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.flabel{
+  font-size:9.2px;font-weight:800;color:var(--blue);background:var(--blue-wash);
+  border:1px solid var(--blue-line);padding:2px 6px;border-radius:5px;letter-spacing:-.02em;white-space:nowrap;
+}
+.flink{
+  margin-left:auto;border:none;background:none;font-size:9.2px;font-weight:800;color:var(--ink-3);
+  padding:2px 0 2px 6px;cursor:pointer;white-space:nowrap;letter-spacing:-.02em;
+}
+.flink:active{color:var(--blue)}
+.fpills{display:flex;flex-wrap:wrap;align-items:center;gap:3px 4px}
+.pill{
+  display:inline-flex;align-items:center;gap:3px;max-width:100%;
+  background:#F7F3EC;border:1px solid #EDE5D8;border-radius:8px;padding:2.5px 6px 2.5px 4px;
+  cursor:pointer;transition:.15s;line-height:1.15;
+}
+.pill:active{transform:scale(.97);background:#F2ECE1}
+.pill i{font-style:normal;font-size:9.5px;line-height:1}
+.pill b{font-size:10.2px;font-weight:800;color:var(--blue);letter-spacing:-.01em;white-space:nowrap}
+.pill small{font-size:8.4px;font-weight:700;color:var(--ink-3);white-space:nowrap;letter-spacing:-.02em}
+.fop{color:#C9BEAE;font-weight:800;font-size:9.5px}
+.farrow{color:var(--seal);font-weight:800;font-size:10px;padding:0 1px}
+.fresult{font-size:10.2px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.fnote{margin-top:4px;font-size:8.8px;color:var(--ink-3);font-weight:600;line-height:1.35;letter-spacing:-.02em}
+.mask-hint{
+  position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);display:none;z-index:4;
+  font-size:9.2px;font-weight:800;color:var(--blue);background:rgba(255,255,255,.95);
+  border:1px solid var(--blue-line);padding:5px 9px;border-radius:999px;white-space:nowrap;
+  box-shadow:var(--shadow-sm);pointer-events:none;
+}
+.card.masked .core,.card.masked .fresult,.card.masked .fnote,.card.masked .krhint{filter:blur(6px);opacity:.75;user-select:none}
+.card.masked .mask-hint{display:block}
+
+/* ---------- example strip ---------- */
+.exstrip{
+  flex:none;display:flex;align-items:stretch;gap:8px;
+  background:#fff;border:1px solid var(--line);border-radius:13px;
+  padding:8px 9px;box-shadow:var(--shadow-sm);cursor:pointer;
+}
+.exbody{flex:1;min-width:0}
+.extag{
+  display:inline-block;font-size:7.8px;font-weight:800;color:var(--blue-2);background:var(--blue-wash);
+  padding:1.5px 5px;border-radius:4px;letter-spacing:.01em;
+}
+.ex-en{
+  margin:3px 0 0;font-size:10.1px;line-height:1.4;font-weight:700;color:var(--ink);letter-spacing:-.01em;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.ex-ko{
+  margin:2px 0 0;font-size:8.9px;line-height:1.4;color:var(--ink-3);font-weight:600;letter-spacing:-.02em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.exside{flex:none;display:flex;flex-direction:column;justify-content:center;gap:4px}
+.exside button{
+  border:none;border-radius:7px;font-size:8.8px;font-weight:800;padding:5px 6px;cursor:pointer;
+  letter-spacing:-.02em;white-space:nowrap;
+}
+#exSpeak{background:var(--paper-2);color:var(--blue);font-size:10px;padding:4px 6px}
+#exOpen{background:var(--blue-wash);border:1px solid var(--blue-line);color:var(--blue-2)}
+
+/* ---------- bottom bar ---------- */
+.bottombar{
+  flex:none;display:flex;gap:5px;padding:6px 10px calc(6px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--line-2);
+  background:linear-gradient(180deg,rgba(250,248,245,.6),var(--paper) 45%);
+}
+.btn{
+  flex:1;border-radius:11px;border:1px solid var(--line);background:#fff;color:var(--ink-2);
+  font-size:10.8px;font-weight:800;letter-spacing:-.02em;padding:10px 2px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap;transition:.15s;
+}
+.btn:active{transform:translateY(1px)}
+.btn.quiz{color:var(--blue);background:var(--blue-wash);border-color:var(--blue-line)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;flex:1.05;box-shadow:0 7px 15px -7px rgba(30,58,95,.8)}
+
+/* ---------- backdrop / sheets ---------- */
+.backdrop{
+  position:absolute;inset:0;z-index:30;background:rgba(21,32,45,.44);opacity:0;pointer-events:none;
+  transition:opacity .26s ease;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+}
+.backdrop.on{opacity:1;pointer-events:auto}
+.sheet{
+  position:absolute;left:0;right:0;bottom:0;z-index:40;max-height:88%;
+  background:var(--paper);border-radius:22px 22px 0 0;display:flex;flex-direction:column;
+  transform:translateY(103%);transition:transform .32s cubic-bezier(.32,.72,0,1);
+  box-shadow:0 -18px 44px rgba(18,30,44,.26);will-change:transform;
+}
+.sheet.on{transform:translateY(0)}
+.sheet-head{flex:none;position:relative;padding:8px 14px 6px;display:flex;align-items:center;border-bottom:1px solid var(--line-2)}
+.sheet-head .handle{position:absolute;top:6px;left:50%;transform:translateX(-50%);width:32px;height:3.5px;border-radius:99px;background:#DDD4C6}
+.sheet-head h3{margin:7px 0 0;font-size:12px;font-weight:800;letter-spacing:-.03em;display:flex;align-items:center;gap:5px}
+.sheet-head .x{
+  margin-left:auto;margin-top:7px;width:25px;height:25px;border-radius:50%;border:none;background:var(--paper-2);
+  color:var(--ink-2);font-size:10.5px;cursor:pointer;display:grid;place-items:center;
+}
+.sheet-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:11px 14px calc(16px + env(safe-area-inset-bottom));font-size:11.5px;line-height:1.6;color:var(--ink-2)}
+.sheet-body h4{margin:13px 0 5px;font-size:10.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.sheet-body h4:first-child{margin-top:0}
+.sheet-body p{margin:0 0 7px}
+.muted{color:var(--ink-3)}
+.hr{height:1px;background:var(--line-2);margin:10px 0}
+
+/* story sheet */
+.sh-head{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.sh-ico{
+  flex:none;width:46px;height:46px;border-radius:12px;background:#fff;border:1px solid var(--line);
+  display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--blue);text-align:center;
+  line-height:1.15;letter-spacing:-.03em;box-shadow:var(--shadow-sm);padding:0 2px;
+}
+.sh-meta{min-width:0;display:flex;flex-direction:column;gap:1px}
+.sh-meta b{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.sh-meta span{font-size:9.5px;color:var(--ink-3);font-weight:700}
+.tag{display:inline-block;font-size:8.5px;font-weight:800;color:var(--blue-2);background:var(--blue-wash);border-radius:4px;padding:1.5px 5px;margin-top:3px;align-self:flex-start}
+.story-p{font-size:11.5px;line-height:1.68;color:var(--ink-2);margin:0 0 9px!important}
+.famrow{display:flex;flex-wrap:wrap;gap:4px}
+.famchip{
+  display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid var(--line);border-radius:8px;
+  padding:4px 7px;font-size:9.5px;font-weight:700;color:var(--ink-2);cursor:pointer;letter-spacing:-.02em;
+}
+.famchip b{font-size:11px;color:var(--blue);font-weight:800}
+.famchip.locked{background:#F6F2EB;color:#A99C8B;border-style:dashed}
+.famchip.locked b{color:#A99C8B}
+.sheet-actions{display:flex;gap:5px;margin-top:11px}
+.sheet-actions button{flex:1;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink-2);font-size:10px;font-weight:800;padding:8px 3px;cursor:pointer}
+.sheet-actions button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* examples */
+.exitem{background:#fff;border:1px solid var(--line);border-radius:11px;padding:8px 9px;margin-bottom:6px;box-shadow:var(--shadow-sm)}
+.exitem .top{display:flex;align-items:center;gap:6px}
+.exitem .n{
+  flex:none;width:16px;height:16px;border-radius:50%;background:var(--blue-wash);color:var(--blue-2);
+  font-size:8.5px;font-weight:800;display:grid;place-items:center;
+}
+.exitem .say{margin-left:auto;width:24px;height:24px;border-radius:7px;border:none;background:var(--paper-2);color:var(--blue);font-size:10px;cursor:pointer}
+.exitem .en{font-size:11.3px;line-height:1.5;font-weight:700;color:var(--ink);margin:5px 0 0;letter-spacing:-.01em}
+.exitem .ko{font-size:10px;line-height:1.45;color:var(--ink-3);margin:2px 0 0}
+.exitem .wm{font-size:8.5px;font-weight:800;color:var(--blue-2);background:var(--blue-wash);border-radius:4px;padding:1px 4px}
+.exitem .sk{font-size:8.5px;font-weight:800;color:var(--seal);background:var(--seal-soft);border-radius:4px;padding:1px 4px}
+
+/* notes */
+.notearea{
+  width:100%;min-height:110px;border-radius:11px;border:1px solid var(--line);background:#fff;
+  padding:9px 10px;font-family:inherit;font-size:11.5px;line-height:1.65;color:var(--ink);resize:vertical;outline:none;
+}
+.notearea:focus{border-color:var(--blue-2);box-shadow:0 0 0 3px rgba(47,86,127,.1)}
+.notestat{display:flex;align-items:center;gap:5px;font-size:9.4px;color:var(--ink-3);margin-top:5px;font-weight:700}
+.notestat .dot{width:4px;height:4px;border-radius:50%;background:var(--ok)}
+.listrow{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line-2);cursor:pointer}
+.listrow:last-child{border-bottom:none}
+.listrow .ic{width:25px;height:25px;border-radius:7px;background:var(--paper-2);display:grid;place-items:center;font-size:10px;font-weight:800;color:var(--blue);flex:none}
+.listrow .tt{font-size:11px;font-weight:800;color:var(--ink)}
+.listrow .ss{font-size:8.8px;color:var(--ink-3);margin-top:1px}
+.listrow .go{margin-left:auto;color:var(--ink-3);font-size:11px}
+
+/* quiz */
+.qtabs{display:flex;gap:3px;background:#F0EBE3;padding:3px;border-radius:10px;margin-bottom:10px}
+.qtab{flex:1;border:none;background:transparent;font-size:9.8px;font-weight:800;color:var(--ink-2);padding:7px 2px;border-radius:7px;cursor:pointer;letter-spacing:-.03em;line-height:1.2}
+.qtab.on{background:#fff;color:var(--blue);box-shadow:0 1px 4px rgba(30,58,95,.13)}
+.qprompt{font-size:10.8px;line-height:1.55;color:var(--ink-2);margin-bottom:8px}
+.qprompt b{color:var(--blue);font-weight:800}
+.qpills{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:3px 4px;padding:7px 4px 10px}
+.qword{
+  font-size:29px;font-weight:800;color:var(--blue);text-align:center;padding:2px 0 8px;letter-spacing:-.035em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.qword .qcap{display:block;font-size:9.2px;letter-spacing:-.02em;color:var(--ink-3);margin-top:5px;font-weight:700}
+.qblank{display:inline-block;width:46px;height:1em;border-bottom:2.5px solid var(--seal);vertical-align:-1px;margin:0 2px}
+.qsent{
+  font-size:12px;font-weight:700;color:var(--ink);line-height:1.6;
+  background:#fff;border:1px solid var(--line);border-radius:11px;padding:10px;margin:2px 0 11px;
+}
+.qsent .qko{display:block;font-size:9.5px;font-weight:600;color:var(--ink-3);margin-top:5px}
+.qopts{display:flex;flex-direction:column;gap:5px}
+.qopt{
+  display:flex;align-items:center;flex-wrap:wrap;gap:6px;width:100%;text-align:left;
+  background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:7px 9px;cursor:pointer;transition:.15s;
+}
+.qopt:active{transform:scale(.995)}
+.qopt .qw{font-size:13.5px;font-weight:800;color:var(--blue);white-space:nowrap;letter-spacing:-.02em}
+.qopt .qmini{font-size:9px;color:var(--ink-3);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qopt.correct{border-color:var(--ok);background:var(--ok-soft)}
+.qopt.wrong{border-color:#C4735F;background:#FDF1EE}
+.qopt.dim{opacity:.72}
+.qopt .qdetail{
+  flex-basis:100%;font-size:8.8px;line-height:1.45;color:var(--ink-2);font-weight:700;
+  border-top:1px dashed #E7DFD2;padding-top:3px;margin-top:1px;letter-spacing:-.01em;
+}
+.qopt .qdetail b{color:var(--blue)}
+.qopt .mark{margin-left:auto;font-size:11px;font-weight:800}
+.qfoot{display:flex;align-items:center;gap:8px;margin-top:9px}
+.qscore{font-size:9.2px;font-weight:800;color:var(--ink-3);letter-spacing:.02em}
+.qnext{
+  margin-left:auto;border-radius:9px;border:none;background:var(--blue);color:#fff;
+  font-size:10.5px;font-weight:800;padding:8px 13px;cursor:pointer;box-shadow:0 6px 13px -6px rgba(30,58,95,.75);
+}
+.qnext.ghost{background:#fff;color:var(--ink-3);border:1px solid var(--line);box-shadow:none}
+.qempty{text-align:center;padding:20px 8px;color:var(--ink-3);font-size:11px;line-height:1.6}
+.qhint{font-size:9px;color:var(--ink-3);margin-top:7px;line-height:1.45}
+
+/* b2 sheet */
+.pw-hero{background:linear-gradient(160deg,#1E3A5F 0%,#2A4B73 55%,#35597F 100%);border-radius:14px;padding:14px 13px;color:#fff;margin-bottom:11px;position:relative;overflow:hidden}
+.pw-hero::after{content:"B2";position:absolute;right:-4px;bottom:-22px;font-size:86px;font-weight:800;color:rgba(255,255,255,.07);line-height:1;letter-spacing:-.06em}
+.pw-hero .kicker{font-size:9px;font-weight:800;letter-spacing:.1em;color:#C9D9E9}
+.pw-hero .title{font-size:15px;font-weight:800;margin:3px 0 2px;letter-spacing:-.03em;line-height:1.35}
+.pw-hero .price{font-size:21px;font-weight:800;letter-spacing:-.04em;margin-top:5px}
+.pw-hero .price small{font-size:10px;font-weight:700;color:#C6D8EA;margin-left:4px}
+.pw-hero .sub{font-size:9.5px;color:#C6D8EA;margin-top:2px}
+.pw-compare{display:flex;gap:5px;margin:0 0 9px}
+.pw-compare div{flex:1;border:1px solid var(--line);border-radius:9px;padding:7px;background:#fff}
+.pw-compare .t{font-size:8.5px;font-weight:800;color:var(--ink-3);letter-spacing:.03em}
+.pw-compare .v{font-size:9.8px;font-weight:700;color:var(--ink-2);margin-top:2px;line-height:1.45}
+.pw-compare .hi{border-color:var(--blue-line);background:var(--blue-wash)}
+.pw-compare .hi .v{color:var(--blue)}
+.pw-feat{display:flex;flex-direction:column;margin:0 0 9px}
+.pw-feat div{display:flex;gap:6px;font-size:10.5px;line-height:1.5;padding:4px 0;border-bottom:1px solid var(--line-2);color:var(--ink-2)}
+.pw-feat div:last-child{border-bottom:none}
+.pw-feat .tick{color:var(--ok);font-weight:800;flex:none}
+.pw-feat b{color:var(--ink);font-weight:800}
+.pw-cta{width:100%;border:none;border-radius:11px;background:var(--seal);color:#fff;font-size:12px;font-weight:800;padding:12px;cursor:pointer;box-shadow:0 10px 20px -11px rgba(201,98,43,.95);letter-spacing:-.02em}
+.pw-cta:active{transform:translateY(1px)}
+.pw-cta.done{background:var(--ok);box-shadow:none}
+.pw-note{font-size:8.8px;color:var(--ink-3);line-height:1.55;margin-top:7px;text-align:center}
+
+/* settings / menu */
+.srow{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--line-2)}
+.srow:last-child{border-bottom:none}
+.srow .lbl{font-size:11px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.srow .sub{font-size:9px;color:var(--ink-3);margin-top:2px;line-height:1.4}
+.srow .right{margin-left:auto;flex:none;display:flex;align-items:center;gap:5px}
+.sw{width:36px;height:21px;border-radius:99px;background:#DFD7CA;border:none;position:relative;cursor:pointer;transition:.2s;flex:none}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.22)}
+.sw.on{background:var(--blue)}
+.sw.on::after{transform:translateX(15px)}
+.stepper{display:flex;align-items:center;gap:7px}
+.stepper button{width:22px;height:22px;border-radius:6px;border:1px solid var(--line);background:#fff;font-size:11px;line-height:1;cursor:pointer;color:var(--ink-2)}
+.stepper b{font-size:11px;color:var(--blue);min-width:24px;text-align:center}
+.menu-hero{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.menu-hero .big{width:34px;height:34px;border-radius:10px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:9px;font-weight:800}
+.menu-hero .tt{font-size:12.5px;font-weight:800;color:var(--ink)}
+.menu-hero .ss{font-size:9px;color:var(--ink-3);margin-top:2px}
+.listchips{display:flex;flex-wrap:wrap;gap:4px}
+.listchip{border:1px solid var(--line);background:#fff;border-radius:7px;padding:4px 7px;font-size:10px;font-weight:800;color:var(--blue);cursor:pointer}
+.listchip small{display:block;font-size:7.4px;color:var(--ink-3);font-weight:700;letter-spacing:-.02em;margin-top:1px}
+.comingsoon{border:1px dashed var(--line);border-radius:9px;padding:8px 9px;font-size:9.5px;color:var(--ink-3);line-height:1.5;background:#FBF8F3}
+.rootgrid{display:flex;flex-wrap:wrap;gap:4px}
+.rootbtn{
+  display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:#fff;border-radius:8px;
+  padding:5px 7px;font-size:9.5px;font-weight:700;color:var(--ink-2);cursor:pointer;
+}
+.rootbtn b{font-size:10.5px;color:var(--blue);font-weight:800}
+.rootbtn span{color:var(--ink-3);font-size:8.5px;font-weight:700}
+
+/* toast */
+.toast{
+  position:absolute;left:50%;bottom:78px;transform:translate(-50%,10px);z-index:60;
+  background:rgba(27,40,56,.95);color:#fff;font-size:10.5px;font-weight:700;line-height:1.45;
+  padding:7px 12px;border-radius:12px;max-width:86%;text-align:center;opacity:0;pointer-events:none;
+  transition:opacity .22s,transform .22s;box-shadow:0 10px 24px rgba(20,30,45,.3);
+}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- onboarding ---------- */
+.onboard{
+  position:absolute;inset:0;z-index:70;background:var(--paper);display:flex;flex-direction:column;justify-content:center;
+  padding:22px 20px calc(20px + env(safe-area-inset-bottom));transition:opacity .35s ease,visibility .35s;overflow-y:auto;
+}
+.onboard.hide{opacity:0;visibility:hidden;pointer-events:none}
+.ob-brand{display:flex;align-items:center;gap:7px;margin-bottom:14px}
+.ob-brand .seal{width:30px;height:30px;border-radius:9px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800}
+.ob-brand b{font-size:15.5px;font-weight:800;color:var(--blue);letter-spacing:-.03em}
+.ob-brand span{font-size:8.5px;color:var(--ink-3);font-weight:700;margin-top:8px;letter-spacing:.04em}
+.onboard h1{margin:0 0 6px;font-size:21px;line-height:1.32;letter-spacing:-.05em;font-weight:800;color:var(--ink)}
+.onboard h1 em{font-style:normal;color:var(--seal)}
+.onboard .lead{font-size:11px;line-height:1.6;color:var(--ink-2);margin:0 0 15px}
+.ob-card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:15px 12px;box-shadow:var(--shadow);text-align:center;margin-bottom:15px}
+.ob-formula{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+.obt{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:52px}
+.obt i{font-style:normal;font-size:16px}
+.obt b{font-size:12px;color:var(--blue);font-weight:800}
+.obt small{font-size:8.5px;color:var(--ink-3);font-weight:700}
+.obp{color:#C9BEAE;font-size:13px;font-weight:800}
+.ob-answer{display:inline-flex;flex-direction:column;align-items:center;gap:1px;opacity:0;transform:scale(.82);transition:opacity .45s,transform .5s cubic-bezier(.2,1.4,.4,1)}
+.ob-answer.on{opacity:1;transform:none}
+.ob-answer b{font-size:20px;font-weight:800;color:var(--seal);line-height:1.15;letter-spacing:-.03em}
+.ob-answer small{font-size:8.5px;color:var(--ink-3);font-weight:700;white-space:nowrap}
+.ob-hint{font-size:9px;color:var(--ink-3);margin-top:8px;font-weight:700;transition:opacity .3s}
+.ob-hint.off{opacity:0}
+.ob-list{display:flex;flex-direction:column;gap:5px;margin:0 0 15px}
+.ob-list div{display:flex;gap:6px;font-size:10px;line-height:1.5;color:var(--ink-2)}
+.ob-list span{color:var(--seal);font-weight:800;flex:none}
+.ob-start{width:100%;border:none;border-radius:12px;background:var(--blue);color:#fff;font-size:12.5px;font-weight:800;padding:13px;cursor:pointer;letter-spacing:-.02em;box-shadow:0 12px 24px -13px rgba(30,58,95,.95)}
+.ob-start:active{transform:translateY(1px)}
+.ob-skip{border:none;background:none;color:var(--ink-3);font-size:9.5px;font-weight:700;margin-top:9px;cursor:pointer;padding:6px;align-self:center}
+
+/* ---------- compact heights ---------- */
+@media (max-height:720px){
+  .word{letter-spacing:-.04em}
+  .hero{gap:6px}
+  .sheet{max-height:92%}
+}
+@media (max-height:620px){
+  .deck{justify-content:flex-start}
+  .card{max-height:none}
+}
+@media (max-height:640px){
+  .topline{padding-top:6px}
+  .chip{padding:3.5px 7px}
+  .ex-en{-webkit-line-clamp:1}
+  .core small{display:none}
+  .formula{padding:7px 10px 8px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+<style id="rpLockStyle">
+  /* ============================================================
+     PASSWORD LOCK — 0909
+     The password itself is never written here: only its SHA-256 hex
+     digest, checked in pure JS so it works the same on https:// and
+     file:// (no crypto.subtle needed).
+     ============================================================ */
+  #lockScreen { display: none; }
+  html:not(.rp-unlocked) #lockScreen {
+    display: flex; position: fixed; inset: 0; z-index: 2147483000;
+    align-items: center; justify-content: center; overflow: auto;
+    padding: calc(24px + env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom));
+    background: radial-gradient(900px 520px at 50% -12%, #2b2f38 0%, #171a20 55%, #0b0d11 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", system-ui, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  html:not(.rp-unlocked) body > *:not(#lockScreen) { display: none !important; }
+  html:not(.rp-unlocked) { overflow: hidden !important; }
+  .rp-lock-card {
+    width: 100%; max-width: 392px; margin: auto; color: #1C1A17;
+    background: #fff; border-radius: 18px; box-shadow: 0 26px 70px rgba(0,0,0,.5);
+    padding: 28px 24px 22px; text-align: center;
+  }
+  .rp-lock-card.shake { animation: rpLockShake .36s ease-in-out; }
+  .rp-lock-icon {
+    width: 52px; height: 52px; margin: 0 auto 14px; border-radius: 16px;
+    background: linear-gradient(135deg, #f0bd76, #c8802a);
+    box-shadow: 0 10px 24px rgba(200,128,42,.30);
+    display: flex; align-items: center; justify-content: center; font-size: 24px;
+  }
+  .rp-lock-title { font-size: 17px; font-weight: 800; margin: 0; letter-spacing: -.3px; color: #1C1A17; }
+  .rp-lock-sub { font-size: 12.5px; color: #7A736A; margin: 5px 0 18px; line-height: 1.5; }
+  .rp-lock-field { position: relative; }
+  .rp-lock-field input {
+    width: 100%; font-family: inherit; font-size: 16px; font-weight: 700;
+    letter-spacing: .35em; text-align: center; color: #1C1A17;
+    background: #fff; border: 1px solid #D9D2C6; border-radius: 12px;
+    padding: 12px 52px; outline: none; -webkit-appearance: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .rp-lock-field input:focus { border-color: #C8802A; box-shadow: 0 0 0 3px rgba(200,128,42,.16); }
+  .rp-lock-field input.err { border-color: #D92D20; box-shadow: 0 0 0 3px rgba(217,45,32,.14); }
+  .rp-lock-field input::placeholder { letter-spacing: .3em; font-weight: 400; color: #B5ADA2; }
+  .rp-lock-eye {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    border: 0; background: transparent; cursor: pointer; font-family: inherit;
+    font-size: 11.5px; font-weight: 800; color: #7A736A;
+    padding: 7px 9px; border-radius: 8px; white-space: nowrap;
+  }
+  .rp-lock-eye:hover { background: #F4F0E9; color: #1C1A17; }
+  .rp-lock-error { margin: 10px 0 0; font-size: 12.5px; font-weight: 700; color: #D92D20; line-height: 1.5; }
+  .rp-lock-error[hidden] { display: none; }
+  .rp-lock-submit {
+    margin-top: 14px; width: 100%; border: 0; border-radius: 12px; cursor: pointer;
+    background: #1C1A17; color: #fff; font-family: inherit; font-size: 14px; font-weight: 800;
+    padding: 12px 14px;
+  }
+  .rp-lock-submit:hover { background: #000; }
+  .rp-lock-submit:disabled { opacity: .55; }
+  .rp-lock-foot { font-size: 11.5px; color: #9A938A; margin: 14px 0 0; line-height: 1.55; }
+  @keyframes rpLockShake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+</style>
+</head>
+<body>
+<div id="lockScreen" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
+  <form class="rp-lock-card" id="lockForm" autocomplete="off" novalidate>
+    <div class="rp-lock-icon" aria-hidden="true">🔒</div>
+    <h1 class="rp-lock-title" id="lockTitle">DutchWhy · 더치와이</h1>
+    <p class="rp-lock-sub">비밀번호를 입력해 주세요.</p>
+    <div class="rp-lock-field">
+      <input type="password" id="lockInput" inputmode="numeric" autocomplete="off"
+             autocapitalize="off" spellcheck="false" aria-label="비밀번호" placeholder="••••">
+      <button type="button" class="rp-lock-eye" id="lockEye" aria-label="비밀번호 보기">보기</button>
+    </div>
+    <p class="rp-lock-error" id="lockError" role="alert" hidden></p>
+    <button type="submit" class="rp-lock-submit" id="lockSubmit">잠금 해제</button>
+    <noscript><p class="rp-lock-error">자바스크립트가 꺼져 있어 잠금을 해제할 수 없습니다. 브라우저에서 자바스크립트를 허용한 뒤 새로고침해 주세요.</p></noscript>
+    <p class="rp-lock-foot">잠금은 이 탭에서만 유지됩니다. 탭을 닫으면 다시 잠깁니다.</p>
+  </form>
+</div>
+<script id="rpLockScript">
+(function () {
+  'use strict';
+
+  var PASSWORD_HASH = '9552e277ebcc7fa191292c6e900d94dfe6e837d8abf76a2da927d4530d2c8f69';
+  var STORE_KEY = 'rp.lock.v1';
+  var STORE_VAL = 'unlocked';
+
+  /* ---------- pure-JS SHA-256 (works on https:// and file://) ---------- */
+  var K = [
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+  ];
+
+  function utf8Bytes(str) {
+    var out = [], i, c, d, cp;
+    for (i = 0; i < str.length; i++) {
+      c = str.charCodeAt(i);
+      if (c < 0x80) {
+        out.push(c);
+      } else if (c < 0x800) {
+        out.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f));
+      } else if (c >= 0xd800 && c <= 0xdbff && i + 1 < str.length &&
+                 (d = str.charCodeAt(i + 1)) >= 0xdc00 && d <= 0xdfff) {
+        cp = 0x10000 + ((c - 0xd800) << 10) + (d - 0xdc00);
+        out.push(0xf0 | (cp >> 18), 0x80 | ((cp >> 12) & 0x3f),
+                 0x80 | ((cp >> 6) & 0x3f), 0x80 | (cp & 0x3f));
+        i++;
+      } else {
+        out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
+      }
+    }
+    return out;
+  }
+
+  function sha256Hex(str) {
+    var bytes = utf8Bytes(String(str == null ? '' : str));
+    var len = bytes.length;
+    var total = (((len + 9) + 63) >> 6) << 6;
+    var msg = new Array(total);
+    var i;
+
+    for (i = 0; i < len; i++) msg[i] = bytes[i] & 0xff;
+    msg[len] = 0x80;
+    for (i = len + 1; i < total; i++) msg[i] = 0;
+
+    var hi = Math.floor(len / 536870912);
+    var lo = (len * 8) >>> 0;
+    msg[total - 8] = (hi >>> 24) & 0xff;
+    msg[total - 7] = (hi >>> 16) & 0xff;
+    msg[total - 6] = (hi >>> 8) & 0xff;
+    msg[total - 5] = hi & 0xff;
+    msg[total - 4] = (lo >>> 24) & 0xff;
+    msg[total - 3] = (lo >>> 16) & 0xff;
+    msg[total - 2] = (lo >>> 8) & 0xff;
+    msg[total - 1] = lo & 0xff;
+
+    var H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+             0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+    var w = new Array(64);
+    var off, a, b, c, d, e, f, g, h, t1, t2, s0, s1, ch, maj, j, tmp;
+
+    for (off = 0; off < total; off += 64) {
+      for (j = 0; j < 16; j++) {
+        w[j] = ((msg[off + j * 4] << 24) | (msg[off + j * 4 + 1] << 16) |
+                (msg[off + j * 4 + 2] << 8) | msg[off + j * 4 + 3]) >>> 0;
+      }
+      for (j = 16; j < 64; j++) {
+        tmp = w[j - 15];
+        s0 = ((tmp >>> 7) | (tmp << 25)) ^ ((tmp >>> 18) | (tmp << 14)) ^ (tmp >>> 3);
+        tmp = w[j - 2];
+        s1 = ((tmp >>> 17) | (tmp << 15)) ^ ((tmp >>> 19) | (tmp << 13)) ^ (tmp >>> 10);
+        w[j] = (w[j - 16] + s0 + w[j - 7] + s1) >>> 0;
+      }
+      a = H[0]; b = H[1]; c = H[2]; d = H[3];
+      e = H[4]; f = H[5]; g = H[6]; h = H[7];
+      for (j = 0; j < 64; j++) {
+        s1 = ((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7));
+        ch = (e & f) ^ (~e & g);
+        t1 = (h + s1 + ch + K[j] + w[j]) >>> 0;
+        s0 = ((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10));
+        maj = (a & b) ^ (a & c) ^ (b & c);
+        t2 = (s0 + maj) >>> 0;
+        h = g; g = f; f = e; e = (d + t1) >>> 0;
+        d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+      }
+      H[0] = (H[0] + a) >>> 0; H[1] = (H[1] + b) >>> 0;
+      H[2] = (H[2] + c) >>> 0; H[3] = (H[3] + d) >>> 0;
+      H[4] = (H[4] + e) >>> 0; H[5] = (H[5] + f) >>> 0;
+      H[6] = (H[6] + g) >>> 0; H[7] = (H[7] + h) >>> 0;
+    }
+    var hex = '';
+    for (i = 0; i < 8; i++) hex += ('00000000' + H[i].toString(16)).slice(-8);
+    return hex;
+  }
+
+  function sameHex(a, b) {
+    if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
+    var diff = 0, i;
+    for (i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    return diff === 0;
+  }
+
+  function normalize(value) {
+    return String(value == null ? '' : value).replace(/^\s+|\s+$/g, '');
+  }
+
+  function verify(value) {
+    return sameHex(sha256Hex(normalize(value)), PASSWORD_HASH);
+  }
+
+  /* ---------- session unlock state ---------- */
+  var memoryUnlocked = false;
+
+  function isUnlocked() {
+    try { return window.sessionStorage.getItem(STORE_KEY) === STORE_VAL; }
+    catch (e) { return memoryUnlocked; }
+  }
+
+  function saveUnlocked(on) {
+    memoryUnlocked = !!on;
+    try {
+      if (on) window.sessionStorage.setItem(STORE_KEY, STORE_VAL);
+      else window.sessionStorage.removeItem(STORE_KEY);
+    } catch (e) { /* storage blocked: keep the state in memory for this page only */ }
+  }
+
+  /* ---------- screen ---------- */
+  var root = document.documentElement;
+  var form = document.getElementById('lockForm');
+  var input = document.getElementById('lockInput');
+  var errorEl = document.getElementById('lockError');
+  var eyeBtn = document.getElementById('lockEye');
+  var submitBtn = document.getElementById('lockSubmit');
+  var wrongCount = 0;
+  var cooling = false;
+
+  function focusInput() {
+    if (!input || isUnlocked()) return;
+    try { input.focus({ preventScroll: true }); }
+    catch (e) { try { input.focus(); } catch (e2) {} }
+    try { input.setSelectionRange(input.value.length, input.value.length); } catch (e3) {}
+  }
+
+  function clearError() {
+    if (errorEl) { errorEl.textContent = ''; errorEl.hidden = true; }
+    if (input) input.classList.remove('err');
+  }
+
+  function resetEye() {
+    if (!input) return;
+    input.type = 'password';
+    if (eyeBtn) {
+      eyeBtn.textContent = '보기';
+      eyeBtn.setAttribute('aria-label', '비밀번호 보기');
+    }
+  }
+
+  function applyState() {
+    var unlocked = isUnlocked();
+    if (unlocked) root.classList.add('rp-unlocked');
+    else root.classList.remove('rp-unlocked');
+
+    resetEye();
+    if (input) input.value = '';
+    clearError();
+
+    if (unlocked) wrongCount = 0;
+    else setTimeout(focusInput, 40);
+  }
+
+  function showError(msg) {
+    if (errorEl) { errorEl.textContent = msg; errorEl.hidden = false; }
+    if (input) { input.value = ''; input.classList.add('err'); }
+    if (form) {
+      form.classList.remove('shake');
+      void form.offsetWidth;
+      form.classList.add('shake');
+      setTimeout(function () { if (form) form.classList.remove('shake'); }, 420);
+    }
+    focusInput();
+  }
+
+  function unlockNow() {
+    saveUnlocked(true);
+    applyState();
+    window.scrollTo(0, 0);
+  }
+
+  function lockNow() {
+    saveUnlocked(false);
+    applyState();
+    window.scrollTo(0, 0);
+  }
+
+  if (form) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (cooling) return;
+
+      var value = input ? input.value : '';
+      if (!normalize(value)) {
+        showError('비밀번호를 입력해 주세요.');
+        return;
+      }
+      if (verify(value)) {
+        unlockNow();
+        return;
+      }
+
+      wrongCount += 1;
+      showError('비밀번호가 맞지 않습니다. 다시 확인해 주세요.');
+
+      if (wrongCount >= 3) {
+        cooling = true;
+        var wait = Math.min(3000, (wrongCount - 2) * 800);
+        if (submitBtn) submitBtn.disabled = true;
+        if (errorEl) {
+          errorEl.textContent = '비밀번호를 ' + wrongCount + '번 틀렸습니다. ' +
+            (wait / 1000).toFixed(1) + '초 후 다시 시도해 주세요.';
+          errorEl.hidden = false;
+        }
+        setTimeout(function () {
+          cooling = false;
+          if (submitBtn) submitBtn.disabled = false;
+          focusInput();
+        }, wait);
+      }
+    });
+  }
+
+  if (eyeBtn) {
+    eyeBtn.addEventListener('click', function () {
+      if (!input) return;
+      var reveal = input.type === 'password';
+      input.type = reveal ? 'text' : 'password';
+      eyeBtn.textContent = reveal ? '숨기기' : '보기';
+      eyeBtn.setAttribute('aria-label', reveal ? '비밀번호 숨기기' : '비밀번호 보기');
+      focusInput();
+    });
+  }
+
+  applyState();
+
+  /* hook so the lock can be checked from automation */
+  window.RP_LOCK = {
+    hash: sha256Hex,
+    verify: verify,
+    isUnlocked: isUnlocked,
+    unlock: function () { unlockNow(); },
+    lock: function () { lockNow(); }
+  };
+})();
+</script>
+<div class="phone" id="phone">
+  <div class="progress"><i id="progBar"></i></div>
+
+  <div class="topline">
+    <div class="brand">
+      <span class="seal">NL</span><b>DutchWhy</b><span class="tld">B1·B2</span>
+    </div>
+    <div class="meta">
+      <span class="counter" id="counter">오늘 0 · 10</span>
+      <button class="iconbtn" id="btnMenu" aria-label="메뉴">☰</button>
+      <button class="iconbtn" id="btnSettings" aria-label="설정">⚙️</button>
+    </div>
+  </div>
+
+  <div class="levels" id="levels"></div>
+
+  <main class="stage">
+   <div class="deck">
+    <section class="card" id="card">
+      <div class="card-head">
+        <span class="pos" id="pos">동사</span>
+        <span class="art" id="art" hidden>het</span>
+        <span class="sep" id="sep" hidden>분리동사</span>
+        <span class="lvl" id="lvl">B1</span>
+        <button class="star" id="star" aria-label="북마크">★</button>
+      </div>
+
+      <div class="hero" id="hero">
+        <div class="word" id="word" lang="nl">ontdekken</div>
+        <div class="pron" id="pron">
+          <span class="ipa" id="ipa">[ɔnˈdɛkə(n)]</span>
+          <span class="dot">·</span>
+          <span class="syl" id="syl">ont·dek·ken</span>
+          <button class="speak" id="speakWord" aria-label="발음 듣기">🔊</button>
+        </div>
+        <div class="krhint" id="kr">한국어 발음 <b>온데컨</b></div>
+        <div class="core" id="core">발견하다</div>
+      </div>
+
+      <div class="formula">
+        <div class="fhead">
+          <span class="flabel">왜 이 뜻?</span>
+          <button class="flink" id="btnStory">유래·가문 ›</button>
+        </div>
+        <div class="fpills" id="fpills"></div>
+        <div class="fnote" id="fnote"></div>
+      </div>
+
+      <div class="mask-hint">👁️ 탭하면 뜻이 보여요</div>
+    </section>
+
+    <div class="exstrip" id="exstrip">
+      <div class="exbody">
+        <span class="extag" id="exTag">예문</span>
+        <p class="ex-en" id="exEn"></p>
+        <p class="ex-ko" id="exKo"></p>
+      </div>
+      <div class="exside">
+        <button id="exSpeak" aria-label="예문 듣기">🔊</button>
+        <button id="exOpen">예문 3 ›</button>
+      </div>
+    </div>
+   </div>
+  </main>
+
+  <nav class="bottombar">
+    <button class="btn" id="btnHide"><span>👁️</span><span id="hideLabel">뜻 가리기</span></button>
+    <button class="btn quiz" id="btnQuiz">🧩 퀴즈</button>
+    <button class="btn primary" id="btnNext">다음 →</button>
+  </nav>
+
+  <div class="backdrop" id="backdrop"></div>
+
+  <!-- 유래 · 가문 -->
+  <section class="sheet" id="sheet-story" aria-hidden="true">
+    <div class="sheet-head"><span class="handle"></span><h3>유래 · 가문</h3><button class="x" data-close aria-label="닫기">✕</button></div>
+    <div class="sheet-body" id="storyBody"></div>
+  </section>
+
+  <!-- 예문 전체 -->
+  <section class="sheet" id="sheet-examples" aria-hidden="true">
+    <div class="sheet-head"><span class="handle"></span><h3 id="exTitle">예문</h3><button class="x" data-close aria-label="닫기">✕</button></div>
+    <div class="sheet-body" id="exBody"></div>
+  </section>
+
+  <!-- 개인 메모 -->
+  <section class="sheet" id="sheet-notes" aria-hidden="true">
+    <div class="sheet-head"><span class="handle"></span><h3 id="noteTitle">내 메모</h3><button class="x" data-close aria-label="닫기">✕</button></div>
+    <div class="sheet-body" id="noteBody"></div>
+  </section>
+
+  <!-- 퀴즈 -->
+  <section class="sheet" id="sheet-quiz" aria-hidden="true">
+    <div class="sheet-head"><span class="handle"></span><h3>🧩 퀴즈</h3><button class="x" data-close aria-label="닫기">✕</button></div>
+    <div class="sheet-body">
+      <div class="qtabs">
+        <button class="qtab on" data-tab="prefix">접두사 퀴즈</button>
+        <button class="qtab" data-tab="gap">빈칸 퀴즈</button>
+      </div>
+      <div id="tab-prefix"></div>
+      <div id="tab-gap" hidden></div>
+    </div>
+  </section>
+
+  <!-- B2 확장팩 -->
+  <section class="sheet" id="sheet-b2" aria-hidden="true">
+    <div class="sheet-head"><span class="handle"></span><h3>🔓 B2 확장팩</h3><button class="x" data-close aria-label="닫기">✕</button></div>
+    <div class="sheet-body">
+      <div class="pw-hero">
+        <div class="kicker">STAATSEXAMEN NT2 · B2</div>
+        <div class="title">B1에서 멈추지 않고,<br>B2 어휘까지 한 번에</div>
+        <div class="price">16단어<small>잠금 해제 테스트 · 프로토타입</small></div>
+        <div class="sub">B1 20단어는 계속 무료입니다</div>
+      </div>
+      <div class="pw-compare">
+        <div><div class="t">무료 · B1</div><div class="v">B1 20단어<br>+ 접두사·빈칸 퀴즈</div></div>
+        <div class="hi"><div class="t">B2 확장팩</div><div class="v">B2 16단어<br>+ 전체 가문 36단어</div></div>
+      </div>
+      <div class="pw-feat">
+        <div><span class="tick">✓</span><span>B2 16단어 <b>전체 해금</b> (ontwikkelen, gedrag, gevolg …)</span></div>
+        <div><span class="tick">✓</span><span>접두사 가문 9개 · <b>36단어</b> 무제한</span></div>
+        <div><span class="tick">✓</span><span>B2 빈칸·접두사 퀴즈까지 출제</span></div>
+        <div><span class="tick">✓</span><span>분리동사·과거분사 시험 포인트 전체</span></div>
+      </div>
+      <button class="pw-cta" id="b2Cta">테스트용으로 B2 열기</button>
+      <div class="pw-note" id="b2Note">프로토타입입니다. 실제 결제는 없고, 설정의 🧪 스위치로도 열 수 있어요.</div>
+    </div>
+  </section>
+
+  <!-- 설정 -->
+  <section class="sheet" id="sheet-settings" aria-hidden="true">
+    <div class="sheet-head"><span class="handle"></span><h3>⚙️ 설정</h3><button class="x" data-close aria-label="닫기">✕</button></div>
+    <div class="sheet-body">
+      <h4>학습</h4>
+      <div class="srow">
+        <div><div class="lbl">🔊 발음 자동 재생</div><div class="sub">카드를 넘길 때 네덜란드어 발음을 읽어 줍니다</div></div>
+        <div class="right"><button class="sw" id="swAuto" aria-label="발음 자동 재생"></button></div>
+      </div>
+      <div class="srow">
+        <div><div class="lbl">🧪 테스트용: B2 잠금 해제</div><div class="sub">B2 단어를 결제 없이 미리 보기 (출시 버전에는 없음)</div></div>
+        <div class="right"><button class="sw" id="swUnlock" aria-label="B2 잠금 해제"></button></div>
+      </div>
+      <div class="srow">
+        <div><div class="lbl">오늘 목표</div><div class="sub">하루에 볼 단어 수</div></div>
+        <div class="right"><div class="stepper"><button id="goalMinus">−</button><b id="goalVal">10</b><button id="goalPlus">+</button></div></div>
+      </div>
+
+      <h4>발음</h4>
+      <p class="muted" style="font-size:9.5px;margin:0 0 6px">발음은 브라우저 음성 합성(nl-NL)으로 재생됩니다. 기기에 네덜란드어 음성이 없으면 억양이 어색할 수 있어요.</p>
+      <div class="comingsoon">🔊 단어와 예문 모두 개별 재생 · 예문 3문장 연속 듣기 지원</div>
+
+      <h4>기타</h4>
+      <div class="srow">
+        <div><div class="lbl">온보딩 다시 보기</div><div class="sub">ont + dekken = ontdekken 컨셉 카드를 다시 봅니다</div></div>
+        <div class="right"><button class="ghostbtn" id="replayOnboard">보기</button></div>
+      </div>
+      <div class="srow">
+        <div><div class="lbl">학습 기록 초기화</div><div class="sub">오늘 배운 단어 · 북마크 · 메모를 지웁니다</div></div>
+        <div class="right"><button class="ghostbtn" id="resetAll">초기화</button></div>
+      </div>
+      <div class="hr"></div>
+      <p class="muted" style="font-size:8.5px;line-height:1.7;margin:0">
+        DutchWhy 프로토타입 · v0.9 (2026-11-19)<br>
+        한국어 학습자 A2→B1·B2 기준 · Staatsexamen Nt2 / Inburgering B1 어휘<br>
+        어원 표기는 게르만어·네덜란드어 실제 어형을 따랐습니다
+      </p>
+    </div>
+  </section>
+
+  <!-- 메뉴 -->
+  <section class="sheet" id="sheet-menu" aria-hidden="true">
+    <div class="sheet-head"><span class="handle"></span><h3>☰ 메뉴</h3><button class="x" data-close aria-label="닫기">✕</button></div>
+    <div class="sheet-body" id="menuBody"></div>
+  </section>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- 3초 온보딩 -->
+  <div class="onboard" id="onboard">
+    <div class="ob-brand"><span class="seal">NL</span><b>DutchWhy</b><span>더치와이</span></div>
+    <h1>네덜란드어 단어는<br><em>조각을 읽는</em> 것.</h1>
+    <p class="lead">B1·B2 단어는 접두사 하나가 뜻을 결정합니다.<br>조각 두 개면 긴 단어도 저절로 풀립니다.</p>
+
+    <div class="ob-card">
+      <div class="ob-formula">
+        <span class="obt"><i>🔓</i><b>ont-</b><small>벗기다</small></span>
+        <span class="obp">+</span>
+        <span class="obt"><i>🛏️</i><b>dekken</b><small>덮다</small></span>
+        <span class="obp">=</span>
+        <span class="ob-answer" id="obAnswer"><b>ontdekken</b><small>덮개를 벗기다 → 발견하다</small></span>
+      </div>
+      <div class="ob-hint" id="obHint">잠시 뒤 정답이 나타납니다</div>
+    </div>
+
+    <div class="ob-list">
+      <div><span>01</span>접두사 가문 9개 · B1·B2 36단어가 한 번에 열립니다</div>
+      <div><span>02</span>B1 20단어는 평생 무료 · 예문마다 🔊 네덜란드어 발음</div>
+      <div><span>03</span>접두사·빈칸 퀴즈로 시험 전에 바로 점검</div>
+    </div>
+
+    <button class="ob-start" id="obStart">바로 시작하기</button>
+    <button class="ob-skip" id="obSkip">건너뛰고 학습 화면으로</button>
+  </div>
+</div>
+<script>
+/* ============================================================
+   DutchWhy — DATA
+   B1 20 + B2 16 = 36 words across 9 Dutch prefix/root families.
+   level: B1 = 무료 체험 / B2 = 잠금 해제(테스트)
+   ============================================================ */
+const LEVELS = [
+  { id: "B1", label: "B1 필수", full: "CEFR B1 · Staatsexamen Nt2 B1", free: true },
+  { id: "B2", label: "B2 확장", full: "CEFR B2 · Staatsexamen Nt2 B2", free: false }
+];
+
+/* 네덜란드어 접두사·어근 가문 */
+const ROOTS = {
+  ver:   { m: "바뀜·끝까지", latin: "Germ. *fer- ‘지나서’", family: "ver-" },
+  be:    { m: "대상에 붙이기", latin: "Germ. *bi- ‘곁에’", family: "be-" },
+  ont:   { m: "벗김·풀어냄", latin: "Germ. *and- ‘맞서·떨어져’", family: "ont-" },
+  ge:    { m: "모인 결과", latin: "Germ. *ga- ‘함께’", family: "ge-" },
+  werk:  { m: "일하다", latin: "werken", family: "werk" },
+  spreek:{ m: "말하다", latin: "spreken", family: "spreek" },
+  denk:  { m: "생각하다", latin: "denken", family: "denk" },
+  neem:  { m: "잡다", latin: "nemen", family: "neem" },
+  stel:  { m: "놓다", latin: "stellen", family: "stel" }
+};
+
+const WORDS = [
+  /* ================= ver- · 바뀜·끝까지 ================= */
+  {
+    w: "veranderen", level: "B1", pos: "동사", core: "바뀌다 · 바꾸다",
+    ipa: "vərˈɑndərən", syl: "ver·an·de·ren", kr: "베르안데런", root: "ver",
+    parts: [
+      { i: "🔄", a: "ver-", m: "다른 상태로", k: "접두사" },
+      { i: "🔀", a: "ander", m: "다른", k: "어근" }
+    ],
+    eq: "다른 것이 되다", res: "바뀌다",
+    story: "ver-는 ‘다른 상태로’를 만드는 접두사입니다. ander(다른)에 ver-가 붙어 ‘다른 것이 되다’ → veranderen. 그래서 스스로 바뀌는 자동사이자 ‘~을 바꾸다’라는 타동사로도 씁니다. 명사 verandering(변화)까지 한 묶음으로 기억하세요.",
+    colloc: "van baan veranderen", collockr: "직장을 바꾸다",
+    ex: [
+      { en: "Sinds de verhuizing is er veel veranderd in onze buurt: er zijn nieuwe winkels en het park is opgeknapt.", ko: "이사 온 뒤 우리 동네에 많은 것이 바뀌었다: 새 가게들이 생겼고 공원도 단장되었다.", sk: "읽기" },
+      { en: "Ik wil graag iets aan mijn werktijden veranderen, want ik moet 's ochtends voor mijn moeder zorgen.", ko: "어머니를 아침에 돌봐야 해서 근무 시간을 좀 바꾸고 싶습니다.", sk: "말하기" },
+      { en: "Ik schrijf u omdat ik graag wil dat de gemeente iets verandert aan de speelplaats bij ons huis.", ko: "저희 집 근처 놀이터를 시에서 좀 바꿔 주셨으면 해서 글을 씁니다.", sk: "쓰기" }
+    ],
+    point: "ver- 동사는 과거분사에 ge-를 붙이지 않습니다: veranderd (×geveranderd). 자동사 ‘바뀌다’와 타동사 ‘바꾸다’를 모두 쓰고, ‘~로 변하다’는 veranderen in.",
+    gap: { s: "De gemeente wil het centrum ___, zodat er minder auto's komen.", ko: "시는 자동차를 줄이기 위해 시내를 바꾸고 싶어 한다." }
+  },
+  {
+    w: "verbeteren", level: "B1", pos: "동사", core: "개선하다 · 향상되다",
+    ipa: "vərˈbeːtərən", syl: "ver·be·te·ren", kr: "베르베테런", root: "ver",
+    parts: [
+      { i: "🔄", a: "ver-", m: "더 나은 쪽으로", k: "접두사" },
+      { i: "👍", a: "beter", m: "더 좋은", k: "어근" }
+    ],
+    eq: "더 좋게 만들다", res: "개선하다",
+    story: "비교급 beter(더 좋은)가 그대로 들어 있습니다. ver- ‘더 ~하게’ + beter = verbeteren. ‘나아지다’라는 자동사로도 씁니다: Mijn Nederlands is verbeterd. 명사 verbetering(개선).",
+    colloc: "je uitspraak verbeteren", collockr: "발음을 개선하다",
+    ex: [
+      { en: "Uit het onderzoek blijkt dat leerlingen die elke dag tien minuten lezen, hun taalvaardigheid duidelijk verbeteren.", ko: "연구에 따르면 매일 10분씩 읽는 학생들은 언어 능력이 분명히 향상된다.", sk: "읽기" },
+      { en: "Ik probeer mijn uitspraak te verbeteren door elke ochtend hardop de radio na te zeggen.", ko: "매일 아침 라디오를 소리 내어 따라 하면서 발음을 고치려고 해요.", sk: "말하기" },
+      { en: "Bedankt voor uw tips. Ik heb ze gebruikt om mijn sollicitatiebrief te verbeteren.", ko: "조언 감사합니다. 조언을 활용해 지원서를 개선했습니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 verbeterd. 재귀형 zich verbeteren도 가능하고, ‘~을 개선하다’는 타동사가 가장 흔합니다. 명사 verbetering은 시험 쓰기에서 ‘개선점’으로 자주 씁니다.",
+    gap: { s: "Met deze oefeningen kun je je uitspraak snel ___.", ko: "이 연습으로 발음을 빨리 개선할 수 있다." }
+  },
+  {
+    w: "vergelijken", level: "B1", pos: "동사", core: "비교하다",
+    ipa: "vərɣəˈlɛikən", syl: "ver·ge·lij·ken", kr: "베르헐레이컨", root: "ver",
+    parts: [
+      { i: "🔄", a: "ver-", m: "맞대어", k: "접두사" },
+      { i: "⚖️", a: "gelijk", m: "같은", k: "어근" }
+    ],
+    eq: "같은 자리에 놓고 보다", res: "비교하다",
+    story: "gelijk(같은)을 서로 맞대어 보는 것이 vergelijken입니다. 명사 vergelijking(비교). 시험 지문에서는 과거분사 구 ‘vergeleken met’(~와 비교해)이 거의 한 덩어리로 나옵니다.",
+    colloc: "vergeleken met vorig jaar", collockr: "작년과 비교해",
+    ex: [
+      { en: "Vergeleken met vorig jaar zijn de prijzen in de supermarkt met bijna tien procent gestegen.", ko: "작년과 비교하면 슈퍼마켓 가격이 거의 10퍼센트 올랐다.", sk: "읽기" },
+      { en: "Als je de trein met de auto vergelijkt, is de trein in de spits vaak sneller.", ko: "기차를 자동차와 비교하면 출퇴근 시간대에는 기차가 종종 더 빨라요.", sk: "말하기" },
+      { en: "In de bijlage vindt u een tabel waarin wij de kosten van beide abonnementen vergelijken.", ko: "첨부 파일에 두 요금제의 비용을 비교한 표를 보내 드립니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 vergeleken. ‘vergeleken met’은 독해 빈출 연결어이고, vergelijkbaar(비교할 수 있는)는 형용사입니다. ‘A met B vergelijken’ 형태를 통째로 외워 두세요.",
+    gap: { s: "Je kunt de huur van Amsterdam niet met die van Utrecht ___ zonder naar de kamers te kijken.", ko: "방을 보지 않고는 암스테르담 집세를 위트레흐트와 비교할 수 없다." }
+  },
+  {
+    w: "verzekeren", level: "B2", pos: "동사", core: "보장하다 · 보험에 들다",
+    ipa: "vərˈzeːkərən", syl: "ver·ze·ke·ren", kr: "베르제커런", root: "ver",
+    parts: [
+      { i: "🔄", a: "ver-", m: "확실하게", k: "접두사" },
+      { i: "🔒", a: "zeker", m: "확실한", k: "어근" }
+    ],
+    eq: "확실하게 만들다", res: "보장하다",
+    story: "zeker(확실한) + ver- ‘확실하게 만들다’. ‘보장하다’와 ‘보험에 들다’가 같은 뿌리입니다. 불확실한 일에 대비해 확실하게 해 두는 것 — 그래서 verzekering이 ‘보험’입니다.",
+    colloc: "een verzekering afsluiten", collockr: "보험에 가입하다",
+    ex: [
+      { en: "Wie in Nederland een auto bestuurt, is verplicht om zich te verzekeren tegen schade aan anderen.", ko: "네덜란드에서 자동차를 운전하는 사람은 다른 사람의 피해에 대비해 의무적으로 보험에 들어야 한다.", sk: "읽기" },
+      { en: "Kunt u mij vertellen of mijn bagage ook verzekerd is als ik overstap in Frankfurt?", ko: "프랑크푸르트에서 환승할 때 제 짐도 보험 적용이 되는지 알려 주실 수 있나요?", sk: "말하기" },
+      { en: "Ik wil graag een afspraak maken om mijn nieuwe woning te verzekeren tegen brand en wateroverlast.", ko: "새 집을 화재와 침수에 대비해 보험에 들기 위해 예약을 하고 싶습니다.", sk: "쓰기" }
+    ],
+    point: "재귀동사 zich verzekeren tegen/van. ‘~을 확신하다’는 ergens verzekerd van zijn. 명사 verzekering은 ‘보험’과 ‘보장’ 둘 다입니다.",
+    gap: { s: "De organisatie wil zich ervan ___ dat alle deelnemers op tijd zijn.", ko: "조직은 모든 참가자가 제시간에 도착하는지 확실히 하고 싶어 한다." }
+  },
+
+  /* ================= be- · 대상에 붙이기 ================= */
+  {
+    w: "begrijpen", level: "B1", pos: "동사", core: "이해하다",
+    ipa: "bəˈɣrɛipən", syl: "be·grij·pen", kr: "버흐레이픈", root: "be",
+    parts: [
+      { i: "🎯", a: "be-", m: "대상에 붙어", k: "접두사" },
+      { i: "✊", a: "grijpen", m: "잡다", k: "어근" }
+    ],
+    eq: "붙잡다", res: "이해하다",
+    story: "be-는 동작을 대상에 붙이는 접두사입니다. grijpen(잡다)에 붙으면 ‘머리로 붙잡다’ → begrijpen. 명사 begrip(이해), 형용사 begrijpelijk(이해할 수 있는)까지 같은 가문입니다.",
+    colloc: "elkaar begrijpen", collockr: "서로 이해하다",
+    ex: [
+      { en: "Veel ouderen begrijpen de brieven van de gemeente niet, omdat er te veel moeilijke woorden in staan.", ko: "많은 노인들이 시에서 보낸 편지를 이해하지 못하는데, 어려운 단어가 너무 많기 때문이다.", sk: "읽기" },
+      { en: "Sorry, ik begrijp de vraag niet helemaal. Kunt u die nog een keer uitleggen?", ko: "죄송합니다, 질문을 완전히 이해하지 못했어요. 다시 한 번 설명해 주시겠어요?", sk: "말하기" },
+      { en: "Ik begrijp dat de huur volgend jaar omhooggaat, maar ik wil graag weten met hoeveel procent.", ko: "내년에 월세가 오른다는 것은 이해하지만, 몇 퍼센트 오르는지 알고 싶습니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 begrepen(강변화). begrijpen + dat절이 시험 듣기·읽기에서 가장 흔합니다. ‘오해하다’는 verkeerd begrijpen.",
+    gap: { s: "Ik kan niet ___ waarom hij zo boos is; er is niets gebeurd.", ko: "아무 일도 없었는데 그가 왜 그렇게 화났는지 이해할 수 없다." }
+  },
+  {
+    w: "beslissen", level: "B1", pos: "동사", core: "결정하다",
+    ipa: "bəˈslɪsən", syl: "be·slis·sen", kr: "버슬리선", root: "be",
+    parts: [
+      { i: "🎯", a: "be-", m: "끝까지", k: "접두사" },
+      { i: "🪢", a: "slissen", m: "옛말 끝내다", k: "어근" }
+    ],
+    eq: "매듭짓다", res: "결정하다",
+    story: "be- + slissen(옛 네덜란드어 ‘끝내다·화해시키다’). 논의를 끝내고 결론을 내리는 것이 beslissen입니다. 명사 beslissing(결정), besluit(결의·결정)과 함께 묶어 두세요.",
+    colloc: "een beslissing nemen", collockr: "결정을 내리다",
+    ex: [
+      { en: "De rechtbank heeft beslist dat het bedrijf de werknemers een vergoeding moet betalen.", ko: "법원은 그 회사가 직원들에게 보상을 지급해야 한다고 결정했다.", sk: "읽기" },
+      { en: "We moeten vóór vrijdag beslissen of we het huis nemen of niet.", ko: "금요일 전까지 그 집을 살지 말지 결정해야 해요.", sk: "말하기" },
+      { en: "Ik heb besloten om me aan te melden voor de cursus Nederlands op niveau B1.", ko: "저는 B1 수준 네덜란드어 과정에 등록하기로 결정했습니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 beslist. 같은 뜻의 besluiten은 불규칙으로 besloten이 되고, ‘(회의를) 끝내다’도 됩니다. beslist는 부사로 ‘반드시’라는 뜻도 있습니다.",
+    gap: { s: "De jury moet vóór vrijdag ___ wie de prijs krijgt.", ko: "심사위원단은 금요일 전까지 누가 상을 받을지 결정해야 한다." }
+  },
+  {
+    w: "bereiken", level: "B1", pos: "동사", core: "도달하다 · 달성하다",
+    ipa: "bəˈrɛikən", syl: "be·rei·ken", kr: "버레이컨", root: "be",
+    parts: [
+      { i: "🎯", a: "be-", m: "대상까지", k: "접두사" },
+      { i: "🤏", a: "reiken", m: "손을 뻗다", k: "어근" }
+    ],
+    eq: "손이 닿다", res: "도달하다",
+    story: "reiken(손을 뻗다)에 be-가 붙어 ‘닿을 때까지 뻗다’ → bereiken. 목적지에 도착하는 것과 목표를 이루는 것 둘 다입니다. bereikbaar(연락 가능한)도 같은 뿌리.",
+    colloc: "een doel bereiken", collockr: "목표를 달성하다",
+    ex: [
+      { en: "Met de nieuwe sneltram bereikt u het centrum in twintig minuten.", ko: "새 급행 트램을 타면 20분 만에 시내에 도착할 수 있습니다.", sk: "읽기" },
+      { en: "Ik probeer elke dag een halfuur te oefenen; zo hoop ik mijn doel dit jaar te bereiken.", ko: "매일 30분씩 연습해서 올해 목표를 이루고 싶어요.", sk: "말하기" },
+      { en: "Helaas kon ik u telefonisch niet bereiken. Daarom stuur ik u deze e-mail.", ko: "안타깝게도 전화로 연락이 닿지 않아 이메일을 보냅니다.", sk: "쓰기" }
+    ],
+    point: "사람을 목적어로 쓰면 ‘연락이 닿다’입니다. 과거분사 bereikt. 명사 bereik은 ‘범위·사거리’, 형용사 bereikbaar는 ‘연락 가능한·접근 가능한’.",
+    gap: { s: "Het doel van het project is om in 2030 geen afval meer te produceren; of we dat ___ is nog onzeker.", ko: "이 프로젝트의 목표는 2030년까지 쓰레기를 만들지 않는 것이다; 그것을 달성할 수 있을지는 아직 불확실하다." }
+  },
+  {
+    w: "bewijzen", level: "B2", pos: "동사", core: "증명하다",
+    ipa: "bəˈʋɛizən", syl: "be·wij·zen", kr: "버베이전", root: "be",
+    parts: [
+      { i: "🎯", a: "be-", m: "대상에", k: "접두사" },
+      { i: "👉", a: "wijzen", m: "가리키다", k: "어근" }
+    ],
+    eq: "가리켜 보이다", res: "증명하다",
+    story: "wijzen(가리키다) + be-. 사실을 손가락으로 가리키듯 분명히 보여 주는 것 → bewijzen. 명사 bewijs(증거)와 함께 기억하면 시험 쓰기에서 바로 씁니다.",
+    colloc: "bewijzen dat", collockr: "~라는 것을 증명하다",
+    ex: [
+      { en: "Uit de cijfers blijkt niet dat de maatregel werkt; er is meer onderzoek nodig om dat te bewijzen.", ko: "수치만으로는 그 조치가 효과가 있다는 것이 드러나지 않는다; 그것을 증명하려면 더 많은 연구가 필요하다.", sk: "읽기" },
+      { en: "Kunt u bewijzen dat u daar op dat moment was?", ko: "당신이 그때 그곳에 있었다는 것을 증명할 수 있나요?", sk: "말하기" },
+      { en: "Ik stuur u hierbij een kopie van mijn diploma als bewijs dat ik de opleiding heb afgerond.", ko: "교육 과정을 마쳤다는 증거로 졸업증명서 사본을 동봉합니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 bewezen. 명사 bewijs(증거)는 셀 수 없이 쓰는 경우가 많습니다. ‘증명하다’는 bewijzen, ‘증거’는 het bewijs, ‘증인’은 de getuige — 세 단어를 구분하세요.",
+    gap: { s: "De politie kon niet ___ dat de man de fiets had gestolen.", ko: "경찰은 그 남자가 자전거를 훔쳤다는 것을 증명할 수 없었다." }
+  },
+
+  /* ================= ont- · 벗김·풀어냄 ================= */
+  {
+    w: "ontdekken", level: "B1", pos: "동사", core: "발견하다 · 알게 되다",
+    ipa: "ɔnˈdɛkən", syl: "ont·dek·ken", kr: "온데컨", root: "ont",
+    parts: [
+      { i: "🔓", a: "ont-", m: "벗기다", k: "접두사" },
+      { i: "🛏️", a: "dekken", m: "덮다", k: "어근" }
+    ],
+    eq: "덮개를 벗기다", res: "발견하다",
+    story: "ont-는 ‘분리·벗김’의 접두사입니다. dekken(덮다)에서 덮개를 벗기면 안이 드러나죠 → ontdekken. 새 사실을 알게 되는 모든 순간에 씁니다. 명사 ontdekking(발견).",
+    colloc: "een ontdekking doen", collockr: "발견하다",
+    ex: [
+      { en: "Wetenschappers hebben ontdekt dat sommige vissen kunnen herkennen wie hen verzorgt.", ko: "과학자들은 일부 물고기가 자신을 돌보는 사람을 알아볼 수 있다는 것을 발견했다.", sk: "읽기" },
+      { en: "Ik heb pas ontdekt dat je via de app goedkoper een treinkaartje kunt kopen.", ko: "앱으로 하면 기차표를 더 싸게 살 수 있다는 걸 최근에 알았어요.", sk: "말하기" },
+      { en: "Tijdens mijn stage ontdekte ik dat ik graag met ouderen werk.", ko: "인턴십 동안 저는 노인들과 일하는 것을 좋아한다는 것을 알게 되었습니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 ontdekt (ge- 없음). ontdekken + dat절. ‘발견’은 de ontdekking, ‘발명’은 de uitvinding — 시험 독해에서 바꿔 출제됩니다.",
+    gap: { s: "De onderzoekers hopen te ___ of het nieuwe medicijn veilig is.", ko: "연구진은 새 약이 안전한지 발견해 내고 싶어 한다." }
+  },
+  {
+    w: "onthouden", level: "B1", pos: "동사", core: "기억하다 · 외워 두다",
+    ipa: "ɔntˈɦɑudən", syl: "ont·hou·den", kr: "온트하우던", root: "ont",
+    parts: [
+      { i: "🔓", a: "ont-", m: "붙잡아 두고", k: "접두사" },
+      { i: "✊", a: "houden", m: "잡고 있다", k: "어근" }
+    ],
+    eq: "잡아 두다", res: "기억하다",
+    story: "houden(잡고 있다)에 ont-가 붙어 ‘머릿속에 붙잡아 두다’ → onthouden. ‘기억하고 있다’와 ‘외워 두다’ 둘 다입니다. herinneren은 ‘떠올리다’, onthouden은 ‘붙잡아 두다’의 느낌.",
+    colloc: "iets onthouden", collockr: "무언가를 기억하다",
+    ex: [
+      { en: "Tips om woordjes beter te onthouden: herhaal ze na een dag, na een week en na een maand.", ko: "단어를 더 잘 외우는 방법: 하루 뒤, 일주일 뒤, 한 달 뒤에 반복하세요.", sk: "읽기" },
+      { en: "Ik kan uw naam niet onthouden; mag ik hem opschrijven?", ko: "성함을 기억하지 못하겠어요. 적어도 될까요?", sk: "말하기" },
+      { en: "Kunt u mij de datum nog even mailen? Dan kan ik die beter onthouden.", ko: "날짜를 메일로 한 번 더 보내 주시겠어요? 그러면 더 잘 기억할 수 있습니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 onthouden(형태 그대로). ‘기억나다’는 zich herinneren, ‘외우다’는 uit het hoofd leren / onthouden. 시험에서는 onthouden + dat/hoe절도 나옵니다.",
+    gap: { s: "Ik kan nooit wachtwoorden ___, dus ik gebruik een app daarvoor.", ko: "나는 비밀번호를 절대 기억하지 못해서 앱을 쓴다." }
+  },
+  {
+    w: "ontwikkelen", level: "B2", pos: "동사", core: "개발하다 · 발달하다",
+    ipa: "ɔntˈʋɪkələn", syl: "ont·wik·ke·len", kr: "온트빅컬런", root: "ont",
+    parts: [
+      { i: "🔓", a: "ont-", m: "풀어내다", k: "접두사" },
+      { i: "🧶", a: "wikkelen", m: "감다", k: "어근" }
+    ],
+    eq: "감긴 것을 풀다", res: "개발하다",
+    story: "wikkelen(감다)에서 ont-(풀다). 감긴 실타래를 풀어 펼치듯 능력·제품을 펼쳐 나가는 것이 ontwikkelen입니다. 재귀형 zich ontwikkelen은 ‘발달하다’. 명사 ontwikkeling(발전·개발)은 시험 단골.",
+    colloc: "zich ontwikkelen tot", collockr: "~로 발전하다",
+    ex: [
+      { en: "De gemeente wil een nieuw buurthuis ontwikkelen waar jong en oud elkaar kunnen ontmoeten.", ko: "시는 남녀노소가 만날 수 있는 새 주민센터를 개발할 계획이다.", sk: "읽기" },
+      { en: "Ik wil mij de komende jaren verder ontwikkelen in mijn werk, bijvoorbeeld door een cursus te volgen.", ko: "앞으로 몇 년간 과정을 듣는 등 일에서 더 발전하고 싶어요.", sk: "말하기" },
+      { en: "Wij zijn een klein bedrijf dat een app ontwikkelt voor mensen die Nederlands leren.", ko: "저희는 네덜란드어를 배우는 사람들을 위한 앱을 개발하는 작은 회사입니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 ontwikkeld. 재귀동사 zich ontwikkelen. ‘발전’은 de ontwikkeling, ‘개발자’는 de ontwikkelaar. ‘ontwikkelingsland’ 같은 합성어도 시험에 나옵니다.",
+    gap: { s: "Het bedrijf wil dit jaar een nieuwe app ___ waarmee klanten hun afspraken kunnen plannen.", ko: "그 회사는 올해 고객이 예약을 관리할 수 있는 새 앱을 개발하려고 한다." }
+  },
+  {
+    w: "ontvangen", level: "B2", pos: "동사", core: "받다 · 영접하다",
+    ipa: "ɔntˈfɑŋən", syl: "ont·van·gen", kr: "온트팡언", root: "ont",
+    parts: [
+      { i: "🔓", a: "ont-", m: "받아들여", k: "접두사" },
+      { i: "🫱", a: "vangen", m: "잡다", k: "어근" }
+    ],
+    eq: "받아 잡다", res: "받다",
+    story: "vangen(잡다) + ont-. 다가온 것을 받아 잡는 그림입니다. 편지·손님·신호를 ‘받다’ — 격식 있는 ‘받다’입니다. 명사 ontvangst(수령·환영), ontvanger(수신자).",
+    colloc: "een brief ontvangen", collockr: "편지를 받다",
+    ex: [
+      { en: "De bewoners ontvangen binnen twee weken een brief met de nieuwe afspraken over het afval.", ko: "주민들은 2주 안에 쓰레기 처리에 관한 새 안내가 담긴 편지를 받는다.", sk: "읽기" },
+      { en: "Heeft u mijn e-mail van vorige week ontvangen?", ko: "지난주에 보낸 제 이메일 받으셨나요?", sk: "말하기" },
+      { en: "Hartelijk dank voor de uitnodiging. Ik ontvang graag meer informatie over het programma.", ko: "초대해 주셔서 감사합니다. 프로그램에 대한 자세한 정보를 받고 싶습니다.", sk: "쓰기" },
+    ],
+    point: "과거분사 ontvangen. 일상에서는 krijgen을 더 많이 쓰고, ontvangen은 격식체(편지·손님·공식 문서)에 씁니다. ‘환영받다’는 worden ontvangen.",
+    gap: { s: "Wij hebben uw aanvraag goed ___. Binnen tien dagen krijgt u een reactie.", ko: "귀하의 신청을 잘 받았습니다. 10일 안에 답변을 받으실 겁니다." }
+  },
+
+
+
+  /* ================= ge- · 모인 결과 ================= */
+  {
+    w: "gesprek", level: "B1", pos: "명사", art: "het", core: "대화 · 상담",
+    ipa: "ɣəˈsprɛk", syl: "ge·sprek", kr: "헐스프렉", root: "ge",
+    parts: [
+      { i: "🧩", a: "ge-", m: "모인 결과", k: "접두사" },
+      { i: "💬", a: "spreken", m: "말하다", k: "어근" }
+    ],
+    eq: "주고받은 말의 묶음", res: "대화",
+    story: "ge-는 ‘모아진 결과’를 만드는 접두사입니다. spreken(말하다)에 붙어 ‘주고받은 말의 묶음’ → gesprek. ‘대화를 나누다’는 een gesprek voeren, ‘면접’은 een sollicitatiegesprek입니다.",
+    colloc: "een gesprek voeren", collockr: "대화를 나누다",
+    ex: [
+      { en: "Na het gesprek met de huisarts kreeg zij een verwijzing naar het ziekenhuis.", ko: "주치의와 상담한 뒤 그녀는 병원 진료 의뢰서를 받았다.", sk: "읽기" },
+      { en: "Ik heb morgen een sollicitatiegesprek; ik ben best zenuwachtig.", ko: "내일 면접이 있는데 꽤 긴장돼요.", sk: "말하기" },
+      { en: "Naar aanleiding van ons gesprek van vorige week stuur ik u hierbij de gevraagde documenten.", ko: "지난주 대화와 관련하여 요청하신 서류를 보냅니다.", sk: "쓰기" }
+    ],
+    point: "het gesprek(중성), 복수 gesprekken. ‘~와의 대화’는 het gesprek met. 시험 쓰기에서는 Naar aanleiding van ons gesprek(저희 대화와 관련하여)가 정형 표현입니다.",
+    gap: { s: "Het ___ met de directeur duurde bijna een uur.", ko: "이사장과의 대화는 거의 한 시간 동안 이어졌다." }
+  },
+  {
+    w: "gebruik", level: "B1", pos: "명사", art: "het", core: "사용 · 이용",
+    ipa: "ɣəˈbrœyk", syl: "ge·bruik", kr: "헐브뢰크", root: "ge",
+    parts: [
+      { i: "🧩", a: "ge-", m: "모인 결과", k: "접두사" },
+      { i: "🛠️", a: "bruiken", m: "쓰다", k: "어근" }
+    ],
+    eq: "쓴 것의 결과", res: "사용",
+    story: "bruiken(옛말 ‘쓰다’) + ge- → gebruik. 동사 gebruiken(사용하다)의 명사형입니다. ‘~을 이용하다’는 gebruik maken van — 시험 독해·쓰기에 자주 나오는 덩어리입니다.",
+    colloc: "gebruik maken van", collockr: "~을 이용하다",
+    ex: [
+      { en: "Het gebruik van de fiets in de stad neemt al jaren toe, vooral onder jongeren.", ko: "도시에서 자전거 이용은 특히 젊은 층에서 수년째 늘고 있다.", sk: "읽기" },
+      { en: "Mag ik uw telefoon even gebruiken? Mijn batterij is leeg.", ko: "휴대폰을 잠깐 써도 될까요? 배터리가 다 됐어요.", sk: "말하기" },
+      { en: "Voor het gebruik van de sportschool heeft u een pasje nodig.", ko: "체육관을 이용하려면 회원 카드가 필요합니다.", sk: "쓰기" }
+    ],
+    point: "het gebruik(중성, 불가산). ‘사용하다’는 gebruiken + 목적어, ‘이용하다’는 gebruikmaken van(한 단어로도 씀). 형용사 gebruikelijk은 ‘일반적인’이라는 다른 뜻.",
+    gap: { s: "Het ___ van plastic zakken is sinds dit jaar verboden in winkels.", ko: "올해부터 가게에서 비닐봉지 사용이 금지되었다." }
+  },
+  {
+    w: "gedrag", level: "B2", pos: "명사", art: "het", core: "행동 · 태도",
+    ipa: "ɣəˈdrɑx", syl: "ge·drag", kr: "헐드라흐", root: "ge",
+    parts: [
+      { i: "🧩", a: "ge-", m: "모인 결과", k: "접두사" },
+      { i: "🎒", a: "dragen", m: "지니다·나르다", k: "어근" }
+    ],
+    eq: "자신을 지니는 방식", res: "행동",
+    story: "dragen(지니다·나르다)에서 ‘자신을 지니는 방식’ → gedrag. 그래서 ‘행동·태도’입니다. 동사는 zich gedragen(행동하다). 학교·직장 규칙 문장에서 ‘onacceptabel gedrag’(받아들일 수 없는 행동)으로 자주 나옵니다.",
+    colloc: "onacceptabel gedrag", collockr: "받아들일 수 없는 행동",
+    ex: [
+      { en: "De school heeft nieuwe regels opgesteld om ongewenst gedrag op het schoolplein tegen te gaan.", ko: "학교는 운동장에서의 바람직하지 않은 행동을 막기 위해 새 규칙을 마련했다.", sk: "읽기" },
+      { en: "Wat mij opvalt, is dat het gedrag van reizigers in de spits soms te wensen overlaat.", ko: "제가 눈여겨본 것은 혼잡 시간대 승객들의 행동이 때때로 많이 아쉽다는 점이에요.", sk: "말하기" },
+      { en: "Ik wil een klacht indienen over het gedrag van een van uw medewerkers.", ko: "직원 한 분의 태도에 대해 불만을 제기하고 싶습니다.", sk: "쓰기" }
+    ],
+    point: "het gedrag(불가산). 사람과 동물 모두. ‘~처럼 행동하다’는 zich gedragen als. 형용사형은 따로 없고, 합성어에서는 gedrags-로 붙습니다(gedragsregel).",
+    gap: { s: "De gemeente start een campagne tegen agressief ___ in het verkeer.", ko: "시는 교통에서의 공격적 행동에 반대하는 캠페인을 시작한다." }
+  },
+  {
+    w: "gevolg", level: "B2", pos: "명사", art: "het", core: "결과 · 영향",
+    ipa: "ɣəˈvɔlx", syl: "ge·volg", kr: "헐폴흐", root: "ge",
+    parts: [
+      { i: "🧩", a: "ge-", m: "모인 결과", k: "접두사" },
+      { i: "➡️", a: "volgen", m: "따르다", k: "어근" }
+    ],
+    eq: "뒤따라오는 것", res: "결과",
+    story: "volgen(따르다) + ge- = ‘뒤따라 생기는 것’ → gevolg. ‘~의 결과로’는 als gevolg van, ‘~을 초래하다’는 tot gevolg hebben. 독해 지문의 인과 연결어로 가장 중요한 단어입니다.",
+    colloc: "als gevolg van", collockr: "~의 결과로",
+    ex: [
+      { en: "Als gevolg van de lange droogte is de oogst dit jaar veel kleiner dan normaal.", ko: "긴 가뭄의 결과로 올해 수확량은 평년보다 훨씬 적다.", sk: "읽기" },
+      { en: "De file was het gevolg van een ongeluk bij de tunnel.", ko: "정체는 터널 근처 사고의 결과였어요.", sk: "말하기" },
+      { en: "Door de verbouwing kunnen er tijdelijk geluidsoverlast en vertraging ontstaan; wij vragen begrip voor de gevolgen.", ko: "공사로 인해 일시적으로 소음과 지연이 생길 수 있습니다; 이에 대한 양해를 부탁드립니다.", sk: "쓰기" }
+    ],
+    point: "het gevolg. als gevolg van(전치사구) / tot gevolg hebben(동사구)를 통째로. 형용사 volgend(다음의)와 철자가 비슷하니 구분하세요.",
+    gap: { s: "Veel reizigers hadden vertraging als ___ van het defecte sein.", ko: "많은 승객이 신호 고장의 결과로 지연을 겪었다." }
+  },
+
+  /* ================= werk · 일하다 ================= */
+  {
+    w: "samenwerken", level: "B1", pos: "동사", core: "협력하다", sep: true,
+    ipa: "ˈsaːmənˌʋɛrkən", syl: "sa·men·wer·ken", kr: "사멘베르컨", root: "werk",
+    parts: [
+      { i: "🤝", a: "samen", m: "함께", k: "부사" },
+      { i: "🛠️", a: "werken", m: "일하다", k: "어근" }
+    ],
+    eq: "함께 일하다", res: "협력하다",
+    story: "samen(함께) + werken(일하다)의 합성어. 본동사가 앞으로 나가는 분리동사입니다: Ik werk samen. 명사 samenwerking(협력). ‘~와 협력하다’는 samenwerken met — 시험 쓰기에서 제안 문장에 자주 씁니다.",
+    colloc: "goed samenwerken met", collockr: "~와 잘 협력하다",
+    ex: [
+      { en: "De twee ziekenhuizen gaan samenwerken om de wachttijden voor patiënten te verkorten.", ko: "두 병원은 환자 대기 시간을 줄이기 위해 협력하기로 했다.", sk: "읽기" },
+      { en: "Ik werk het liefst in een team waarin mensen open met elkaar samenwerken.", ko: "저는 사람들이 서로 열린 마음으로 협력하는 팀에서 일하는 것을 가장 좋아해요.", sk: "말하기" },
+      { en: "Wij willen graag met uw organisatie samenwerken aan het project voor nieuwkomers.", ko: "저희는 귀 기관과 신규 이민자 프로젝트에서 협력하고 싶습니다.", sk: "쓰기" }
+    ],
+    point: "분리동사: ik werk samen, heb samengewerkt. 문장에서 떨어져도 사전 표기는 한 단어 samenwerken입니다. 명사 samenwerking.",
+    gap: { s: "Om het probleem op te lossen, moeten de scholen en de politie beter ___.", ko: "문제를 해결하려면 학교와 경찰이 더 잘 협력해야 한다." }
+  },
+  {
+    w: "werknemer", level: "B2", pos: "명사", art: "de", core: "직원 · 근로자",
+    ipa: "ˈʋɛrkˌneːmər", syl: "werk·ne·mer", kr: "베르크네머", root: "werk",
+    parts: [
+      { i: "🛠️", a: "werk", m: "일", k: "어근" },
+      { i: "✋", a: "nemen", m: "잡다", k: "어근" },
+      { i: "🧑", a: "-er", m: "~하는 사람", k: "접미사" }
+    ],
+    eq: "일을 맡은 사람", res: "직원",
+    story: "werk(일) + nemer(nemen ‘잡다’의 사람) = ‘일을 맡은 사람’ → werknemer. 반대는 werkgever(일을 주는 사람, 고용주). -er가 ‘~하는 사람’을 만든다는 점이 열쇠입니다.",
+    colloc: "een vaste werknemer", collockr: "정규 직원",
+    ex: [
+      { en: "Het bedrijf verwacht dat elke werknemer minstens één dag per week thuiswerkt.", ko: "그 회사는 모든 직원이 주당 최소 하루는 재택근무하기를 기대한다.", sk: "읽기" },
+      { en: "Als werknemer heb je recht op vier weken vakantie per jaar.", ko: "근로자로서 1년에 4주 휴가를 받을 권리가 있어요.", sk: "말하기" },
+      { en: "Ik ben sinds 2023 werknemer bij deze organisatie en wil graag mijn contract verlengen.", ko: "저는 2023년부터 이 기관의 직원으로 일하고 있으며 계약 연장을 원합니다.", sk: "쓰기" }
+    ],
+    point: "de werknemer, 복수 werknemers, 여성형 werkneemster. 고용주는 de werkgever. ‘직원 수’는 het aantal werknemers.",
+    gap: { s: "Elke ___ heeft recht op een veilige werkplek.", ko: "모든 근로자는 안전한 일터에 대한 권리가 있다." }
+  },
+  {
+    w: "verwerken", level: "B2", pos: "동사", core: "처리하다 · 소화하다",
+    ipa: "vərˈʋɛrkən", syl: "ver·wer·ken", kr: "베르베르컨", root: "werk",
+    parts: [
+      { i: "🔄", a: "ver-", m: "끝까지", k: "접두사" },
+      { i: "🛠️", a: "werken", m: "일하다", k: "어근" }
+    ],
+    eq: "끝까지 일해 넣다", res: "처리하다",
+    story: "werken(일하다) + ver- ‘끝까지 해내다’. 정보·재료를 끝까지 다뤄 자기 것으로 만드는 것 → ‘처리하다’. 감정을 ‘소화하다’라는 뜻도 같은 그림입니다.",
+    colloc: "informatie verwerken", collockr: "정보를 처리하다",
+    ex: [
+      { en: "Het systeem kan per seconde duizenden aanvragen verwerken, maar bij storingen loopt alles vast.", ko: "그 시스템은 초당 수천 건의 신청을 처리할 수 있지만, 장애가 나면 모든 것이 멈춘다.", sk: "읽기" },
+      { en: "Het duurde even voordat ik het nieuws kon verwerken.", ko: "그 소식을 받아들이는 데 시간이 좀 걸렸어요.", sk: "말하기" },
+      { en: "Wij verwerken uw persoonsgegevens alleen voor de afhandeling van uw aanvraag.", ko: "저희는 신청 처리 목적으로만 개인정보를 처리합니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 verwerkt. ‘개인정보 처리’는 het verwerken van persoonsgegevens — 시험 읽기에서 자주 나오는 표현. ‘감정을 소화하다’도 verwerken.",
+    gap: { s: "De computer moet alle formulieren binnen een dag ___.", ko: "컴퓨터는 모든 서류를 하루 안에 처리해야 한다." }
+  },
+  {
+    w: "bewerken", level: "B2", pos: "동사", core: "가공하다 · 편집하다",
+    ipa: "bəˈʋɛrkən", syl: "be·wer·ken", kr: "버베르컨", root: "werk",
+    parts: [
+      { i: "🎯", a: "be-", m: "대상에", k: "접두사" },
+      { i: "🛠️", a: "werken", m: "일하다", k: "어근" }
+    ],
+    eq: "대상에 일을 하다", res: "가공하다",
+    story: "werken(일하다) + be- ‘대상에 직접’. 재료를 두드려 다듬거나 글을 손봐 편집하는 것 → bewerken. 명사 bewerking(가공·편집·각색).",
+    colloc: "een tekst bewerken", collockr: "글을 편집하다",
+    ex: [
+      { en: "De foto's zijn bewerkt met een programma, waardoor de kleuren er natuurlijker uitzien.", ko: "사진들은 프로그램으로 보정되어 색이 더 자연스러워 보인다.", sk: "읽기" },
+      { en: "Ik heb mijn tekst laten bewerken door een vriend die docent Nederlands is.", ko: "네덜란드어 선생님인 친구에게 제 글을 편집해 달라고 했어요.", sk: "말하기" },
+      { en: "Wij bewerken metaal voor de scheepsbouw en zoeken daarvoor nieuwe medewerkers.", ko: "저희는 조선용 금속을 가공하며, 이를 위해 새 직원을 찾고 있습니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 bewerkt. ‘가공’과 ‘편집’ 둘 다. 명사 bewerking, tekstbewerking. bewerken vs verwerken: bewerken은 겉을 다듬는 손질, verwerken은 재료를 끝까지 처리해 결과물로 만드는 것.",
+    gap: { s: "Je moet het hout eerst ___ voordat je het schildert.", ko: "나무는 칠하기 전에 먼저 가공해야 한다." }
+  },
+
+  /* ================= spreek · 말하다 ================= */
+  {
+    w: "bespreken", level: "B1", pos: "동사", core: "논의하다 · 상의하다",
+    ipa: "bəˈspreːkən", syl: "be·spre·ken", kr: "버스프레컨", root: "spreek",
+    parts: [
+      { i: "🎯", a: "be-", m: "대상에", k: "접두사" },
+      { i: "💬", a: "spreken", m: "말하다", k: "어근" }
+    ],
+    eq: "대상에 대해 말하다", res: "논의하다",
+    story: "spreken + be- = 특정 주제에 말을 붙이다 → bespreken. 회의에서 안건을 ‘논의하다’, 의사와 ‘상담하다’. 명사 bespreking(회의·논의). 예약하다(reserveren)와 혼동하지 마세요.",
+    colloc: "een punt bespreken", collockr: "안건을 논의하다",
+    ex: [
+      { en: "Tijdens de vergadering wordt besproken hoe de gemeente het verkeer in de wijk veiliger kan maken.", ko: "회의에서는 시가 동네 교통을 어떻게 더 안전하게 만들 수 있을지 논의한다.", sk: "읽기" },
+      { en: "Ik wil graag een paar dingen met u bespreken voordat we beginnen.", ko: "시작하기 전에 몇 가지를 상의하고 싶습니다.", sk: "말하기" },
+      { en: "Kunnen we het voorstel volgende week donderdag in de vergadering bespreken?", ko: "다음 주 목요일 회의에서 그 제안을 논의할 수 있을까요?", sk: "쓰기" }
+    ],
+    point: "과거분사 besproken. 목적어는 ‘논의할 안건’. ‘예약하다’는 een afspraak maken / reserveren — bespreken은 ‘상의하다’입니다.",
+    gap: { s: "We moeten nog ___ of we met de trein of met de auto gaan.", ko: "기차를 탈지 자동차를 탈지 아직 상의해야 한다." }
+  },
+  {
+    w: "afspreken", level: "B1", pos: "동사", core: "약속하다 · 정하다", sep: true,
+    ipa: "ˈɑfˌspreːkən", syl: "af·spre·ken", kr: "아프스프레컨", root: "spreek",
+    parts: [
+      { i: "🔚", a: "af", m: "매듭지어", k: "부사" },
+      { i: "💬", a: "spreken", m: "말하다", k: "어근" }
+    ],
+    eq: "말을 매듭지어 정하다", res: "약속하다",
+    story: "af-는 ‘떨어져·끝까지’의 뉘앙스. spreken(말하다)과 만나 ‘말로 정해 놓는 것’ → afspreken. 분리동사: Ik spreek met hem af. 명사 afspraak(약속·예약) — 병원 예약도 afspraak입니다.",
+    colloc: "een afspraak maken", collockr: "약속·예약하다",
+    ex: [
+      { en: "U kunt online een afspraak maken met de huisarts; voor spoedgevallen belt u direct.", ko: "온라인으로 주치의 예약을 할 수 있습니다; 응급 상황이면 바로 전화하세요.", sk: "읽기" },
+      { en: "Laten we afspreken dat we elkaar om acht uur bij de ingang ontmoeten.", ko: "8시에 입구에서 만나기로 약속해요.", sk: "말하기" },
+      { en: "Helaas moet ik onze afspraak van dinsdag verzetten; kan het woensdagochtend?", ko: "죄송하지만 화요일 약속을 미뤄야 합니다; 수요일 오전은 어떨까요?", sk: "쓰기" }
+    ],
+    point: "분리동사: ik spreek af, wij spreken af, heb afgesproken. 명사 de afspraak — ‘약속’과 ‘예약’ 둘 다. ‘약속을 지키다’는 een afspraak nakomen.",
+    gap: { s: "Ik wil graag met je ___ dat we elkaar om acht uur zien.", ko: "8시에 만나기로 너와 약속하고 싶어." }
+  },
+  {
+    w: "uitspreken", level: "B2", pos: "동사", core: "발음하다 · 표명하다", sep: true,
+    ipa: "ˈœytˌspreːkən", syl: "uit·spre·ken", kr: "아위트스프레컨", root: "spreek",
+    parts: [
+      { i: "📢", a: "uit", m: "밖으로", k: "부사" },
+      { i: "💬", a: "spreken", m: "말하다", k: "어근" }
+    ],
+    eq: "밖으로 말하다", res: "발음하다",
+    story: "uit(밖으로) + spreken. 소리를 밖으로 내다 → ‘발음하다’; 생각을 밖으로 내놓다 → ‘표명하다’. 명사 uitspraak(발음·판결). 분리동사입니다.",
+    colloc: "een uitspraak doen", collockr: "판결을 내리다",
+    ex: [
+      { en: "De rechter zal volgende maand zijn uitspraak doen in de zaak tegen het bedrijf.", ko: "판사는 다음 달 그 회사에 대한 재판에서 판결을 내릴 것이다.", sk: "읽기" },
+      { en: "Kunt u langzamer praten? Ik vind het nog moeilijk om Nederlandse woorden goed uit te spreken.", ko: "조금 천천히 말씀해 주시겠어요? 네덜란드어 단어 발음이 아직 어려워요.", sk: "말하기" },
+      { en: "Ik wil graag mijn waardering uitspreken voor de hulp van uw team.", ko: "귀 팀의 도움에 감사를 표하고 싶습니다.", sk: "쓰기" }
+    ],
+    point: "분리동사: ik spreek uit, heb uitgesproken. 명사 de uitspraak는 ‘발음’과 ‘판결’ 둘 다. ‘발음하다’는 uitspreken, ‘발음’은 uitspraak.",
+    gap: { s: "Wil je dat woord nog een keer hardop ___?", ko: "그 단어를 한 번 더 소리 내어 발음해 줄래?" }
+  },
+  {
+    w: "toespraak", level: "B2", pos: "명사", art: "de", core: "연설",
+    ipa: "ˈtusprɑːk", syl: "toe·spraak", kr: "투스프라크", root: "spreek",
+    parts: [
+      { i: "🎤", a: "toe", m: "…에게", k: "전치사" },
+      { i: "💬", a: "spraak", m: "말", k: "어근" }
+    ],
+    eq: "청중에게 하는 말", res: "연설",
+    story: "toe(…에게) + spraak(말, spreken의 명사형). 청중을 향해 하는 격식 있는 말 → toespraak. ‘연설하다’는 een toespraak houden — 동사가 아니라 houden을 씁니다.",
+    colloc: "een toespraak houden", collockr: "연설하다",
+    ex: [
+      { en: "In haar toespraak bedankte de burgemeester alle vrijwilligers die het festival mogelijk hadden gemaakt.", ko: "연설에서 시장은 축제를 가능하게 한 모든 자원봉사자에게 감사를 표했다.", sk: "읽기" },
+      { en: "De directeur hield een korte toespraak en daarna was er tijd voor vragen.", ko: "이사장이 짧게 연설하고 나서 질문 시간이 있었어요.", sk: "말하기" },
+      { en: "Voor de opening van het nieuwe buurthuis zoeken wij iemand die een toespraak wil houden.", ko: "새 주민센터 개관을 위해 연설을 해 주실 분을 찾고 있습니다.", sk: "쓰기" }
+    ],
+    point: "de toespraak. 동사로는 ‘toespraak houden’을 씁니다. spreken(말하다) → spraak(말) → toespraak(연설)의 명사 가문을 함께 기억하세요.",
+    gap: { s: "Tijdens de opening hield de wethouder een korte ___.", ko: "개관식에서 시 부시장이 짧은 연설을 했다." }
+  },
+
+  /* ================= denk · 생각하다 ================= */
+  {
+    w: "nadenken", level: "B1", pos: "동사", core: "곰곰이 생각하다", sep: true,
+    ipa: "ˈnaːˌdɛŋkən", syl: "na·den·ken", kr: "나덴컨", root: "denk",
+    parts: [
+      { i: "🔁", a: "na", m: "뒤이어", k: "부사" },
+      { i: "💭", a: "denken", m: "생각하다", k: "어근" }
+    ],
+    eq: "뒤이어 생각하다", res: "숙고하다",
+    story: "na(뒤에) + denken(생각하다) = 일이 있은 뒤 다시 따라 생각하다 → nadenken. 분리동사: Ik denk na. 전치사 over와 함께 ‘nadenken over’(~에 대해 숙고하다)가 고정입니다.",
+    colloc: "nadenken over", collockr: "~에 대해 숙고하다",
+    ex: [
+      { en: "De commissie neemt een week de tijd om na te denken over de plannen van de gemeente.", ko: "위원회는 시의 계획에 대해 숙고할 일주일의 시간을 갖는다.", sk: "읽기" },
+      { en: "Ik moet er nog even over nadenken voordat ik ja zeg.", ko: "네라고 하기 전에 좀 더 생각해 볼게요.", sk: "말하기" },
+      { en: "Na het gesprek ben ik gaan nadenken over mijn toekomst en heb ik besloten een opleiding te volgen.", ko: "면담 후 제 미래에 대해 생각하게 되었고, 과정을 듣기로 결정했습니다.", sk: "쓰기" }
+    ],
+    point: "분리동사: ik denk na, heb nagedacht. denken aan(~을 떠올리다) vs nadenken over(숙고하다)를 구분하세요. ‘om na te denken’처럼 te부정사로도 자주 나옵니다.",
+    gap: { s: "Ik wil er nog een nachtje over ___ voordat ik een beslissing neem.", ko: "결정을 내리기 전에 하룻밤 더 생각해 보고 싶다." }
+  },
+  {
+    w: "bedenken", level: "B1", pos: "동사", core: "생각해 내다 · 깨닫다",
+    ipa: "bəˈdɛŋkən", syl: "be·den·ken", kr: "버덴컨", root: "denk",
+    parts: [
+      { i: "🎯", a: "be-", m: "대상에", k: "접두사" },
+      { i: "💭", a: "denken", m: "생각하다", k: "어근" }
+    ],
+    eq: "생각을 붙이다", res: "고안하다",
+    story: "denken + be- ‘대상에 붙이다’. 머릿속에서 무언가를 만들어 내는 것 → bedenken. ‘생각해 내다’와 ‘문득 깨닫다’ 둘 다. nadenken은 과정, bedenken은 결과물을 만들어 내는 쪽입니다.",
+    colloc: "een oplossing bedenken", collockr: "해결책을 생각해 내다",
+    ex: [
+      { en: "De leerlingen moesten zelf een oplossing bedenken voor het probleem met het afval op school.", ko: "학생들은 학교 쓰레기 문제에 대한 해결책을 직접 생각해 내야 했다.", sk: "읽기" },
+      { en: "O, nu bedenk ik me dat ik de deur niet op slot heb gedaan.", ko: "아, 지금 생각났는데 문을 잠그지 않았어요.", sk: "말하기" },
+      { en: "We hebben een nieuw plan bedacht om meer bezoekers naar de winkel te trekken.", ko: "가게에 더 많은 손님을 끌 새 계획을 생각해 냈습니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 bedacht(불규칙). zich bedenken은 ‘마음을 바꾸다’. ‘해결책을 짜내다’는 een oplossing bedenken.",
+    gap: { s: "Kun je een goed excuus ___ waarom je te laat was?", ko: "네가 늦은 이유에 대해 그럴듯한 변명을 생각해 낼 수 있니?" }
+  },
+  {
+    w: "gedachte", level: "B2", pos: "명사", art: "de", core: "생각",
+    ipa: "ɣəˈdɑxtə", syl: "ge·dach·te", kr: "헐다흐터", root: "denk",
+    parts: [
+      { i: "🧩", a: "ge-", m: "모인 결과", k: "접두사" },
+      { i: "💭", a: "denken", m: "생각하다", k: "어근" },
+      { i: "📄", a: "-te", m: "명사 어미", k: "접미사" }
+    ],
+    eq: "생각해 낸 것", res: "생각",
+    story: "denken(생각하다) + ge- + -te = ‘생각해 낸 결과’ → gedachte, 곧 하나의 ‘생각’. ‘마음속으로’는 in gedachten. ‘사고’라는 추상 개념은 het denken으로 구분합니다.",
+    colloc: "in gedachten verzonken", collockr: "생각에 잠긴",
+    ex: [
+      { en: "Veel mensen maken zich zorgen over de toekomst, maar ze houden die gedachte vaak voor zich.", ko: "많은 사람들이 미래를 걱정하지만, 그 생각을 자주 속으로만 담아 둔다.", sk: "읽기" },
+      { en: "Ik begrijp uw gedachte, maar ik zie het toch anders.", ko: "그 생각은 이해하지만 저는 좀 다르게 봅니다.", sk: "말하기" },
+      { en: "Uw brief heeft mij aan het denken gezet; ik deel uw gedachte dat er meer groen in de wijk moet komen.", ko: "편지를 읽고 생각이 많아졌습니다; 동네에 녹지가 더 필요하다는 생각에 동의합니다.", sk: "쓰기" }
+    ],
+    point: "de gedachte(de-명사), 복수 gedachten. in gedachten(마음속으로), een gedachte uitspreken(생각을 말하다). denken의 명사는 맥락에 따라 gedachte / het denken.",
+    gap: { s: "Ik ben het niet eens met de ___ dat ouderen minder snel leren.", ko: "노인이 더 느리게 배운다는 생각에는 동의하지 않는다." }
+  },
+  {
+    w: "verdenken", level: "B2", pos: "동사", core: "의심하다",
+    ipa: "vərˈdɛŋkən", syl: "ver·den·ken", kr: "베르덴컨", root: "denk",
+    parts: [
+      { i: "❓", a: "ver-", m: "잘못", k: "접두사" },
+      { i: "💭", a: "denken", m: "생각하다", k: "어근" }
+    ],
+    eq: "잘못 생각하다", res: "의심하다",
+    story: "ver-에는 ‘잘못’의 뜻도 있습니다. denken(생각하다)에 붙으면 ‘남을 잘못된 쪽으로 생각하다’ → verdenken ‘의심하다’. 법·뉴스 문장에 자주 나옵니다. 명사 verdenking(혐의), verdachte(용의자).",
+    colloc: "iemand van iets verdenken", collockr: "누군가를 ~혐의로 의심하다",
+    ex: [
+      { en: "De politie verdenkt de man van diefstal, maar er is nog geen bewijs.", ko: "경찰은 그 남자를 절도 혐의로 의심하지만 아직 증거는 없다.", sk: "읽기" },
+      { en: "Ik hoop dat u mij niet verdenkt; ik heb niets met de fout te maken.", ko: "저를 의심하지 않으시길 바랍니다; 그 실수와는 아무 관련이 없습니다.", sk: "말하기" },
+      { en: "Wij verdenken niemand, maar wij willen wel graag weten hoe de fout heeft kunnen gebeuren.", ko: "누구도 의심하지 않지만, 어떻게 그런 실수가 생겼는지 알고 싶습니다.", sk: "쓰기" }
+    ],
+    point: "verdenken + van. 과거분사 verdacht — 형용사 verdacht(수상한)와 같은 형태입니다. 명사 de verdenking, de verdachte.",
+    gap: { s: "Waarom zou de politie hem ___ van brandstichting? Hij was thuis.", ko: "왜 경찰이 그를 방화 혐의로 의심하겠는가? 그는 집에 있었다." }
+  },
+
+  /* ================= neem · 잡다 ================= */
+  {
+    w: "deelnemen", level: "B1", pos: "동사", core: "참여하다", sep: true,
+    ipa: "ˈdeːlˌneːmən", syl: "deel·ne·men", kr: "델네먼", root: "neem",
+    parts: [
+      { i: "🧩", a: "deel", m: "부분", k: "명사" },
+      { i: "✋", a: "nemen", m: "잡다", k: "어근" }
+    ],
+    eq: "한몫을 잡다", res: "참여하다",
+    story: "deel(부분) + nemen(잡다) = ‘한몫을 잡다’ → deelnemen. 분리동사: Ik neem deel. 전치사 aan이 고정입니다: deelnemen aan. 명사 deelname(참여), deelnemer(참가자).",
+    colloc: "deelnemen aan", collockr: "~에 참여하다",
+    ex: [
+      { en: "Iedereen tussen de achttien en dertig jaar kan deelnemen aan de taalcursus.", ko: "18세에서 30세 사이의 모든 사람이 그 어학 과정에 참여할 수 있다.", sk: "읽기" },
+      { en: "Ik wil graag deelnemen aan het gesprek, maar ik durf nog niet goed te praten.", ko: "대화에 참여하고 싶지만 아직 말하는 게 두려워요.", sk: "말하기" },
+      { en: "Hierbij meld ik mij aan om deel te nemen aan de bijeenkomst van 12 mei.", ko: "5월 12일 모임에 참여하겠다고 신청합니다.", sk: "쓰기" }
+    ],
+    point: "분리동사: neem deel, heb deelgenomen. 전치사 aan. ‘참가자’는 de deelnemer, ‘참여’는 de deelname. 시험 안내문에서 ‘Deelname is gratis’가 자주 나옵니다.",
+    gap: { s: "Wilt u ook ___ aan de wandeltocht van zondag?", ko: "일요일 걷기 행사에도 참여하시겠어요?" }
+  },
+  {
+    w: "aannemen", level: "B1", pos: "동사", core: "받아들이다 · 채용하다", sep: true,
+    ipa: "ˈaːˌneːmən", syl: "aan·ne·men", kr: "안네먼", root: "neem",
+    parts: [
+      { i: "🫱", a: "aan", m: "…에 붙여", k: "전치사" },
+      { i: "✋", a: "nemen", m: "잡다", k: "어근" }
+    ],
+    eq: "내 쪽으로 잡아당겨 받다", res: "받아들이다",
+    story: "aan(붙여) + nemen(잡다) = 내 쪽으로 가져와 받아들이다. ‘수락하다’, ‘채용하다’, ‘전화를 받다’, ‘가정하다’까지 뜻이 넓어집니다. Ik neem aan dat …(~라고 생각해요)은 회화·듣기 빈출.",
+    colloc: "een voorstel aannemen", collockr: "제안을 받아들이다",
+    ex: [
+      { en: "Het bedrijf heeft besloten tien nieuwe medewerkers aan te nemen voor de vestiging in Groningen.", ko: "그 회사는 흐로닝언 지사에 새 직원 10명을 채용하기로 했다.", sk: "읽기" },
+      { en: "Ik neem aan dat u het formulier al heeft ingevuld?", ko: "서류는 이미 작성하셨다고 생각합니다만?", sk: "말하기" },
+      { en: "Ik heb uw aanbod met plezier aangenomen en begin volgende maand.", ko: "제안을 기쁘게 받아들였고 다음 달에 시작합니다.", sk: "쓰기" }
+    ],
+    point: "분리동사 + 불규칙: nam aan, heb aangenomen. 전화 aannemen은 ‘전화를 받다’. ‘채용하다’도 aannemen — 사람을 목적어로 쓰면 문맥으로 구분합니다.",
+    gap: { s: "Wij willen graag een nieuwe medewerker ___ voor de keuken.", ko: "주방에서 일할 새 직원을 채용하고 싶습니다." }
+  },
+  {
+    w: "overnemen", level: "B2", pos: "동사", core: "인수하다 · 대신하다", sep: true,
+    ipa: "ˈoːvərˌneːmən", syl: "over·ne·men", kr: "오버네먼", root: "neem",
+    parts: [
+      { i: "↔️", a: "over", m: "넘어", k: "전치사" },
+      { i: "✋", a: "nemen", m: "잡다", k: "어근" }
+    ],
+    eq: "넘어가서 잡다", res: "인수하다",
+    story: "over(넘어) + nemen(잡다). 다른 사람 손에서 넘어와 내가 잡는 것 → ‘인수하다’, ‘이어받다’, ‘대신하다’. 분리동사: Ik neem over. 명사 overname(인수).",
+    colloc: "een bedrijf overnemen", collockr: "회사를 인수하다",
+    ex: [
+      { en: "Een grote keten heeft vorige maand alle vestigingen van de kleine supermarktketen overgenomen.", ko: "한 대형 체인이 지난달 작은 슈퍼마켓 체인의 모든 지점을 인수했다.", sk: "읽기" },
+      { en: "Kun jij mijn dienst overnemen? Ik moet naar de dokter.", ko: "제 근무를 대신해 줄 수 있어요? 병원에 가야 해서요.", sk: "말하기" },
+      { en: "Als u het project overneemt, willen wij graag weten wie ons aanspreekpunt wordt.", ko: "프로젝트를 인수하신다면 저희 담당자가 누가 될지 알고 싶습니다.", sk: "쓰기" }
+    ],
+    point: "분리동사 + 불규칙: nam over, heb overgenomen. 강세는 앞의 óver-에 있습니다(ondernemen와 비교!). ‘말을 이어받다’, ‘근무를 대신하다’도 overnemen.",
+    gap: { s: "Zij is met pensioen, dus iemand anders moet haar taken ___.", ko: "그녀가 은퇴해서 다른 누군가가 그녀의 업무를 이어받아야 한다." }
+  },
+  {
+    w: "ondernemen", level: "B2", pos: "동사", core: "착수하다 · 기업을 하다",
+    ipa: "ˌɔndərˈneːmən", syl: "on·der·ne·men", kr: "온더르네먼", root: "neem",
+    parts: [
+      { i: "🏗️", a: "onder", m: "밑·기초로", k: "전치사" },
+      { i: "✋", a: "nemen", m: "잡다", k: "어근" }
+    ],
+    eq: "기초를 잡고 떠맡다", res: "착수하다",
+    story: "onder(밑) + nemen(잡다) = 일의 밑을 잡고 떠맡다 → ondernemen ‘착수하다’. ‘기업을 하다’는 뜻도 있습니다. 명사 onderneming(기업·조치), ondernemer(기업가). 분리동사가 아닙니다.",
+    colloc: "actie ondernemen", collockr: "조치를 취하다",
+    ex: [
+      { en: "De gemeente onderneemt actie tegen leegstaande winkels in het centrum.", ko: "시는 시내의 빈 상가에 대응 조치를 취한다.", sk: "읽기" },
+      { en: "Als het weer zo slecht blijft, moeten we iets ondernemen.", ko: "날씨가 계속 이렇게 나쁘면 우리 뭔가 조치를 취해야 해요.", sk: "말하기" },
+      { en: "De school wil stappen ondernemen om het pesten op het schoolplein tegen te gaan.", ko: "학교는 운동장에서의 괴롭힘을 막기 위한 조치를 취하려 한다.", sk: "쓰기" }
+    ],
+    point: "과거분사 ondernomen. 강세가 -né-에 있어 분리되지 않습니다 (óvernemen vs ondernémen). 명사 ondernemer(기업가), onderneming(기업·조치).",
+    gap: { s: "De school wil actie ___ tegen het pesten op het schoolplein.", ko: "학교는 운동장 내 괴롭힘에 대응 조치를 취하려 한다." }
+  },
+
+  /* ================= stel · 놓다 ================= */
+  {
+    w: "voorstellen", level: "B1", pos: "동사", core: "제안하다 · 소개하다", sep: true,
+    ipa: "ˈvoːrˌstɛlən", syl: "voor·stel·len", kr: "포르스텔런", root: "stel",
+    parts: [
+      { i: "📍", a: "voor", m: "앞에", k: "전치사" },
+      { i: "🧱", a: "stellen", m: "놓다", k: "어근" }
+    ],
+    eq: "앞에 놓다", res: "제안하다",
+    story: "voor(앞에) + stellen(놓다). 안건을 사람들 앞에 놓으면 ‘제안하다’; 사람을 앞에 놓으면 ‘소개하다’; 머릿속에 앞에 그려 보면 ‘상상하다’. 분리동사: Ik stel voor. 명사 voorstel(제안).",
+    colloc: "een voorstel doen", collockr: "제안하다",
+    ex: [
+      { en: "De bewoners hebben een plan voorgesteld om de speeltuin te vernieuwen.", ko: "주민들은 놀이터를 새로 단장할 계획을 제안했다.", sk: "읽기" },
+      { en: "Mag ik u mijn collega voorstellen? Dit is mevrouw De Vries.", ko: "동료를 소개해도 될까요? 이분은 더 프리스 씨입니다.", sk: "말하기" },
+      { en: "Ik stel voor om de vergadering naar woensdag te verplaatsen, omdat niet iedereen maandag aanwezig kan zijn.", ko: "월요일에는 모두 참석할 수 없으므로 회의를 수요일로 옮기자고 제안합니다.", sk: "쓰기" }
+    ],
+    point: "분리동사 + 불규칙: stelde voor, heb voorgesteld. Ik stel voor dat …(~을 제안합니다). zich voorstellen는 ‘자기소개하다’와 ‘상상하다’ 둘 다.",
+    gap: { s: "Ik wil graag een nieuw plan ___ om het probleem op te lossen.", ko: "문제를 해결할 새 계획을 제안하고 싶습니다." }
+  },
+  {
+    w: "herstellen", level: "B1", pos: "동사", core: "복구하다 · 회복하다",
+    ipa: "ɦɛrˈstɛlən", syl: "her·stel·len", kr: "헤르스텔런", root: "stel",
+    parts: [
+      { i: "🔁", a: "her", m: "다시", k: "접두사" },
+      { i: "🧱", a: "stellen", m: "놓다", k: "어근" }
+    ],
+    eq: "다시 제자리에 놓다", res: "복구하다",
+    story: "her(다시) + stellen(놓다) = 원래 자리에 다시 놓다 → ‘고치다’, ‘회복하다’. 명사 herstel(회복·수리). ‘~에서 회복되다’는 zich herstellen van — 병원·수리 맥락 모두에 씁니다.",
+    colloc: "zich herstellen van", collockr: "~에서 회복하다",
+    ex: [
+      { en: "De weg blijft nog een week dicht; de gemeente hoopt de schade voor het einde van de maand te herstellen.", ko: "도로는 일주일 더 통제된다; 시는 이달 말까지 피해를 복구하기를 바란다.", sk: "읽기" },
+      { en: "Het duurt meestal een paar dagen voordat je van zo'n griep herstelt.", ko: "그런 독감에서 회복되기까지 보통 며칠 걸려요.", sk: "말하기" },
+      { en: "Ik kan helaas niet komen, omdat ik nog moet herstellen van een operatie.", ko: "수술에서 아직 회복 중이라 아쉽지만 참석할 수 없습니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 hersteld. 재귀동사 zich herstellen van(~에서 회복하다)과 타동사 iets herstellen(~을 고치다). 명사 het herstel.",
+    gap: { s: "De monteur denkt dat hij de machine binnen twee dagen kan ___.", ko: "수리기사는 이틀 안에 기계를 고칠 수 있다고 생각한다." }
+  },
+  {
+    w: "vaststellen", level: "B2", pos: "동사", core: "확인하다 · 확정하다", sep: true,
+    ipa: "ˈvɑstˌstɛlən", syl: "vast·stel·len", kr: "바스트스텔런", root: "stel",
+    parts: [
+      { i: "📌", a: "vast", m: "단단히", k: "부사" },
+      { i: "🧱", a: "stellen", m: "놓다", k: "어근" }
+    ],
+    eq: "단단히 정해 놓다", res: "확정하다",
+    story: "vast(단단히) + stellen(놓다) = 흔들리지 않게 못 박아 정하다 → vaststellen. ‘사실을 확인하다’(establish)와 ‘규칙을 정하다’(fix) 둘 다. 분리동사: Ik stel vast.",
+    colloc: "de oorzaak vaststellen", collockr: "원인을 확인하다",
+    ex: [
+      { en: "De artsen konden niet vaststellen wat de oorzaak van de klachten was.", ko: "의사들은 그 증상의 원인을 확인할 수 없었다.", sk: "읽기" },
+      { en: "We moeten eerst vaststellen welke eisen de gemeente stelt.", ko: "먼저 시가 어떤 요건을 요구하는지 확정해야 해요.", sk: "말하기" },
+      { en: "In het onderzoek wordt vastgesteld dat het aantal fietsers in tien jaar is verdubbeld.", ko: "연구에서는 자전거 이용자가 10년 만에 두 배로 늘었음이 확인된다.", sk: "쓰기" }
+    ],
+    point: "분리동사: stelde vast, heb vastgesteld. ‘확인하다’와 ‘정하다’ 둘 다. 명사 vaststelling. 수동태 wordt vastgesteld가 시험 읽기에 자주 나옵니다.",
+    gap: { s: "De politie wil de oorzaak van de brand snel ___.", ko: "경찰은 화재 원인을 확인하려고 한다." }
+  },
+  {
+    w: "bestellen", level: "B1", pos: "동사", core: "주문하다",
+    ipa: "bəˈstɛlən", syl: "be·stel·len", kr: "버스텔런", root: "stel",
+    parts: [
+      { i: "🎯", a: "be-", m: "대상에", k: "접두사" },
+      { i: "🧱", a: "stellen", m: "놓다", k: "어근" }
+    ],
+    eq: "할 일을 자리에 두다", res: "주문하다",
+    story: "stellen(놓다) + be-. 옛 뜻은 ‘정리해 두다·지시하다’였고, 오늘날에는 ‘주문하다’로 자리 잡았습니다. 명사 bestelling(주문). 과거분사 besteld — 규칙 변화입니다.",
+    colloc: "online bestellen", collockr: "온라인으로 주문하다",
+    ex: [
+      { en: "Als u voor twaalf uur bestelt, wordt uw pakket de volgende dag bezorgd.", ko: "12시 전에 주문하면 택배가 다음 날 배송됩니다.", sk: "읽기" },
+      { en: "Zullen we vanavond eten bestellen? Ik heb geen zin om te koken.", ko: "오늘 저녁에 음식 시킬까요? 요리하기 싫어요.", sk: "말하기" },
+      { en: "Ik heb vorige week een jas bij u besteld, maar ik heb nog niets ontvangen.", ko: "지난주에 귀사에서 재킷을 주문했지만 아직 아무것도 받지 못했습니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 besteld. ‘주문’은 de bestelling, ‘예약’은 de reservering. bij + 상점 bestellen(~에서 주문하다) 형태로 시험 쓰기에 자주 씁니다.",
+    gap: { s: "Ik wil graag een nieuwe fiets online ___.", ko: "새 자전거를 온라인으로 주문하고 싶다." }
+  }
+];
+
+/* ============================================================
+   APP LOGIC — DutchWhy
+   ============================================================ */
+(function () {
+  "use strict";
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function shuffle(a) {
+    const r = a.slice();
+    for (let i = r.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const t = r[i]; r[i] = r[j]; r[j] = t;
+    }
+    return r;
+  }
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function uniq(a) { return a.filter(function (x, i) { return a.indexOf(x) === i; }); }
+
+  /* ---------------- storage ---------------- */
+  const NS = "dw_";
+  function lsGet(k, d) {
+    try { const v = localStorage.getItem(NS + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; }
+  }
+  function lsSet(k, v) { try { localStorage.setItem(NS + k, JSON.stringify(v)); } catch (e) {} }
+  function lsDel(k) { try { localStorage.removeItem(NS + k); } catch (e) {} }
+  function todayKey() {
+    const d = new Date();
+    return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+  }
+
+  /* ---------------- state ---------------- */
+  const S = {
+    filter: lsGet("filter", "ALL"),
+    pass: !!lsGet("pass", false),
+    unlock: !!lsGet("unlock", false),
+    hide: false,
+    autoTTS: !!lsGet("autoTTS", false),
+    goal: lsGet("goal", 10) || 10,
+    bookmarks: lsGet("bookmarks", []) || [],
+    notes: lsGet("notes", {}) || {},
+    today: lsGet("today", null),
+    idx: {},
+    onboarded: !!lsGet("onboarded", false)
+  };
+  if (!S.today || S.today.d !== todayKey()) S.today = { d: todayKey(), words: [] };
+  if (!Array.isArray(S.today.words)) S.today.words = [];
+  if (!Array.isArray(S.bookmarks)) S.bookmarks = [];
+  if (typeof S.notes !== "object" || S.notes === null) S.notes = {};
+
+  /* ---------------- level helpers ---------------- */
+  function lvDef(id) {
+    for (let i = 0; i < LEVELS.length; i++) if (LEVELS[i].id === id) return LEVELS[i];
+    return LEVELS[0];
+  }
+  function isOpen(id) { return (S.pass || S.unlock) ? true : lvDef(id).free; }
+  function openPool() { return WORDS.filter(function (w) { return isOpen(w.level); }); }
+  function deck() {
+    const base = openPool();
+    if (S.filter === "ALL") return base;
+    return base.filter(function (w) { return w.level === S.filter; });
+  }
+  function curIdx() {
+    const d = deck();
+    if (!d.length) return 0;
+    return Math.min(S.idx[S.filter] || 0, d.length - 1);
+  }
+  function cur() {
+    const d = deck();
+    return d[curIdx()] || WORDS[0];
+  }
+  function byWord(w) {
+    for (let i = 0; i < WORDS.length; i++) if (WORDS[i].w === w) return WORDS[i];
+    return null;
+  }
+  function wordsWithPart(affix) {
+    return WORDS.filter(function (x) {
+      return x.parts.some(function (p) { return p.a === affix; });
+    });
+  }
+  function familyOf(w) { return WORDS.filter(function (x) { return x.root === w.root; }); }
+
+  /* ---------------- toast ---------------- */
+  let toastTimer = null;
+  function toast(msg) {
+    const el = $("toast");
+    el.textContent = msg;
+    el.classList.add("on");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove("on"); }, 2300);
+  }
+
+  /* ---------------- speech (nl-NL) ---------------- */
+  let voiceWarned = false;
+  function pickVoice() {
+    try {
+      const vs = window.speechSynthesis.getVoices() || [];
+      for (let i = 0; i < vs.length; i++) {
+        if ((vs[i].lang || "").toLowerCase() === "nl-nl") return vs[i];
+      }
+      for (let i = 0; i < vs.length; i++) {
+        if ((vs[i].lang || "").toLowerCase().indexOf("nl") === 0) return vs[i];
+      }
+    } catch (e) {}
+    return null;
+  }
+  function speak(text, rate) {
+    if (!("speechSynthesis" in window)) { toast("이 브라우저는 음성 재생을 지원하지 않아요"); return; }
+    try { window.speechSynthesis.cancel(); } catch (e) {}
+    const u = new SpeechSynthesisUtterance(String(text || "").replace(/[\[\]]/g, ""));
+    u.lang = "nl-NL";
+    u.rate = rate || 0.9;
+    u.pitch = 1;
+    const v = pickVoice();
+    if (v) u.voice = v;
+    else if (!voiceWarned) { voiceWarned = true; }
+    try { window.speechSynthesis.speak(u); } catch (e) {}
+  }
+  if (window.speechSynthesis && "onvoiceschanged" in window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = function () {};
+  }
+
+  /* ---------------- render: level chips ---------------- */
+  function renderLevels() {
+    const wrap = $("levels");
+    const items = [{ id: "ALL", label: "전체", free: true }].concat(LEVELS);
+    wrap.innerHTML = items.map(function (lv) {
+      const locked = lv.id !== "ALL" && !isOpen(lv.id);
+      const on = S.filter === lv.id;
+      return '<button class="chip' + (on ? " on" : "") + (locked ? " locked" : "") +
+        '" data-level="' + lv.id + '">' + (locked ? "🔒 " : "") + esc(lv.label) + "</button>";
+    }).join("");
+  }
+
+  /* ---------------- render: card ---------------- */
+  let studyTimer = null;
+
+  function fitWord(w) {
+    const el = $("word");
+    const hero = $("hero");
+    const len = w.length;
+    let base = len <= 6 ? 80 : len <= 8 ? 64 : len <= 10 ? 54 : 46;
+    const vmax = window.innerHeight * 0.115;
+    if (vmax > 24) base = Math.min(base, vmax);
+    el.style.fontSize = base + "px";
+    const avail = Math.max(120, hero.clientWidth - 26);
+    let size = base, guard = 0;
+    while (el.scrollWidth > avail && size > 15 && guard < 80) {
+      size -= 1;
+      el.style.fontSize = size + "px";
+      guard++;
+    }
+  }
+
+  function render(dir) {
+    let d = deck();
+    if (!d.length) { S.filter = "ALL"; d = deck(); }
+    renderLevels();
+    const i = curIdx();
+    S.idx[S.filter] = i;
+    const w = d[i];
+    if (!w) return;
+
+    $("pos").textContent = w.pos;
+    $("art").hidden = !w.art;
+    $("art").textContent = w.art || "";
+    $("sep").hidden = !w.sep;
+    $("lvl").textContent = lvDef(w.level).label;
+    $("star").classList.toggle("on", S.bookmarks.indexOf(w.w) >= 0);
+
+    $("word").textContent = w.w;
+    $("ipa").textContent = "[" + w.ipa + "]";
+    $("syl").textContent = w.syl;
+    $("kr").innerHTML = "한국어 발음 <b>" + esc(w.kr) + "</b>";
+
+    const bits = String(w.core).split(" · ");
+    $("core").innerHTML = esc(bits[0]) + (bits.length > 1 ? "<small>" + esc(bits.slice(1).join(" · ")) + "</small>" : "");
+
+    /* etymology pills */
+    let h = "";
+    w.parts.forEach(function (p, k) {
+      if (k) h += '<span class="fop">+</span>';
+      const locked = wordsWithPart(p.a).filter(function (x) { return isOpen(x.level); }).length === 0;
+      h += '<button class="pill" data-part="' + esc(p.a) + '">' +
+           (locked ? "🔒" : "<i>" + p.i + "</i>") +
+           "<b>" + esc(p.a) + "</b><small>" + esc(p.m) + "</small></button>";
+    });
+    h += '<span class="farrow">→</span><span class="fresult">' + esc(w.eq) + "</span>";
+    $("fpills").innerHTML = h;
+
+    const fam = familyOf(w);
+    $("fnote").innerHTML = esc((ROOTS[w.root] || {}).latin || "") + " · " +
+      esc((ROOTS[w.root] || {}).family || w.root) + " 가문 " + fam.length + "단어";
+
+    /* example strip */
+    const ex = w.ex[0] || { en: "", ko: "", sk: "" };
+    $("exTag").textContent = lvDef(w.level).label + " · " + (ex.sk || "예문");
+    $("exEn").textContent = ex.en;
+    $("exKo").textContent = ex.ko;
+
+    /* header + progress */
+    const n = S.today.words.length;
+    $("counter").textContent = "오늘 " + n + " · " + S.goal;
+    const pct = Math.max(4, Math.min(100, Math.round(n / Math.max(1, S.goal) * 100)));
+    $("progBar").style.width = pct + "%";
+
+    fitWord(w.w);
+
+    $("card").classList.remove("anim-next", "anim-prev");
+    if (dir) {
+      void $("card").offsetWidth;
+      $("card").classList.add(dir > 0 ? "anim-next" : "anim-prev");
+    }
+
+    if (typeof Q !== "undefined" && Q.aiWords && Q.aiWords !== w.w) {
+      Q.aiWords = null;
+    }
+
+    markStudied(w);
+    if (S.autoTTS) speak(w.w, 0.88);
+  }
+
+  function markStudied(w) {
+    clearTimeout(studyTimer);
+    studyTimer = setTimeout(function () {
+      if (S.today.d !== todayKey()) S.today = { d: todayKey(), words: [] };
+      if (S.today.words.indexOf(w.w) < 0) {
+        S.today.words.push(w.w);
+        lsSet("today", S.today);
+        const n = S.today.words.length;
+        $("counter").textContent = "오늘 " + n + " · " + S.goal;
+        $("progBar").style.width = Math.max(4, Math.min(100, Math.round(n / Math.max(1, S.goal) * 100))) + "%";
+      }
+    }, 850);
+  }
+
+  /* ---------------- navigation ---------------- */
+  function next() {
+    const d = deck();
+    const i = curIdx();
+    if (i + 1 >= d.length) {
+      S.idx[S.filter] = 0;
+      render(1);
+      toast((S.filter === "ALL" ? "전체" : lvDef(S.filter).label) + " " + d.length + "단어를 한 바퀴 돌았어요");
+      return;
+    }
+    S.idx[S.filter] = i + 1;
+    render(1);
+  }
+  function prev() {
+    const d = deck();
+    if (!d.length) return;
+    const i = curIdx();
+    S.idx[S.filter] = (i - 1 + d.length) % d.length;
+    render(-1);
+  }
+  function jumpTo(word) {
+    const d = deck();
+    for (let i = 0; i < d.length; i++) {
+      if (d[i].w === word) { S.idx[S.filter] = i; render(1); return true; }
+    }
+    return false;
+  }
+  function jumpToAny(word) {
+    const w = byWord(word);
+    if (!w) return false;
+    if (!isOpen(w.level)) return false;
+    if (S.filter !== "ALL" && S.filter !== w.level) {
+      S.filter = "ALL"; lsSet("filter", S.filter);
+    }
+    return jumpTo(word);
+  }
+
+  /* ---------------- sheets ---------------- */
+  const stack = [];
+  function openSheet(id) {
+    const el = $(id);
+    if (!el) return;
+    if (stack.length) {
+      const top = $(stack[stack.length - 1]);
+      if (top) top.classList.remove("on");
+    }
+    el.classList.add("on");
+    el.setAttribute("aria-hidden", "false");
+    stack.push(id);
+    $("backdrop").classList.add("on");
+  }
+  function closeSheet() {
+    const id = stack.pop();
+    if (id) {
+      const el = $(id);
+      if (el) { el.classList.remove("on"); el.setAttribute("aria-hidden", "true"); }
+    }
+    if (stack.length) {
+      const p = $(stack[stack.length - 1]);
+      if (p) { p.classList.add("on"); p.setAttribute("aria-hidden", "false"); }
+    } else {
+      $("backdrop").classList.remove("on");
+    }
+  }
+  function closeAll() { while (stack.length) closeSheet(); }
+
+  /* ---------------- story + family ---------------- */
+  function openStory() {
+    const w = cur();
+    const fam = familyOf(w);
+    let h = "";
+    h += '<div class="sh-head"><div class="sh-ico"><span style="display:block;font-size:8px;color:var(--ink-3);letter-spacing:.02em">ROOT</span>' + esc(w.root) + "</div>";
+    h += '<div class="sh-meta"><b>' + esc(w.w) + " · " + esc(w.core) + "</b>";
+    h += "<span>" + (w.art ? esc(w.art) + " · " : "") + esc(w.pos) + " · " + esc(lvDef(w.level).label) + " · [" + esc(w.ipa) + "]</span>";
+    h += '<span class="tag">' + esc((ROOTS[w.root] || {}).family || w.root) + " = " + esc((ROOTS[w.root] || {}).m || "") + "</span></div></div>";
+
+    h += '<p class="story-p">' + esc(w.story) + "</p>";
+
+    h += "<h4>조각으로 보기</h4><div class=\"famrow\">";
+    w.parts.forEach(function (p) {
+      h += '<span class="famchip"><b>' + esc(p.a) + "</b>" + p.i + " " + esc(p.m) + ' <span style="font-size:8px;color:#9aa5b0">' + esc(p.k) + "</span></span>";
+    });
+    h += "</div>";
+
+    h += '<h4>같은 가문 · ' + esc((ROOTS[w.root] || {}).family || w.root) + " " + esc((ROOTS[w.root] || {}).m || "") + " " + fam.length + "단어</h4><div class=\"famrow\">";
+    fam.forEach(function (x) {
+      const open = isOpen(x.level);
+      h += '<button class="famchip' + (open ? "" : " locked") + '" data-fam="' + esc(x.w) + '" data-open="' + (open ? "1" : "0") + '">' +
+        (open ? "" : "🔒") + "<b>" + esc(x.w) + "</b>" + esc(x.core.split(" · ")[0]) +
+        '<span style="font-size:8px;color:#9aa5b0">' + esc(lvDef(x.level).label) + "</span></button>";
+    });
+    h += "</div>";
+
+    h += '<h4>시험 포인트</h4><p class="story-p" style="margin-bottom:2px!important">' + esc(w.point) + "</p>";
+
+    if (w.colloc) {
+      h += '<h4>함께 외우는 표현</h4><p class="story-p" style="margin-bottom:2px!important"><b style="color:var(--blue)">' +
+        esc(w.colloc) + "</b> — " + esc(w.collockr) + "</p>";
+    }
+
+    h += '<div class="sheet-actions">';
+    h += '<button id="storySpeak">🔊 발음</button>';
+    h += '<button id="storyNote">📝 내 메모</button>';
+    h += '<button class="primary" id="storyStar">' + (S.bookmarks.indexOf(w.w) >= 0 ? "★ 저장됨" : "☆ 저장") + "</button>";
+    h += "</div>";
+
+    $("storyBody").innerHTML = h;
+    openSheet("sheet-story");
+
+    $("storySpeak").onclick = function () { speak(w.w); };
+    $("storyNote").onclick = function () { closeAll(); setTimeout(openNotes, 220); };
+    $("storyStar").onclick = function () {
+      toggleStar();
+      $("storyStar").textContent = S.bookmarks.indexOf(w.w) >= 0 ? "★ 저장됨" : "☆ 저장";
+    };
+    $("storyBody").querySelectorAll("[data-fam]").forEach(function (b) {
+      b.onclick = function () {
+        const target = b.getAttribute("data-fam");
+        if (b.getAttribute("data-open") !== "1") {
+          openB2("「" + target + "」는 B2 단어예요");
+          return;
+        }
+        closeAll();
+        if (!jumpToAny(target)) toast("그 단어로 이동할 수 없어요");
+        else toast(byWord(target).w + " · " + byWord(target).core);
+      };
+    });
+  }
+
+  /* ---------------- examples ---------------- */
+  function openExamples() {
+    const w = cur();
+    $("exTitle").textContent = "예문 · " + w.w;
+    let h = "";
+    w.ex.forEach(function (e, i) {
+      h += '<div class="exitem">';
+      h += '<div class="top"><span class="n">' + (i + 1) + "</span>";
+      h += '<span class="wm">' + esc(lvDef(w.level).label) + "</span>";
+      h += '<span class="sk">' + esc(e.sk || "예문") + "</span>";
+      h += '<button class="say" data-say="' + esc(e.en) + '" aria-label="예문 듣기">🔊</button></div>';
+      h += '<p class="en">' + esc(e.en) + "</p>";
+      h += '<p class="ko">' + esc(e.ko) + "</p>";
+      h += "</div>";
+    });
+    h += '<div class="sheet-actions">';
+    h += '<button id="exAll">🔊 3문장 연속 듣기</button>';
+    h += '<button class="primary" id="exWord">🔊 ' + esc(w.w) + " 발음</button>";
+    h += "</div>";
+    h += '<div class="qhint">예문마다 🔊 버튼으로 네덜란드어(nl-NL) 발음을 들을 수 있어요. 문장을 소리 내어 따라 읽으면 시험 말하기에 그대로 쓸 수 있는 덩어리가 됩니다.</div>';
+    $("exBody").innerHTML = h;
+    openSheet("sheet-examples");
+
+    $("exBody").querySelectorAll("[data-say]").forEach(function (b) {
+      b.onclick = function () { speak(b.getAttribute("data-say"), 0.86); };
+    });
+    $("exWord").onclick = function () { speak(w.w); };
+    $("exAll").onclick = function () {
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+      w.ex.forEach(function (e, i) {
+        setTimeout(function () { speak(e.en, 0.86); }, i * 5200);
+      });
+      toast("3문장을 차례로 읽어 드려요");
+    };
+  }
+
+  /* ---------------- notes ---------------- */
+  function openNotes() {
+    const w = cur();
+    $("noteTitle").textContent = "메모 · " + w.w;
+    const saved = S.notes[w.w] || "";
+    let h = "";
+    h += '<p class="muted" style="font-size:9.5px;margin:0 0 6px">나만의 연상법이나 실제로 써 본 문장을 적어 두세요. 이 기기에만 저장됩니다.</p>';
+    h += '<textarea class="notearea" id="noteInput" placeholder="예: ont(벗기다) + dekken(덮다) — 덮개를 벗기면 발견">' + esc(saved) + "</textarea>";
+    h += '<div class="notestat"><span class="dot"></span><span id="noteStat">자동 저장됩니다</span></div>';
+    const others = Object.keys(S.notes).filter(function (k) { return k !== w.w && S.notes[k]; });
+    if (others.length) {
+      h += "<h4>다른 단어 메모 " + others.length + "개</h4>";
+      others.forEach(function (k) {
+        const o = byWord(k);
+        h += '<div class="listrow" data-note="' + esc(k) + '"><div class="ic">' + esc(k.slice(0, 2)) + "</div><div><div class=\"tt\">" + esc(o ? o.w : k) +
+          '</div><div class="ss">' + esc(String(S.notes[k]).slice(0, 40)) + '</div></div><div class="go">›</div></div>';
+      });
+    }
+    $("noteBody").innerHTML = h;
+    openSheet("sheet-notes");
+
+    const input = $("noteInput");
+    let t = null;
+    input.oninput = function () {
+      const v = input.value;
+      $("noteStat").textContent = "저장 중…";
+      clearTimeout(t);
+      t = setTimeout(function () {
+        if (v.trim()) S.notes[w.w] = v; else delete S.notes[w.w];
+        lsSet("notes", S.notes);
+        $("noteStat").textContent = v.trim() ? "저장됨 · 이 기기에만" : "비어 있음";
+      }, 380);
+    };
+    $("noteBody").querySelectorAll("[data-note]").forEach(function (row) {
+      row.onclick = function () {
+        const k = row.getAttribute("data-note");
+        closeAll();
+        if (!jumpToAny(k)) { toast("그 단어는 지금 레벨에서 볼 수 없어요"); return; }
+        setTimeout(openNotes, 240);
+      };
+    });
+  }
+
+  /* ---------------- B2 pack ---------------- */
+  function openB2(reason) {
+    $("b2Note").innerHTML = (reason ? '<span style="color:#B0503F;font-weight:800">' + esc(reason) + "</span><br>" : "") +
+      "프로토타입입니다. 실제 결제는 없고, 설정의 🧪 스위치로도 열 수 있어요.";
+    updateB2UI();
+    openSheet("sheet-b2");
+  }
+  function updateB2UI() {
+    const b = $("b2Cta");
+    if (S.pass) { b.textContent = "✓ B2 확장팩 열림"; b.classList.add("done"); }
+    else { b.textContent = "테스트용으로 B2 열기"; b.classList.remove("done"); }
+  }
+
+  /* ---------------- star / hide ---------------- */
+  function toggleStar() {
+    const w = cur();
+    const i = S.bookmarks.indexOf(w.w);
+    if (i >= 0) { S.bookmarks.splice(i, 1); toast(w.w + " 북마크를 해제했어요"); }
+    else { S.bookmarks.push(w.w); toast(w.w + " · " + w.core.split(" · ")[0] + " 저장"); }
+    lsSet("bookmarks", S.bookmarks);
+    $("star").classList.toggle("on", S.bookmarks.indexOf(w.w) >= 0);
+  }
+  function setHide(v) {
+    S.hide = v;
+    $("card").classList.toggle("masked", v);
+    $("hideLabel").textContent = v ? "뜻 보이기" : "뜻 가리기";
+  }
+
+  /* ---------------- menu ---------------- */
+  function renderMenu() {
+    const todayWs = S.today.words.map(byWord).filter(Boolean);
+    const bookWs = S.bookmarks.map(byWord).filter(Boolean);
+    let h = "";
+    h += '<div class="menu-hero"><div class="big">NL</div><div><div class="tt">DutchWhy</div><div class="ss">네덜란드어 단어는 조각을 읽는 것</div></div></div>';
+
+    h += "<h4>오늘 배운 단어 " + todayWs.length + "</h4>";
+    if (todayWs.length) {
+      h += '<div class="listchips">';
+      todayWs.forEach(function (x) {
+        h += '<button class="listchip" data-jump="' + esc(x.w) + '">' + esc(x.w) + "<small>" + esc(x.core.split(" · ")[0]) + "</small></button>";
+      });
+      h += "</div>";
+    } else {
+      h += '<div class="comingsoon">아직 오늘 배운 단어가 없어요. 카드를 한 장 넘겨 보세요.</div>';
+    }
+
+    h += "<h4>★ 저장한 단어 " + bookWs.length + "</h4>";
+    if (bookWs.length) {
+      h += '<div class="listchips">';
+      bookWs.forEach(function (x) {
+        h += '<button class="listchip" data-jump="' + esc(x.w) + '">' + esc(x.w) + "<small>" + esc(x.core.split(" · ")[0]) + "</small></button>";
+      });
+      h += "</div>";
+    } else {
+      h += '<div class="comingsoon">카드 오른쪽 위 ★를 누르면 여기에 모아 둘 수 있어요.</div>';
+    }
+
+    h += "<h4>가문 9개 · " + WORDS.length + "단어</h4><div class=\"rootgrid\">";
+    Object.keys(ROOTS).forEach(function (k) {
+      const fam = WORDS.filter(function (x) { return x.root === k; });
+      const openN = fam.filter(function (x) { return isOpen(x.level); }).length;
+      h += '<button class="rootbtn" data-root="' + esc(k) + '"><b>' + esc(ROOTS[k].family) + "</b>" + esc(ROOTS[k].m) +
+        " <span>" + openN + "/" + fam.length + "</span></button>";
+    });
+    h += "</div>";
+    h += '<p class="muted" style="font-size:8.8px;margin:6px 0 0">숫자는 열린 단어 / 전체 단어입니다. 잠긴 가문은 B2 확장팩에서 열립니다.</p>';
+
+    h += "<h4>더 보기</h4>";
+    if (!S.pass) {
+      h += '<div class="listrow" data-menu="b2"><div class="ic">🔓</div><div><div class="tt">B2 확장팩</div><div class="ss">B2 16단어 · 전체 가문 36단어 · 잠금 해제 테스트</div></div><div class="go">›</div></div>';
+    }
+    h += '<div class="listrow" data-menu="quiz"><div class="ic">🧩</div><div><div class="tt">접두사 · 빈칸 퀴즈</div><div class="ss">B1·B2 시험형 어휘 점검</div></div><div class="go">›</div></div>';
+    h += '<div class="listrow" data-menu="settings"><div class="ic">⚙️</div><div><div class="tt">설정</div><div class="ss">발음·B2 잠금·목표</div></div><div class="go">›</div></div>';
+    h += '<div class="hr"></div><p class="muted" style="font-size:8.5px;margin:0">DutchWhy 프로토타입 · 게르만어 접두사 표기 기준</p>';
+
+    $("menuBody").innerHTML = h;
+    $("menuBody").querySelectorAll("[data-jump]").forEach(function (b) {
+      b.onclick = function () {
+        const w = b.getAttribute("data-jump");
+        closeAll();
+        if (!jumpToAny(w)) toast("그 단어는 지금 레벨에서 볼 수 없어요");
+      };
+    });
+    $("menuBody").querySelectorAll("[data-root]").forEach(function (b) {
+      b.onclick = function () {
+        const k = b.getAttribute("data-root");
+        const fam = WORDS.filter(function (x) { return x.root === k; });
+        const open = fam.filter(function (x) { return isOpen(x.level); });
+        if (!open.length) { openB2("「" + k + "」 가문은 B2에 있어요"); return; }
+        closeAll();
+        if (!jumpToAny(open[0].w)) toast("이동할 수 없어요");
+        else toast("「" + ROOTS[k].family + " " + ROOTS[k].m + "」 가문 · " + open[0].w + "부터");
+      };
+    });
+    $("menuBody").querySelectorAll("[data-menu]").forEach(function (b) {
+      b.onclick = function () {
+        const m = b.getAttribute("data-menu");
+        if (m === "b2") openB2();
+        else if (m === "quiz") openQuiz();
+        else if (m === "settings") openSheet("sheet-settings");
+      };
+    });
+  }
+
+  /* ---------------- settings ---------------- */
+  function syncSettings() {
+    $("swAuto").classList.toggle("on", S.autoTTS);
+    $("swUnlock").classList.toggle("on", S.unlock);
+    $("goalVal").textContent = S.goal;
+  }
+
+  /* ---------------- onboarding ---------------- */
+  let obTimer = null;
+  function showOnboard() {
+    $("onboard").classList.remove("hide");
+    $("obAnswer").classList.remove("on");
+    $("obHint").classList.remove("off");
+    clearTimeout(obTimer);
+    obTimer = setTimeout(function () {
+      $("obAnswer").classList.add("on");
+      $("obHint").classList.add("off");
+    }, 1100);
+  }
+  function hideOnboard() {
+    $("onboard").classList.add("hide");
+    S.onboarded = true;
+    lsSet("onboarded", true);
+    clearTimeout(obTimer);
+  }
+
+  /* ============================================================
+     QUIZ — 접두사 퀴즈 + 빈칸 퀴즈
+     ============================================================ */
+  const PREFIXES = ["ver-", "be-", "ont-", "ge-", "her-"];
+  const Q = { prefix: null, gap: null, stats: { right: 0, done: 0 }, aiWords: null };
+
+  function quizPool() {
+    let p = deck();
+    if (p.length < 4) p = openPool();
+    return p;
+  }
+  function prefixPart(w) {
+    if (!w.parts.length) return null;
+    const p = w.parts[0];
+    if (p.k !== "접두사") return null;
+    if (PREFIXES.indexOf(p.a) < 0) return null;
+    if (w.parts.length < 2) return null;
+    return p;
+  }
+
+  function openQuiz() {
+    Q.prefix = null; Q.gap = null;
+    document.querySelectorAll(".qtab").forEach(function (x, i) { x.classList.toggle("on", i === 0); });
+    $("tab-prefix").hidden = false;
+    $("tab-gap").hidden = true;
+    renderPrefix();
+    openSheet("sheet-quiz");
+  }
+
+  /* ---------- quiz 1 · 접두사 ---------- */
+  function buildPrefix() {
+    const pool = quizPool().filter(prefixPart);
+    if (!pool.length) return null;
+    const answer = pick(pool);
+    const p = prefixPart(answer);
+    const stem = answer.w.slice(p.a.replace("-", "").length);
+    const others = shuffle(PREFIXES.filter(function (x) { return x !== p.a; })).slice(0, 3);
+    return { answer: answer, part: p, stem: stem, opts: shuffle([p.a].concat(others)), answered: false };
+  }
+  function renderPrefix() {
+    const tab = $("tab-prefix");
+    if (!Q.prefix) Q.prefix = buildPrefix();
+    const q = Q.prefix;
+    if (!q) { tab.innerHTML = '<div class="qempty">출제할 단어가 모자라요.<br>B2를 열거나 전체 레벨을 골라 보세요.</div>'; return; }
+    const a = q.answer;
+    let h = "";
+    h += '<div class="qprompt">빈 접두사를 고르세요 — 뜻은 <b>' + esc(a.core) + "</b></div>";
+    h += '<div class="qword"><span class="qblank" aria-label="빈 접두사"></span>' + esc(q.stem) +
+      '<span class="qcap">' + esc(a.pos) + " · " + esc(lvDef(a.level).label) + " · 접두사 하나만 고르세요</span></div>";
+    h += '<div class="qopts">';
+    q.opts.forEach(function (o, i) {
+      h += '<button class="qopt" data-opt="' + i + '"><span class="qw">' + esc(o) + "</span></button>";
+    });
+    h += "</div>";
+    h += '<div class="qfoot"><span class="qscore">정답 ' + Q.stats.right + " / " + Q.stats.done + "</span>";
+    h += '<button class="qnext' + (q.answered ? "" : " ghost") + '" id="q1next">다음 문제 →</button></div>';
+    h += '<div class="qhint">고르면 네 보기 모두 <b>전체 단어 · 발음 · 한국어 뜻</b>이 공개됩니다. 🔒 단어는 B2 확장팩에서 열려요.</div>';
+    tab.innerHTML = h;
+  }
+  function answerPrefix(idx) {
+    const q = Q.prefix;
+    if (!q || q.answered) return;
+    q.answered = true;
+    const chosen = q.opts[idx];
+    const right = chosen === q.part.a;
+    Q.stats.done++;
+    if (right) Q.stats.right++;
+
+    const opts = $("tab-prefix").querySelectorAll("[data-opt]");
+    opts.forEach(function (btn, i) {
+      const o = q.opts[i];
+      const isAns = o === q.part.a;
+      btn.classList.add(isAns ? "correct" : (i === idx ? "wrong" : "dim"));
+      const m = document.createElement("span");
+      m.className = "mark";
+      m.textContent = isAns ? "✓" : (i === idx ? "✗" : "");
+      btn.appendChild(m);
+      let word = null;
+      for (let k = 0; k < WORDS.length; k++) {
+        const w = WORDS[k];
+        const pp = prefixPart(w);
+        if (pp && pp.a === o && w.w.slice(pp.a.replace("-", "").length) === q.stem) { word = w; break; }
+      }
+      btn.insertAdjacentHTML("beforeend",
+        '<span class="qdetail">' + (word
+          ? '<b>' + esc(word.w) + '</b> = ' + esc(word.parts.map(function (p) { return p.a + "(" + p.m + ")"; }).join(" + ")) +
+            "<br>[" + esc(word.ipa) + "] · " + esc(word.core)
+          : esc(o) + q.stem + " — 이 가문에 그 단어는 없어요") + "</span>");
+    });
+    const score = $("tab-prefix").querySelector(".qscore");
+    if (score) score.textContent = "정답 " + Q.stats.right + " / " + Q.stats.done;
+    const nx = $("q1next");
+    if (nx) nx.classList.remove("ghost");
+
+    if (right) toast("정답! " + q.part.a + q.stem + " — " + q.answer.parts.map(function (p) { return p.m; }).join(" + "));
+    else toast("정답은 " + q.part.a + " — " + q.answer.w + " (" + q.answer.eq + ")");
+  }
+
+  /* ---------- quiz 2 · 빈칸 ---------- */
+  function buildGap() {
+    const pool = quizPool().filter(function (w) { return w.gap && w.gap.s; });
+    if (pool.length < 4) return null;
+    const answer = pick(pool);
+    const others = shuffle(openPool().filter(function (x) {
+      return x.w !== answer.w && x.root !== answer.root;
+    }));
+    const wrongs = [];
+    const seenRoot = {};
+    seenRoot[answer.root] = 1;
+    others.forEach(function (x) {
+      if (wrongs.length < 3 && !seenRoot[x.root]) { seenRoot[x.root] = 1; wrongs.push(x); }
+    });
+    if (wrongs.length < 3) return null;
+    return { answer: answer, opts: shuffle([answer].concat(wrongs)), answered: false };
+  }
+  function renderGap() {
+    const tab = $("tab-gap");
+    if (!Q.gap) Q.gap = buildGap();
+    const q = Q.gap;
+    if (!q) { tab.innerHTML = '<div class="qempty">출제할 문장이 모자라요.</div>'; return; }
+    const a = q.answer;
+    const sent = esc(a.gap.s).replace("___", '<span class="qblank" aria-label="빈칸"></span>');
+    let h = "";
+    h += '<div class="qprompt">빈칸에 들어갈 단어는? <b>' + esc(lvDef(a.level).label) + "</b></div>";
+    h += '<div class="qsent">' + sent + '<span class="qko">' + esc(a.gap.ko) + "</span></div>";
+    h += '<div class="qopts">';
+    q.opts.forEach(function (o, i) {
+      h += '<button class="qopt" data-opt="' + i + '"><span class="qw">' + esc(o.w) + "</span></button>";
+    });
+    h += "</div>";
+    h += '<div class="qfoot"><span class="qscore">정답 ' + Q.stats.right + " / " + Q.stats.done + "</span>";
+    h += '<button class="qnext' + (q.answered ? "" : " ghost") + '" id="q2next">다음 문제 →</button></div>';
+    h += '<div class="qhint">고르면 보기 모두 <b>어근 분해 · 발음 · 한국어 뜻</b>이 공개됩니다. 문장은 시험 읽기·쓰기 스타일입니다.</div>';
+    tab.innerHTML = h;
+  }
+  function answerGap(idx) {
+    const q = Q.gap;
+    if (!q || q.answered) return;
+    q.answered = true;
+    const chosen = q.opts[idx];
+    const right = chosen === q.answer;
+    Q.stats.done++;
+    if (right) Q.stats.right++;
+
+    const opts = $("tab-gap").querySelectorAll("[data-opt]");
+    opts.forEach(function (btn, i) {
+      const o = q.opts[i];
+      const isAns = o === q.answer;
+      btn.classList.add(isAns ? "correct" : (i === idx ? "wrong" : "dim"));
+      const m = document.createElement("span");
+      m.className = "mark";
+      m.textContent = isAns ? "✓" : (i === idx ? "✗" : "");
+      btn.appendChild(m);
+      btn.insertAdjacentHTML("beforeend",
+        '<span class="qdetail"><b>' + esc(o.parts.map(function (p) { return p.a; }).join(" + ")) + "</b> · " +
+        esc(o.parts.map(function (p) { return p.a.replace(/[-~]/g, "") + "(" + p.m + ")"; }).join(" + ")) + "<br>[" + esc(o.ipa) + "] · " + esc(o.core) + "</span>");
+    });
+    const score = $("tab-gap").querySelector(".qscore");
+    if (score) score.textContent = "정답 " + Q.stats.right + " / " + Q.stats.done;
+    const nx = $("q2next");
+    if (nx) nx.classList.remove("ghost");
+
+    if (right) toast("정답! " + q.answer.w + " — " + q.answer.core.split(" · ")[0]);
+    else toast("정답은 " + q.answer.w + " — " + q.answer.eq);
+  }
+
+  /* ---------------- init ---------------- */
+  function init() {
+    renderLevels();
+    render();
+    renderMenu();
+    syncSettings();
+    updateB2UI();
+    setHide(false);
+
+    if (S.onboarded) $("onboard").classList.add("hide");
+    else showOnboard();
+
+    /* level chips */
+    $("levels").addEventListener("click", function (e) {
+      const b = e.target.closest("[data-level]");
+      if (!b) return;
+      const v = b.getAttribute("data-level");
+      if (v !== "ALL" && !isOpen(v)) {
+        openB2(v === "B2" ? "B2 확장팩에 들어 있는 레벨이에요" : "이 레벨은 아직 열려 있지 않아요");
+        return;
+      }
+      S.filter = v;
+      lsSet("filter", v);
+      S.idx[v] = S.idx[v] || 0;
+      render(1);
+    });
+
+    /* etymology pills → jump to same-affix word */
+    $("fpills").addEventListener("click", function (e) {
+      const b = e.target.closest("[data-part]");
+      if (!b) return;
+      const affix = b.getAttribute("data-part");
+      const all = wordsWithPart(affix);
+      const open = all.filter(function (x) { return isOpen(x.level); });
+      if (!open.length) { openB2("「" + affix + "」 가문은 B2에 있어요"); return; }
+      if (open.length === 1) { toast("「" + affix + "」는 지금 이 단어뿐이에요"); return; }
+      const cw = cur().w;
+      let pos = -1;
+      for (let i = 0; i < open.length; i++) if (open[i].w === cw) pos = i;
+      const t = open[(pos + 1) % open.length];
+      if (jumpToAny(t.w)) toast("「" + affix + "」 가문 · " + t.w + " · " + t.core.split(" · ")[0]);
+    });
+
+    /* swipe + tap to reveal */
+    const card = $("card");
+    let sx = 0, sy = 0, tracking = false;
+    card.addEventListener("pointerdown", function (e) { sx = e.clientX; sy = e.clientY; tracking = true; });
+    card.addEventListener("pointerup", function (e) {
+      if (!tracking) return;
+      tracking = false;
+      const dx = e.clientX - sx, dy = e.clientY - sy;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+        if (dx < 0) next(); else prev();
+      }
+    });
+    card.addEventListener("click", function (e) {
+      if (!S.hide) return;
+      if (e.target.closest("button")) return;
+      setHide(false);
+      toast("뜻을 다시 보여드려요");
+    });
+
+    /* bottom bar */
+    $("btnNext").onclick = function () { next(); };
+    $("btnHide").onclick = function () { setHide(!S.hide); };
+    $("btnQuiz").onclick = function () { openQuiz(); };
+    $("btnStory").onclick = function () { openStory(); };
+    $("star").onclick = function () { toggleStar(); };
+    $("speakWord").onclick = function () { speak(cur().w); };
+    $("pron").onclick = function (e) { if (!e.target.closest("button")) speak(cur().w); };
+    $("exSpeak").onclick = function (e) { e.stopPropagation(); speak(cur().ex[0].en, 0.86); };
+    $("exstrip").onclick = function () { openExamples(); };
+    $("exOpen").onclick = function (e) { e.stopPropagation(); openExamples(); };
+
+    /* sheets */
+    $("backdrop").onclick = closeAll;
+    document.querySelectorAll("[data-close]").forEach(function (b) { b.onclick = closeAll; });
+
+    /* quiz tabs */
+    document.querySelectorAll(".qtab").forEach(function (t) {
+      t.onclick = function () {
+        document.querySelectorAll(".qtab").forEach(function (x) { x.classList.remove("on"); });
+        t.classList.add("on");
+        const tab = t.getAttribute("data-tab");
+        $("tab-prefix").hidden = tab !== "prefix";
+        $("tab-gap").hidden = tab !== "gap";
+        if (tab === "prefix") renderPrefix();
+        else renderGap();
+      };
+    });
+    $("tab-prefix").addEventListener("click", function (e) {
+      const opt = e.target.closest("[data-opt]");
+      if (opt && Q.prefix && !Q.prefix.answered) answerPrefix(parseInt(opt.getAttribute("data-opt"), 10));
+      if (e.target.closest("#q1next")) { Q.prefix = null; renderPrefix(); }
+    });
+    $("tab-gap").addEventListener("click", function (e) {
+      const opt = e.target.closest("[data-opt]");
+      if (opt && Q.gap && !Q.gap.answered) answerGap(parseInt(opt.getAttribute("data-opt"), 10));
+      if (e.target.closest("#q2next")) { Q.gap = null; renderGap(); }
+    });
+
+    /* B2 pack */
+    $("b2Cta").onclick = function () {
+      if (S.pass) { toast("이미 B2 확장팩이 열려 있어요"); return; }
+      S.pass = true;
+      lsSet("pass", true);
+      updateB2UI();
+      renderLevels();
+      render();
+      renderMenu();
+      toast("B2 확장팩 열기 — 36단어 전체가 열렸어요 (프로토타입)");
+    };
+
+    /* settings */
+    $("btnSettings").onclick = function () { syncSettings(); openSheet("sheet-settings"); };
+    $("btnMenu").onclick = function () { renderMenu(); openSheet("sheet-menu"); };
+    $("swAuto").onclick = function () {
+      S.autoTTS = !S.autoTTS;
+      lsSet("autoTTS", S.autoTTS);
+      syncSettings();
+      toast(S.autoTTS ? "카드를 넘길 때 발음을 읽어 드려요" : "자동 재생을 껐어요");
+    };
+    $("swUnlock").onclick = function () {
+      S.unlock = !S.unlock;
+      lsSet("unlock", S.unlock);
+      syncSettings();
+      if (!isOpen(S.filter)) S.filter = "ALL";
+      renderLevels();
+      render();
+      renderMenu();
+      toast(S.unlock ? "🧪 테스트용: B2 잠금을 해제했어요" : "테스트용 잠금 해제를 껐어요");
+    };
+    $("goalMinus").onclick = function () {
+      S.goal = Math.max(5, S.goal - 5);
+      lsSet("goal", S.goal);
+      syncSettings();
+      render();
+    };
+    $("goalPlus").onclick = function () {
+      S.goal = Math.min(50, S.goal + 5);
+      lsSet("goal", S.goal);
+      syncSettings();
+      render();
+    };
+    $("replayOnboard").onclick = function () { closeAll(); showOnboard(); };
+    $("resetAll").onclick = function () {
+      ["today", "bookmarks", "notes", "pass", "unlock", "filter", "autoTTS", "goal"].forEach(lsDel);
+      S.today = { d: todayKey(), words: [] };
+      S.bookmarks = []; S.notes = {}; S.pass = false; S.unlock = false;
+      S.filter = "ALL"; S.idx = {}; S.goal = 10;
+      render(); renderMenu(); syncSettings(); updateB2UI();
+      toast("학습 기록을 초기화했어요");
+    };
+
+    /* onboarding */
+    $("obStart").onclick = hideOnboard;
+    $("obSkip").onclick = hideOnboard;
+
+    /* keyboard */
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        if (stack.length) closeAll();
+        else if (!$("onboard").classList.contains("hide")) hideOnboard();
+        return;
+      }
+      if (stack.length) return;
+      if (e.key === "ArrowRight") next();
+      else if (e.key === "ArrowLeft") prev();
+      else if (e.key === "h") setHide(!S.hide);
+      else if (e.key === "q") openQuiz();
+    });
+
+    window.addEventListener("resize", function () { fitWord(cur().w); });
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
