@@ -213,6 +213,49 @@
   }
   .form-actions .spacer{ flex:1 1 auto; }
 
+  /* ---------- import (JSON paste / #import= link) ---------- */
+  .import-notice{
+    display:flex; align-items:flex-start; gap:9px; margin:0 0 12px;
+    background:#ecfdf3; border:1px solid #b7ebc9; color:#0f6b3d;
+    border-radius:10px; padding:10px 12px; font-size:12.5px; font-weight:600; line-height:1.5;
+  }
+  .import-notice[hidden]{ display:none; }
+  .import-notice .ic{ flex:0 0 auto; line-height:1.35; }
+  .import-notice .msg{ flex:1 1 auto; min-width:0; }
+  .import-notice .sub{ display:block; font-weight:500; color:#3f7a58; font-size:11.5px; margin-top:2px; }
+  .import-notice .btn{ flex:0 0 auto; }
+
+  .modal{ position:fixed; inset:0; z-index:250; display:flex; align-items:center; justify-content:center; padding:16px; }
+  .modal[hidden]{ display:none; }
+  .modal-backdrop{ position:absolute; inset:0; background:rgba(16,18,23,.5); }
+  .modal-card{
+    position:relative; width:100%; max-width:600px; max-height:calc(100vh - 32px);
+    display:flex; flex-direction:column; background:#fff; border-radius:16px;
+    box-shadow:0 24px 60px rgba(16,24,40,.3); overflow:hidden;
+  }
+  .modal-head{ display:flex; align-items:center; gap:10px; padding:15px 16px; border-bottom:1px solid var(--line); }
+  .modal-head h2{ font-size:15px; margin:0; font-weight:800; letter-spacing:-.2px; }
+  .modal-head .x{ margin-left:auto; }
+  .modal-body{ padding:16px; overflow:auto; }
+  .modal-body textarea{
+    font-family:var(--mono); font-size:12.5px; line-height:1.6; min-height:210px; background:#fbfbfc;
+  }
+  .modal-body .note{ margin:0 0 10px; }
+  .modal-body code{ font-family:var(--mono); font-size:11.5px; background:#f1f2f5; padding:1px 5px; border-radius:5px; color:#b42318; }
+  .import-error{
+    margin:10px 0 0; font-size:12.5px; font-weight:600; color:#b42318;
+    background:#fff5f5; border:1px solid #fecaca; border-radius:9px; padding:9px 11px; line-height:1.5;
+  }
+  .import-error[hidden]{ display:none; }
+  .import-clear{ display:flex; align-items:center; gap:7px; margin:12px 0 0; font-size:12.5px; color:#4b5563; cursor:pointer; }
+  .import-clear input{ width:15px; height:15px; accent-color:var(--brand); margin:0; flex:0 0 auto; }
+  .modal-foot{ display:flex; gap:8px; justify-content:flex-end; padding:13px 16px; border-top:1px solid var(--line); background:#fcfcfd; }
+  @media (max-width:640px){
+    .modal{ padding:0; align-items:flex-end; }
+    .modal-card{ max-width:none; max-height:92vh; border-radius:16px 16px 0 0; }
+    .modal-body textarea{ min-height:34vh; }
+  }
+
   /* ---------- generation status ---------- */
   .runbar{ margin-top:12px; display:none; }
   .runbar.show{ display:block; }
@@ -539,6 +582,25 @@
                 <p style="margin:0">① 구매전환 후킹·손실회피·스펙→욕구 번역 ② 러셀 브런슨(Hook-Story-Offer, 매력 캐릭터, New Opportunity, Irresistible Offer) ③ 구뇌 설득 코드(PAIN→CLAIM 3개→GAIN→6자극) ④ 7섹션 표준 구조. 자세한 기준서는 <b>상세페이지-제작-기준서.md</b> 파일에 있습니다.</p>
               </div>
             </details>
+            <details class="help" style="margin-top:8px">
+              <summary>수집한 상품 정보 자동 채우기</summary>
+              <div class="help-body">
+                <p style="margin:0 0 7px">Nunu가 보내준 <b>#import=</b> 링크를 열면 상품 정보가 자동으로 채워집니다. 링크를 열어도 <b>비밀번호(0909)</b>는 그대로 필요하고, 잠금을 해제하면 채워집니다.</p>
+                <p style="margin:0 0 5px">직접 붙여넣으려면 <b>📥 데이터 가져오기 (JSON)</b> 버튼을 누르세요. 코드블록(```json)으로 감싸져 있어도 되고, <b>상품명: ...</b> 줄 형식도 됩니다.</p>
+                <pre style="margin:0; padding:9px 10px; background:#f1f2f5; border-radius:8px; font-family:var(--mono); font-size:11px; line-height:1.55; overflow:auto; white-space:pre">{
+  "product":  "상품명",
+  "category": "카테고리",
+  "target":   "타깃 고객",
+  "price":    "정가",
+  "sale":     "할인가·혜택",
+  "features": "핵심 특징 / 스펙",
+  "pain":     "고객의 불편",
+  "proof":    "차별화 근거",
+  "tone":     "강력한 세일즈 | 프리미엄 | 친근함 | 전문가형",
+  "extra":    "추가 요청"
+}</pre>
+              </div>
+            </details>
           </div>
         </section>
 
@@ -613,7 +675,17 @@
             </div>
           </div>
 
+          <div class="import-notice" id="importNotice" hidden>
+            <span class="ic" aria-hidden="true">✅</span>
+            <span class="msg">
+              <span id="importNoticeText">수집된 상품 정보가 자동으로 채워졌습니다.</span>
+              <span class="sub" id="importNoticeSub"></span>
+            </span>
+            <button class="btn btn-sm btn-ghost" type="button" id="importNoticeClose">닫기</button>
+          </div>
+
           <div class="form-actions">
+            <button class="btn" id="importBtn" title="수집한 상품 정보(JSON)를 붙여넣어 자동으로 채웁니다">📥 데이터 가져오기 (JSON)</button>
             <button class="btn" id="exampleBtn">예시 데이터 채우기</button>
             <button class="btn btn-ghost" id="clearFormBtn">입력 초기화</button>
             <div class="spacer"></div>
@@ -686,6 +758,29 @@
         </div>
       </section>
 
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="importModal" hidden>
+  <div class="modal-backdrop" data-import-close="1"></div>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="importTitle">
+    <div class="modal-head">
+      <h2 id="importTitle">📥 데이터 가져오기 (JSON)</h2>
+      <button class="btn btn-sm btn-ghost x" type="button" id="importCloseBtn" aria-label="닫기">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="note">
+        수집한 상품 정보 JSON을 붙여넣고 <b>적용하기</b>를 누르세요.
+        <code>```json</code> 코드블록으로 감싸져 있어도 되고, JSON이 아니면 <code>상품명: ...</code> 같은 줄 형식도 인식합니다.
+      </p>
+      <textarea id="importText" spellcheck="false" autocomplete="off" placeholder='{&#10;  "product": "넥웜 프로 무선 온열 목마사지기",&#10;  "category": "건강/생활가전 &gt; 마사지기",&#10;  "target": "하루 8시간 앉아 일하는 30~40대 직장인",&#10;  "price": "69,000원",&#10;  "sale": "39,900원, 무료배송",&#10;  "features": "무게 380g / 온열 42℃ 2단계 / KC 인증",&#10;  "pain": "마사지숍 1회 4만원 부담, 저녁이면 목이 굳어 두통",&#10;  "proof": "12주 자체 테스트 120명 / 누적 2.4만개 판매",&#10;  "tone": "강력한 세일즈",&#10;  "extra": ""&#10;}'></textarea>
+      <label class="import-clear"><input type="checkbox" id="importClear" checked> 기존 입력을 모두 지우고 채우기</label>
+      <p class="import-error" id="importError" role="alert" hidden></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" type="button" id="importCancelBtn">취소</button>
+      <button class="btn btn-primary" type="button" id="importApplyBtn">적용하기</button>
     </div>
   </div>
 </div>
@@ -997,6 +1092,12 @@
     } else {
       setTimeout(focusInput, 40);
     }
+
+    /* let the rest of the page react (e.g. fill an #import= payload
+       only once the password gate is open) */
+    try {
+      document.dispatchEvent(new CustomEvent('dpb:lockchange', { detail: { unlocked: unlocked } }));
+    } catch (e) { /* very old browser: no CustomEvent */ }
   }
 
   function showError(msg) {
@@ -1504,6 +1605,417 @@
     storeSet(LS.form, readForm());
     toast('입력을 초기화했습니다.');
   });
+
+  /* =========================================================
+     Import — fill the form from scraped product JSON
+     · manual: "📥 데이터 가져오기 (JSON)" drawer
+     · automatic: URL hash #import=<base64 utf-8 json>
+     The #import= payload is applied only after the 0909 lock
+     is open, so the link never bypasses the password gate.
+     ========================================================= */
+
+  /* key aliases -> form field id (keys are normalized: lowercase, no space/_/-/./) */
+  var IMPORT_ALIASES = {
+    product: 'fProduct', products: 'fProduct', 'product name': 'fProduct', name: 'fProduct',
+    title: 'fProduct', item: 'fProduct', 'item name': 'fProduct',
+    fproduct: 'fProduct', '상품명': 'fProduct', '상품 이름': 'fProduct', '제품명': 'fProduct', '상품': 'fProduct',
+
+    category: 'fCategory', categories: 'fCategory', cat: 'fCategory', 'category path': 'fCategory',
+    fcategory: 'fCategory', '카테고리': 'fCategory', '분류': 'fCategory', '카테고리명': 'fCategory',
+
+    target: 'fTarget', targets: 'fTarget', audience: 'fTarget', 'target audience': 'fTarget',
+    ftarget: 'fTarget', '타깃': 'fTarget', '타겟': 'fTarget', '타깃 고객': 'fTarget', '타겟 고객': 'fTarget', '고객': 'fTarget',
+
+    price: 'fPrice', 'list price': 'fPrice', 'original price': 'fPrice', 'regular price': 'fPrice',
+    fprice: 'fPrice', '정가': 'fPrice', '판매가': 'fPrice', '가격': 'fPrice',
+
+    sale: 'fSale', 'sale price': 'fSale', discount: 'fSale', 'discount price': 'fSale',
+    benefit: 'fSale', benefits: 'fSale', promotion: 'fSale',
+    fsale: 'fSale', '할인가': 'fSale', '할인': 'fSale', '혜택': 'fSale', '프로모션': 'fSale',
+
+    features: 'fFeatures', feature: 'fFeatures', 'key features': 'fFeatures',
+    specs: 'fFeatures', spec: 'fFeatures', specifications: 'fFeatures',
+    ffeatures: 'fFeatures', '특징': 'fFeatures', '핵심 특징': 'fFeatures', '스펙': 'fFeatures', '사양': 'fFeatures',
+
+    pain: 'fPain', pains: 'fPain', 'pain point': 'fPain', 'pain points': 'fPain',
+    problem: 'fPain', problems: 'fPain', complaints: 'fPain',
+    fpain: 'fPain', '불편': 'fPain', '고통': 'fPain', '문제': 'fPain', '불편사항': 'fPain', '페인': 'fPain',
+
+    proof: 'fProof', evidence: 'fProof', usp: 'fProof', differentiator: 'fProof', differentiators: 'fProof',
+    'proof points': 'fProof', fproof: 'fProof',
+    '근거': 'fProof', '차별점': 'fProof', '차별화': 'fProof', '차별화 포인트': 'fProof', '증명': 'fProof',
+
+    tone: 'fTone', 'tone and manner': 'fTone', 'tone manner': 'fTone', mood: 'fTone',
+    ftone: 'fTone', '톤': 'fTone', '톤앤매너': 'fTone', '분위기': 'fTone',
+
+    extra: 'fExtra', extras: 'fExtra', note: 'fExtra', notes: 'fExtra', memo: 'fExtra',
+    request: 'fExtra', requests: 'fExtra', additional: 'fExtra',
+    fextra: 'fExtra', '추가': 'fExtra', '추가 요청': 'fExtra', '추가 요청사항': 'fExtra', '요청': 'fExtra', '메모': 'fExtra'
+  };
+
+  var TONE_OPTIONS = ['강력한 세일즈', '프리미엄', '친근함', '전문가형'];
+
+  function normalizeKey(k) {
+    return String(k == null ? '' : k).toLowerCase().replace(/[\s_\-\/.,:]+/g, '');
+  }
+
+  var IMPORT_LOOKUP = (function () {
+    var map = {}, k;
+    for (k in IMPORT_ALIASES) {
+      if (Object.prototype.hasOwnProperty.call(IMPORT_ALIASES, k)) {
+        map[normalizeKey(k)] = IMPORT_ALIASES[k];
+      }
+    }
+    return map;
+  })();
+
+  function importTextValue(v) {
+    if (v === null || v === undefined) return '';
+    if (typeof v === 'string') return v.replace(/^\s+|\s+$/g, '');
+    if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+    if (Object.prototype.toString.call(v) === '[object Array]') {
+      var parts = [], i, t;
+      for (i = 0; i < v.length; i++) {
+        t = importTextValue(v[i]);
+        if (t) parts.push(t);
+      }
+      return parts.join(' / ');
+    }
+    if (typeof v === 'object') {
+      var name = '', val = '', keys1 = ['name', 'title', 'label', 'feature', 'key'],
+          keys2 = ['value', 'text', 'content', 'description', 'desc', 'spec', 'detail']; j;
+      for (j = 0; j < keys1.length; j++) {
+        if (typeof v[keys1[j]] === 'string' && v[keys1[j]].replace(/\s/g, '')) { name = v[keys1[j]].trim(); break; }
+      }
+      for (j = 0; j < keys2.length; j++) {
+        if (typeof v[keys2[j]] === 'string' && v[keys2[j]].replace(/\s/g, '')) { val = v[keys2[j]].trim(); break; }
+      }
+      if (name && val) return name + ': ' + val;
+      if (val) return val;
+      if (name) return name;
+      try { return JSON.stringify(v); } catch (e) { return ''; }
+    }
+    return String(v);
+  }
+
+  function matchTone(raw) {
+    var t = normalizeKey(raw);
+    if (!t) return '';
+    var i;
+    for (i = 0; i < TONE_OPTIONS.length; i++) {
+      if (normalizeKey(TONE_OPTIONS[i]) === t) return TONE_OPTIONS[i];
+    }
+    if (/세일즈|강력|공격|직설/.test(t)) return '강력한 세일즈';
+    if (/프리미엄|고급|럭셔리|고가/.test(t)) return '프리미엄';
+    if (/친근|따뜻|다정|편안|감성/.test(t)) return '친근함';
+    if (/전문|신뢰|데이터|분석|객관/.test(t)) return '전문가형';
+    return '';
+  }
+
+  function stripCodeFences(s) {
+    var m = String(s).match(/```[a-zA-Z0-9_+-]*[ \t]*\r?\n?([\s\S]*?)```/);
+    return (m && m[1] != null) ? m[1] : String(s);
+  }
+
+  function tryParseJson(s) {
+    var t = String(s).replace(/^\uFEFF/, '').replace(/^\s+|\s+$/g, '');
+    try { return { ok: true, value: JSON.parse(t) }; } catch (e) { /* try a slice below */ }
+    var a = t.indexOf('{'), b = t.lastIndexOf('}');
+    if (a >= 0 && b > a) {
+      try { return { ok: true, value: JSON.parse(t.slice(a, b + 1)) }; } catch (e2) { /* next */ }
+    }
+    var c = t.indexOf('['), d = t.lastIndexOf(']');
+    if (c >= 0 && d > c) {
+      try { return { ok: true, value: JSON.parse(t.slice(c, d + 1)) }; } catch (e3) { /* give up */ }
+    }
+    return { ok: false };
+  }
+
+  function parseKeyValueLines(s) {
+    var obj = {}, any = false, lines = String(s).split(/\r?\n/);
+    lines.forEach(function (line) {
+      var t = line.replace(/^\s*[-*•·]\s*/, '').replace(/\s+$/g, '');
+      if (!t || t.indexOf(':') < 0 && t.indexOf('=') < 0 && t.indexOf('\t') < 0) return;
+      var m = t.match(/^([^:：=\t]{1,40})\s*[:：=\t]\s*(.+)$/);
+      if (!m) return;
+      var k = m[1].replace(/^\s+|\s+$/g, '');
+      var v = m[2].replace(/^\s+|\s+$/g, '').replace(/^["']|["']$/g, '');
+      if (!k || !v) return;
+      obj[k] = v;
+      any = true;
+    });
+    return any ? obj : null;
+  }
+
+  function parseImportPayload(raw) {
+    var text = String(raw == null ? '' : raw).replace(/^\uFEFF/, '').replace(/^\s+|\s+$/g, '');
+    if (!text) return { ok: false, error: '붙여넣은 내용이 없습니다.' };
+    var body = stripCodeFences(text).replace(/^\s+|\s+$/g, '');
+    var parsed = tryParseJson(body);
+    if (parsed.ok) {
+      var val = parsed.value;
+      if (Object.prototype.toString.call(val) === '[object Array]') {
+        if (!val.length || typeof val[0] !== 'object' || val[0] === null) {
+          return { ok: false, error: 'JSON은 맞지만 안에 상품 정보 객체가 없습니다.' };
+        }
+        val = val[0];
+      }
+      if (!val || typeof val !== 'object') {
+        return { ok: false, error: 'JSON을 읽었지만 객체({ ... }) 형식이 아닙니다.' };
+      }
+      return { ok: true, obj: val, format: 'json' };
+    }
+    if (body.charAt(0) === '{' || body.charAt(0) === '[') {
+      return { ok: false, error: 'JSON 형식이 올바르지 않습니다. 따옴표·쉼표가 빠지지 않았는지 확인해 주세요.' };
+    }
+    var kv = parseKeyValueLines(body);
+    if (kv) return { ok: true, obj: kv, format: 'kv' };
+    return { ok: false, error: 'JSON을 찾지 못했습니다. {"product": "..."} 객체나 "상품명: ..." 줄 형식으로 붙여넣어 주세요.' };
+  }
+
+  /* scrapers often wrap the fields: {"data": {...}} */
+  function unwrapImportObject(obj) {
+    if (!obj || typeof obj !== 'object') return obj;
+    var looksUseful = function (o) {
+      if (!o || typeof o !== 'object') return false;
+      var ks = Object.keys(o), i;
+      for (i = 0; i < ks.length; i++) if (IMPORT_LOOKUP[normalizeKey(ks[i])]) return true;
+      return false;
+    };
+    if (looksUseful(obj)) return obj;
+    var containers = ['data', 'result', 'product_info', 'productInfo', 'product', 'info', 'item', 'payload', '상품정보'], i, inner;
+    for (i = 0; i < containers.length; i++) {
+      inner = obj[containers[i]];
+      if (inner && typeof inner === 'object' && looksUseful(inner)) return inner;
+    }
+    return obj;
+  }
+
+  function mapImportObject(obj) {
+    var src = unwrapImportObject(obj) || {};
+    var values = {}, filled = 0, skipped = [], unknown = [];
+    Object.keys(src).forEach(function (k) {
+      var field = IMPORT_LOOKUP[normalizeKey(k)];
+      if (!field) { unknown.push(k); return; }
+      if (field === 'fTone') {
+        var tone = matchTone(importTextValue(src[k]));
+        if (tone) { values[field] = tone; filled++; } else skipped.push(k);
+        return;
+      }
+      var text = importTextValue(src[k]);
+      if (text) { values[field] = text; filled++; } else skipped.push(k);
+    });
+    return { values: values, filled: filled, skipped: skipped, unknown: unknown };
+  }
+
+  var IMPORT_FIELD_LABELS = {
+    fProduct: '상품명', fCategory: '카테고리', fTarget: '타깃 고객', fPrice: '판매가', fSale: '할인가·혜택',
+    fFeatures: '핵심 특징', fPain: 'PAIN', fProof: '차별화 근거', fTone: '톤앤매너', fExtra: '추가 요청'
+  };
+
+  function clearImportFields() {
+    FIELD_IDS.forEach(function (id) {
+      var el = $(id);
+      if (!el) return;
+      try { el.value = (id === 'fTone' ? '강력한 세일즈' : ''); } catch (e) { /* ignore */ }
+    });
+  }
+
+  function fillImportFields(values) {
+    var names = [];
+    Object.keys(values).forEach(function (id) {
+      var el = $(id);
+      if (!el) return;
+      if (el.tagName === 'SELECT') {
+        var found = false, i;
+        for (i = 0; i < el.options.length; i++) if (el.options[i].value === values[id]) found = true;
+        if (!found) return;
+      }
+      try {
+        el.value = values[id];
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+      } catch (e) { /* ignore */ }
+      names.push(IMPORT_FIELD_LABELS[id] || id);
+    });
+    storeSet(LS.form, readForm());
+    try { $('promptView').textContent = fullPromptText(readForm()); } catch (e) { /* ignore */ }
+    return names;
+  }
+
+  var importNoticeTimer = null;
+  function showImportNotice(title, sub) {
+    var el = $('importNotice');
+    if (!el) return;
+    $('importNoticeText').textContent = title || '수집된 상품 정보가 자동으로 채워졌습니다.';
+    var subEl = $('importNoticeSub');
+    if (subEl) { subEl.textContent = sub || ''; subEl.style.display = sub ? '' : 'none'; }
+    el.hidden = false;
+    clearTimeout(importNoticeTimer);
+    importNoticeTimer = setTimeout(function () { el.hidden = true; }, 12000);
+  }
+
+  function showImportError(msg) {
+    var el = $('importError');
+    if (!el) return;
+    el.textContent = msg;
+    el.hidden = false;
+  }
+
+  function hideImportError() {
+    var el = $('importError');
+    if (!el) { return; }
+    el.textContent = '';
+    el.hidden = true;
+  }
+
+  /* core: parse text -> map -> fill. Never touches the lock. */
+  function applyImportPayload(raw, opts) {
+    opts = opts || {};
+    var parsed = parseImportPayload(raw);
+    if (!parsed.ok) {
+      if (opts.inline) showImportError(parsed.error); else toast(parsed.error);
+      return { ok: false, error: parsed.error };
+    }
+    var mapped = mapImportObject(parsed.obj);
+    if (!mapped.filled) {
+      var msg = '채울 항목을 찾지 못했습니다. 지원 키: product, category, target, price, sale, features, pain, proof, tone, extra';
+      if (opts.inline) showImportError(msg); else toast(msg);
+      return { ok: false, error: msg };
+    }
+    if (opts.clear) clearImportFields();
+    var names = fillImportFields(mapped.values);
+    var sub = names.join(' · ');
+    if (mapped.skipped && mapped.skipped.length) sub += '  (인식 못한 키: ' + mapped.skipped.join(', ') + ')';
+    showImportNotice(opts.title || '수집된 상품 정보가 자동으로 채워졌습니다.', sub);
+    return { ok: true, filled: mapped.filled, values: mapped.values, names: names, skipped: mapped.skipped, unknown: mapped.unknown, format: parsed.format };
+  }
+
+  /* ---------- base64 (#import=) ---------- */
+  function normalizeBase64(s) {
+    var t = String(s == null ? '' : s);
+    if (t.indexOf('%') >= 0) { try { t = decodeURIComponent(t); } catch (e) { /* keep raw */ } }
+    t = t.replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
+    var pad = t.length % 4;
+    if (pad === 1) throw new Error('base64 길이가 맞지 않습니다.');
+    if (pad) t += new Array(5 - pad).join('=');
+    return t;
+  }
+
+  function decodeBase64Text(s) {
+    var bin = window.atob(normalizeBase64(s));
+    if (window.TextDecoder) {
+      try {
+        var bytes = new Uint8Array(bin.length), i;
+        for (i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i) & 0xff;
+        return new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+      } catch (e) { /* fall through */ }
+    }
+    try { return decodeURIComponent(escape(bin)); } catch (e2) { return bin; }
+  }
+
+  function readHashImport() {
+    var h = String(window.location.hash || '').replace(/^#/, '');
+    if (!h) return '';
+    var parts = h.split('&'), i, p, eq;
+    for (i = 0; i < parts.length; i++) {
+      p = parts[i];
+      eq = p.indexOf('=');
+      if ((eq >= 0 ? p.slice(0, eq) : p) === 'import') return eq >= 0 ? p.slice(eq + 1) : '';
+    }
+    return '';
+  }
+
+  function clearHashImport() {
+    try {
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      } else {
+        window.location.hash = '';
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  function appIsUnlocked() {
+    return document.documentElement.classList.contains('dpb-unlocked');
+  }
+
+  var lastHashImport = '';
+
+  function applyHashImport() {
+    var payload = readHashImport();
+    if (!payload) return { ok: false, reason: 'no-hash' };
+    if (!appIsUnlocked()) return { ok: false, reason: 'locked' };   /* never bypass the 0909 gate */
+    if (payload === lastHashImport && $('importNotice') && !$('importNotice').hidden) {
+      return { ok: false, reason: 'duplicate' };
+    }
+    var json;
+    try { json = decodeBase64Text(payload); }
+    catch (e) {
+      lastHashImport = payload;
+      toast('링크에 담긴 데이터를 읽지 못했습니다. 📥 데이터 가져오기로 붙여넣어 주세요.');
+      return { ok: false, reason: 'decode', error: 'decode' };
+    }
+    var res = applyImportPayload(json, { clear: true });
+    lastHashImport = payload;
+    if (res.ok) clearHashImport();
+    else toast('링크 데이터를 적용하지 못했습니다. 📥 데이터 가져오기(JSON)로 붙여넣어 주세요.');
+    return res;
+  }
+
+  /* ---------- modal ---------- */
+  function openImportModal() {
+    hideImportError();
+    $('importText').value = '';
+    $('importModal').hidden = false;
+    document.body.style.overflow = 'hidden';
+    setTimeout(function () { try { $('importText').focus(); } catch (e) { /* ignore */ } }, 30);
+  }
+
+  function closeImportModal() {
+    $('importModal').hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  (function wireImport() {
+    if (!$('importBtn')) return;
+
+    $('importBtn').addEventListener('click', openImportModal);
+    $('importCloseBtn').addEventListener('click', closeImportModal);
+    $('importCancelBtn').addEventListener('click', closeImportModal);
+    $('importModal').addEventListener('click', function (e) {
+      if (e.target && e.target.getAttribute && e.target.getAttribute('data-import-close')) closeImportModal();
+    });
+    $('importNoticeClose').addEventListener('click', function () { $('importNotice').hidden = true; });
+
+    $('importApplyBtn').addEventListener('click', function () {
+      hideImportError();
+      var res = applyImportPayload($('importText').value, {
+        inline: true,
+        clear: !!($('importClear') && $('importClear').checked)
+      });
+      if (res.ok) {
+        closeImportModal();
+        toast('상품 정보 ' + res.filled + '개 항목을 채웠습니다.');
+      }
+    });
+
+    $('importText').addEventListener('input', hideImportError);
+    $('importText').addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); $('importApplyBtn').click(); }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && $('importModal') && !$('importModal').hidden) closeImportModal();
+    });
+
+    /* automatic: #import=<base64 json>, on hash change.
+       The first attempt runs from Boot, after the saved form is restored. */
+    window.addEventListener('hashchange', function () { applyHashImport(); });
+    document.addEventListener('dpb:lockchange', function (e) {
+      var unlocked = (e && e.detail) ? !!e.detail.unlocked : appIsUnlocked();
+      if (unlocked) applyHashImport();
+    });
+  })();
 
   /* =========================================================
      Prompt building
@@ -2286,11 +2798,19 @@
   renderHistory();
   $('promptView').textContent = fullPromptText(readForm());
 
+  /* a shared #import= link fills the form over the restored/example values;
+     while the 0909 lock is closed it stays pending and runs on unlock */
+  applyHashImport();
+
   /* expose a tiny hook for automated checks */
   window.__dpb = {
     mdToHtml: mdToHtml,
     buildPrompt: function () { return fullPromptText(readForm()); },
-    state: function () { return { keys: keys, history: history, model: currentModel(), busy: busy }; }
+    state: function () { return { keys: keys, history: history, model: currentModel(), busy: busy }; },
+    importText: function (t) { return applyImportPayload(t, { inline: false, clear: true }); },
+    applyHashImport: applyHashImport,
+    decodeImport: decodeBase64Text,
+    fields: readForm
   };
 })();
 </script>
