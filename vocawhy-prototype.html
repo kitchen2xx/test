@@ -2,6 +2,18 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
+
+<script>
+  /* Apply the saved unlock state before first paint, so an unlocked tab
+     never flashes the lock screen. */
+  (function () {
+    try {
+      if (window.sessionStorage.getItem('rp.lock.v1') === 'unlocked') {
+        document.documentElement.className += ' rp-unlocked';
+      }
+    } catch (e) { /* storage blocked: stay locked until the password is entered */ }
+  })();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <meta name="theme-color" content="#FAF8F5">
 <title>VocaWhy · 보카와이 — 단어는 외우는 게 아니라, 조각을 읽는 것</title>
@@ -475,8 +487,356 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
   *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
 }
 </style>
+<style id="rpLockStyle">
+  /* ============================================================
+     PASSWORD LOCK — 0909
+     The password itself is never written here: only its SHA-256 hex
+     digest, checked in pure JS so it works the same on https:// and
+     file:// (no crypto.subtle needed).
+     ============================================================ */
+  #lockScreen { display: none; }
+  html:not(.rp-unlocked) #lockScreen {
+    display: flex; position: fixed; inset: 0; z-index: 2147483000;
+    align-items: center; justify-content: center; overflow: auto;
+    padding: calc(24px + env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom));
+    background: radial-gradient(900px 520px at 50% -12%, #2b2f38 0%, #171a20 55%, #0b0d11 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", system-ui, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  html:not(.rp-unlocked) body > *:not(#lockScreen) { display: none !important; }
+  html:not(.rp-unlocked) { overflow: hidden !important; }
+  .rp-lock-card {
+    width: 100%; max-width: 392px; margin: auto; color: #1C1A17;
+    background: #fff; border-radius: 18px; box-shadow: 0 26px 70px rgba(0,0,0,.5);
+    padding: 28px 24px 22px; text-align: center;
+  }
+  .rp-lock-card.shake { animation: rpLockShake .36s ease-in-out; }
+  .rp-lock-icon {
+    width: 52px; height: 52px; margin: 0 auto 14px; border-radius: 16px;
+    background: linear-gradient(135deg, #f0bd76, #c8802a);
+    box-shadow: 0 10px 24px rgba(200,128,42,.30);
+    display: flex; align-items: center; justify-content: center; font-size: 24px;
+  }
+  .rp-lock-title { font-size: 17px; font-weight: 800; margin: 0; letter-spacing: -.3px; color: #1C1A17; }
+  .rp-lock-sub { font-size: 12.5px; color: #7A736A; margin: 5px 0 18px; line-height: 1.5; }
+  .rp-lock-field { position: relative; }
+  .rp-lock-field input {
+    width: 100%; font-family: inherit; font-size: 16px; font-weight: 700;
+    letter-spacing: .35em; text-align: center; color: #1C1A17;
+    background: #fff; border: 1px solid #D9D2C6; border-radius: 12px;
+    padding: 12px 52px; outline: none; -webkit-appearance: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .rp-lock-field input:focus { border-color: #C8802A; box-shadow: 0 0 0 3px rgba(200,128,42,.16); }
+  .rp-lock-field input.err { border-color: #D92D20; box-shadow: 0 0 0 3px rgba(217,45,32,.14); }
+  .rp-lock-field input::placeholder { letter-spacing: .3em; font-weight: 400; color: #B5ADA2; }
+  .rp-lock-eye {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    border: 0; background: transparent; cursor: pointer; font-family: inherit;
+    font-size: 11.5px; font-weight: 800; color: #7A736A;
+    padding: 7px 9px; border-radius: 8px; white-space: nowrap;
+  }
+  .rp-lock-eye:hover { background: #F4F0E9; color: #1C1A17; }
+  .rp-lock-error { margin: 10px 0 0; font-size: 12.5px; font-weight: 700; color: #D92D20; line-height: 1.5; }
+  .rp-lock-error[hidden] { display: none; }
+  .rp-lock-submit {
+    margin-top: 14px; width: 100%; border: 0; border-radius: 12px; cursor: pointer;
+    background: #1C1A17; color: #fff; font-family: inherit; font-size: 14px; font-weight: 800;
+    padding: 12px 14px;
+  }
+  .rp-lock-submit:hover { background: #000; }
+  .rp-lock-submit:disabled { opacity: .55; }
+  .rp-lock-foot { font-size: 11.5px; color: #9A938A; margin: 14px 0 0; line-height: 1.55; }
+  @keyframes rpLockShake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+</style>
 </head>
 <body>
+<!-- =========================================================
+     LOCK SCREEN — password 0909 (SHA-256 digest only, no plaintext)
+     ========================================================= -->
+<div id="lockScreen" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
+  <form class="rp-lock-card" id="lockForm" autocomplete="off" novalidate>
+    <div class="rp-lock-icon" aria-hidden="true">🔒</div>
+    <h1 class="rp-lock-title" id="lockTitle">VocaWhy</h1>
+    <p class="rp-lock-sub">비밀번호를 입력해 주세요.</p>
+    <div class="rp-lock-field">
+      <input type="password" id="lockInput" inputmode="numeric" autocomplete="off"
+             autocapitalize="off" spellcheck="false" aria-label="비밀번호" placeholder="••••">
+      <button type="button" class="rp-lock-eye" id="lockEye" aria-label="비밀번호 보기">보기</button>
+    </div>
+    <p class="rp-lock-error" id="lockError" role="alert" hidden></p>
+    <button type="submit" class="rp-lock-submit" id="lockSubmit">잠금 해제</button>
+    <noscript><p class="rp-lock-error">자바스크립트가 꺼져 있어 잠금을 해제할 수 없습니다. 브라우저에서 자바스크립트를 허용한 뒤 새로고침해 주세요.</p></noscript>
+    <p class="rp-lock-foot">잠금은 이 탭에서만 유지됩니다. 탭을 닫으면 다시 잠깁니다.</p>
+  </form>
+</div>
+<script id="rpLockScript">
+(function () {
+  'use strict';
+
+  var PASSWORD_HASH = '9552e277ebcc7fa191292c6e900d94dfe6e837d8abf76a2da927d4530d2c8f69';
+  var STORE_KEY = 'rp.lock.v1';
+  var STORE_VAL = 'unlocked';
+
+  /* ---------- pure-JS SHA-256 (works on https:// and file://) ---------- */
+  var K = [
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+  ];
+
+  function utf8Bytes(str) {
+    var out = [], i, c, d, cp;
+    for (i = 0; i < str.length; i++) {
+      c = str.charCodeAt(i);
+      if (c < 0x80) {
+        out.push(c);
+      } else if (c < 0x800) {
+        out.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f));
+      } else if (c >= 0xd800 && c <= 0xdbff && i + 1 < str.length &&
+                 (d = str.charCodeAt(i + 1)) >= 0xdc00 && d <= 0xdfff) {
+        cp = 0x10000 + ((c - 0xd800) << 10) + (d - 0xdc00);
+        out.push(0xf0 | (cp >> 18), 0x80 | ((cp >> 12) & 0x3f),
+                 0x80 | ((cp >> 6) & 0x3f), 0x80 | (cp & 0x3f));
+        i++;
+      } else {
+        out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
+      }
+    }
+    return out;
+  }
+
+  function sha256Hex(str) {
+    var bytes = utf8Bytes(String(str == null ? '' : str));
+    var len = bytes.length;
+    var total = (((len + 9) + 63) >> 6) << 6;
+    var msg = new Array(total);
+    var i;
+
+    for (i = 0; i < len; i++) msg[i] = bytes[i] & 0xff;
+    msg[len] = 0x80;
+    for (i = len + 1; i < total; i++) msg[i] = 0;
+
+    var hi = Math.floor(len / 536870912);
+    var lo = (len * 8) >>> 0;
+    msg[total - 8] = (hi >>> 24) & 0xff;
+    msg[total - 7] = (hi >>> 16) & 0xff;
+    msg[total - 6] = (hi >>> 8) & 0xff;
+    msg[total - 5] = hi & 0xff;
+    msg[total - 4] = (lo >>> 24) & 0xff;
+    msg[total - 3] = (lo >>> 16) & 0xff;
+    msg[total - 2] = (lo >>> 8) & 0xff;
+    msg[total - 1] = lo & 0xff;
+
+    var H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+             0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+    var w = new Array(64);
+    var off, a, b, c, d, e, f, g, h, t1, t2, s0, s1, ch, maj, j, tmp;
+
+    for (off = 0; off < total; off += 64) {
+      for (j = 0; j < 16; j++) {
+        w[j] = ((msg[off + j * 4] << 24) | (msg[off + j * 4 + 1] << 16) |
+                (msg[off + j * 4 + 2] << 8) | msg[off + j * 4 + 3]) >>> 0;
+      }
+      for (j = 16; j < 64; j++) {
+        tmp = w[j - 15];
+        s0 = ((tmp >>> 7) | (tmp << 25)) ^ ((tmp >>> 18) | (tmp << 14)) ^ (tmp >>> 3);
+        tmp = w[j - 2];
+        s1 = ((tmp >>> 17) | (tmp << 15)) ^ ((tmp >>> 19) | (tmp << 13)) ^ (tmp >>> 10);
+        w[j] = (w[j - 16] + s0 + w[j - 7] + s1) >>> 0;
+      }
+      a = H[0]; b = H[1]; c = H[2]; d = H[3];
+      e = H[4]; f = H[5]; g = H[6]; h = H[7];
+      for (j = 0; j < 64; j++) {
+        s1 = ((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7));
+        ch = (e & f) ^ (~e & g);
+        t1 = (h + s1 + ch + K[j] + w[j]) >>> 0;
+        s0 = ((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10));
+        maj = (a & b) ^ (a & c) ^ (b & c);
+        t2 = (s0 + maj) >>> 0;
+        h = g; g = f; f = e; e = (d + t1) >>> 0;
+        d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+      }
+      H[0] = (H[0] + a) >>> 0; H[1] = (H[1] + b) >>> 0;
+      H[2] = (H[2] + c) >>> 0; H[3] = (H[3] + d) >>> 0;
+      H[4] = (H[4] + e) >>> 0; H[5] = (H[5] + f) >>> 0;
+      H[6] = (H[6] + g) >>> 0; H[7] = (H[7] + h) >>> 0;
+    }
+    var hex = '';
+    for (i = 0; i < 8; i++) hex += ('00000000' + H[i].toString(16)).slice(-8);
+    return hex;
+  }
+
+  function sameHex(a, b) {
+    if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
+    var diff = 0, i;
+    for (i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    return diff === 0;
+  }
+
+  function normalize(value) {
+    return String(value == null ? '' : value).replace(/^\s+|\s+$/g, '');
+  }
+
+  function verify(value) {
+    return sameHex(sha256Hex(normalize(value)), PASSWORD_HASH);
+  }
+
+  /* ---------- session unlock state ---------- */
+  var memoryUnlocked = false;
+
+  function isUnlocked() {
+    try { return window.sessionStorage.getItem(STORE_KEY) === STORE_VAL; }
+    catch (e) { return memoryUnlocked; }
+  }
+
+  function saveUnlocked(on) {
+    memoryUnlocked = !!on;
+    try {
+      if (on) window.sessionStorage.setItem(STORE_KEY, STORE_VAL);
+      else window.sessionStorage.removeItem(STORE_KEY);
+    } catch (e) { /* storage blocked: keep the state in memory for this page only */ }
+  }
+
+  /* ---------- screen ---------- */
+  var root = document.documentElement;
+  var form = document.getElementById('lockForm');
+  var input = document.getElementById('lockInput');
+  var errorEl = document.getElementById('lockError');
+  var eyeBtn = document.getElementById('lockEye');
+  var submitBtn = document.getElementById('lockSubmit');
+  var wrongCount = 0;
+  var cooling = false;
+
+  function focusInput() {
+    if (!input || isUnlocked()) return;
+    try { input.focus({ preventScroll: true }); }
+    catch (e) { try { input.focus(); } catch (e2) {} }
+    try { input.setSelectionRange(input.value.length, input.value.length); } catch (e3) {}
+  }
+
+  function clearError() {
+    if (errorEl) { errorEl.textContent = ''; errorEl.hidden = true; }
+    if (input) input.classList.remove('err');
+  }
+
+  function resetEye() {
+    if (!input) return;
+    input.type = 'password';
+    if (eyeBtn) {
+      eyeBtn.textContent = '보기';
+      eyeBtn.setAttribute('aria-label', '비밀번호 보기');
+    }
+  }
+
+  function applyState() {
+    var unlocked = isUnlocked();
+    if (unlocked) root.classList.add('rp-unlocked');
+    else root.classList.remove('rp-unlocked');
+
+    resetEye();
+    if (input) input.value = '';
+    clearError();
+
+    if (unlocked) wrongCount = 0;
+    else setTimeout(focusInput, 40);
+  }
+
+  function showError(msg) {
+    if (errorEl) { errorEl.textContent = msg; errorEl.hidden = false; }
+    if (input) { input.value = ''; input.classList.add('err'); }
+    if (form) {
+      form.classList.remove('shake');
+      void form.offsetWidth;
+      form.classList.add('shake');
+      setTimeout(function () { if (form) form.classList.remove('shake'); }, 420);
+    }
+    focusInput();
+  }
+
+  function unlockNow() {
+    saveUnlocked(true);
+    applyState();
+    window.scrollTo(0, 0);
+  }
+
+  function lockNow() {
+    saveUnlocked(false);
+    applyState();
+    window.scrollTo(0, 0);
+  }
+
+  if (form) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (cooling) return;
+
+      var value = input ? input.value : '';
+      if (!normalize(value)) {
+        showError('비밀번호를 입력해 주세요.');
+        return;
+      }
+      if (verify(value)) {
+        unlockNow();
+        return;
+      }
+
+      wrongCount += 1;
+      showError('비밀번호가 맞지 않습니다. 다시 확인해 주세요.');
+
+      if (wrongCount >= 3) {
+        cooling = true;
+        var wait = Math.min(3000, (wrongCount - 2) * 800);
+        if (submitBtn) submitBtn.disabled = true;
+        if (errorEl) {
+          errorEl.textContent = '비밀번호를 ' + wrongCount + '번 틀렸습니다. ' +
+            (wait / 1000).toFixed(1) + '초 후 다시 시도해 주세요.';
+          errorEl.hidden = false;
+        }
+        setTimeout(function () {
+          cooling = false;
+          if (submitBtn) submitBtn.disabled = false;
+          focusInput();
+        }, wait);
+      }
+    });
+  }
+
+  if (eyeBtn) {
+    eyeBtn.addEventListener('click', function () {
+      if (!input) return;
+      var reveal = input.type === 'password';
+      input.type = reveal ? 'text' : 'password';
+      eyeBtn.textContent = reveal ? '숨기기' : '보기';
+      eyeBtn.setAttribute('aria-label', reveal ? '비밀번호 숨기기' : '비밀번호 보기');
+      focusInput();
+    });
+  }
+
+  applyState();
+
+  /* hook so the lock can be checked from automation */
+  window.RP_LOCK = {
+    hash: sha256Hex,
+    verify: verify,
+    isUnlocked: isUnlocked,
+    unlock: function () { unlockNow(); },
+    lock: function () { lockNow(); }
+  };
+})();
+</script>
+
 <div class="phone" id="phone">
   <div class="progress"><i id="progBar"></i></div>
 
