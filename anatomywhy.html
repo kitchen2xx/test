@@ -3505,7 +3505,7 @@ function awTick(W, t) {
   var key = (ST.mv && ST.mv[W.name]) || W.defaultMotion;
   var m = W.motions[key] || W.motions[W.defaultMotion];
   if (ST.playing && cur.ch === W.name) {
-    ST.aval[W.name] = 100 * Math.sin(t * 0.75);
+    ST.aval[W.name] = (m.min >= 0) ? (50 - 50 * Math.cos(t * 0.75)) : 100 * Math.sin(t * 0.75);
     if (t - (W._lastUI || 0) > 0.12) {
       W._lastUI = t;
       var el = $('angle'); if (el) el.value = ST.aval[W.name];
