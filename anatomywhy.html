@@ -405,6 +405,22 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border:0;border-radiu
   .note{padding:6px 8px}
 }
 
+/* 가로 화면(폰 가로·짧은 창): 3D 좌 / 카드 우 2단 */
+@media (orientation:landscape) and (max-height:560px){
+  body{display:block}
+  .app{width:100%;max-width:none;height:100dvh;max-height:100dvh;border:0;border-radius:0}
+  #chapter.on{display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,44%);
+    grid-template-rows:auto minmax(0,1fr) auto}
+  .topbar{grid-column:1/-1;padding-top:calc(6px + env(safe-area-inset-top))}
+  .stage{grid-column:1;grid-row:2;min-height:0}
+  .panel{grid-column:2;grid-row:2;flex-basis:auto;min-height:0;max-height:none;border-top:0;border-left:1px solid var(--line)}
+  .dock{grid-column:1/-1;padding-bottom:calc(6px + env(safe-area-inset-bottom))}
+  .stop{top:7px;left:7px;right:7px}
+  .sbot{padding-bottom:calc(6px + env(safe-area-inset-bottom))}
+  .hint{bottom:84px;font-size:9px}
+  .home .chlist{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+}
+
 </style>
 <style id="rpLockStyle">
   /* ============================================================
