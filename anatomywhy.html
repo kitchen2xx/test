@@ -376,6 +376,17 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border:0;border-radiu
 .qfb.no{background:#FCF1F0}
 .qfb b{display:block;font-size:11px;margin-bottom:2px;color:#2F6B4F}
 .qfb.no b{color:#B2454A}
+.qfb .fbblk{margin-top:6px;padding-top:6px;border-top:1px dashed rgba(120,140,120,.28)}
+.qfb.no .fbblk{border-top-color:rgba(178,120,110,.28)}
+.qfb .fbtag{display:inline-block;font-size:8px;font-weight:900;letter-spacing:.05em;color:#8A7448;background:#F4EFE4;border-radius:4px;padding:1px 5px;margin-bottom:3px}
+.qfb.no .fbtag{background:#F7EBE8;color:#A9603F}
+.qfb .fbhj{font-family:var(--serif);font-size:15px;font-weight:800;color:#3B3325;line-height:1.2}
+.qfb .fbhj i{font-family:var(--kr);font-style:normal;font-size:9.5px;color:#9A8C72;font-weight:800;margin-left:5px;letter-spacing:0}
+.qfb .fbparts{font-size:9.5px;font-weight:800;color:#7A6A4C;margin-top:2px;letter-spacing:-.1px}
+.qfb .fbparts span{margin-right:3px}
+.qfb .fbparts b{display:inline;font-family:var(--serif);font-size:11px;color:#4A3E29;margin:0;font-weight:800}
+.qfb .fblat{font-family:var(--serif);font-style:italic;font-size:11.5px;font-weight:700;color:#2F5B47;line-height:1.25}
+.qfb p{margin:2px 0 0;font-size:10px;line-height:1.55;color:#4B5A69;letter-spacing:-.1px}
 .qfoot{display:flex;gap:6px;margin-top:2px}
 .qbtn{flex:1 1 0;padding:11px;border-radius:10px;font-size:11.5px;font-weight:800;letter-spacing:-.2px}
 .qbtn.primary{background:#24405F;color:#F6EBD3}
@@ -892,9 +903,9 @@ var CARDS = {
     latin:'musculus', latinParts:[['mus','쥐'],['-culus','작은']],
     en:'muscle', enNote:'라틴어를 그대로 받아 씀',
     hanjaParts:[['竹','대나무'],['肉','고기'],['力','힘']],
-    hanjaNote:'竹 대나무 + 肉 고기 + 力 힘 — 『說文』 "筋, 肉之力也"',
+    hanjaNote:'筋은 대나무(竹) 대에 고기(肉)와 힘(力)을 붙여 만든 글자 — 뼈에 붙은 힘줄을 가리켰고, 筋肉은 근대에 만들어진 번역어입니다.',
     koNative:'힘살', koBreak:'힘 + 살 (힘을 쓰는 살)',
-    why:'팔을 굽히면 피부 밑에서 근육이 쥐처럼 꿈틀거립니다. 로마인은 그래서 "작은 쥐"라 불렀고, 동아시아는 "뼈에 붙은 힘줄"로 봤습니다.',
+    why:'팔을 굽히면 피부 밑에서 근육이 쥐처럼 꿈틀거립니다. 로마인은 그래서 "작은 쥐(musculus)"라 불렀고, 그 말이 영어 muscle이 되었습니다.',
     trap:'오늘날 쓰는 筋肉은 근대에 만들어진 번역어입니다. 고전 한자에서 筋은 근육이 아니라 "힘줄"을 뜻했습니다.'
   },
   anatomia: {
@@ -902,7 +913,7 @@ var CARDS = {
     latin:'anatomia', latinParts:[['ana-','위로 · 다시'],['tomia','자름 (← temnein)']],
     en:'anatomy', enNote:'*up + cutting* — 풀어서 쪼개 봄',
     hanjaParts:[['解','풀'],['剖','쪼갤'],['學','배울']],
-    hanjaNote:'解 풀 + 剖 쪼개 + 學 배움 — 라틴어 부품을 그대로 直譯',
+    hanjaNote:'解는 뿔과 칼로 소를 풀어 놓는 그림, 剖는 칼로 쪼개는 글자 — "위에서 다시 자름"인 라틴어를 그대로 옮긴 번역어입니다.',
     koNative:'해부', koBreak:'解 풀 + 剖 쪼갬 (한자어를 그대로 읽은 말)',
     why:'그리스어 ana(위로·다시) + temnein(자르다)가 "해부"입니다. 한자어 解剖도 "풀어서 쪼갬" — 두 언어가 같은 그림을 그립니다.',
     trap:'anatomia는 원래 "해부하는 일"이라는 뜻. 剖는 "쪼개다"이지 "나누다(分)"가 아닙니다.'
@@ -912,7 +923,7 @@ var CARDS = {
     latin:'positio anatomica', latinParts:[['positio','놓음 (← ponere)'],['anatomica','해부학의']],
     en:'anatomical position', enNote:'모든 방향·움직임의 기준 자세',
     hanjaParts:[['姿勢','자세']],
-    hanjaNote:'姿勢 자세 — 몸을 놓은 모양',
+    hanjaNote:'姿는 몸가짐을, 勢는 기세·형세를 뜻해 "몸을 놓은 모양"이 곧 자세 — 라틴어 positio(놓음)와 같은 그림입니다.',
     koNative:'해부학적 자세', koBreak:'선 자세 · 손바닥 앞 · 엄지 바깥 · 발끝 앞',
     why:'똑바로 서서 손바닥을 앞으로, 엄지를 바깥으로, 발끝을 앞으로 둔 자세입니다. "안쪽·바깥·앞·뒤"라는 모든 말이 이 자세에서 출발합니다.',
     trap:'손바닥을 뒤로 돌리면(회내) 기준이 뒤집힙니다. 그래서 해부학 그림은 늘 손바닥이 앞을 향합니다.'
@@ -922,9 +933,9 @@ var CARDS = {
     latin:'planum sagittale', latinParts:[['sagitta','화살'],['-alis','~의']],
     en:'sagittal plane', enNote:'*arrow-shaped* — 화살처럼 앞뒤로',
     hanjaParts:[['矢','화살'],['狀','모양'],['面','면']],
-    hanjaNote:'矢 화살 + 狀 모양 + 面 면 — 라틴어를 直譯',
+    hanjaNote:'矢는 화살을 그린 상형자. 정수리 봉합이 화살처럼 앞뒤로 뻗어 있어 이 면을 "화살 모양 면"이라 불렀습니다.',
     koNative:'시상면', koBreak:'화살(矢) 모양으로 몸을 좌우로 가르는 면',
-    why:'정수리를 지나는 봉합이 화살촉 모양이라 "화살면"이 되었습니다. 몸을 왼쪽·오른쪽으로 나누므로 굽힘과 폄이 이 면에서 일어납니다.',
+    why:'몸을 왼쪽·오른쪽으로 나누는 면이라 굽힘과 폄이 모두 이 면 안에서 앞뒤로 일어납니다. 기준선이 되는 것은 이마 한가운데를 지나는 정중면입니다.',
     trap:'정중면(正中面, median plane)은 시상면 중 정확히 한가운데 하나입니다. 시상면은 평행하게 무수히 많습니다.'
   },
   frontalis: {
@@ -932,9 +943,9 @@ var CARDS = {
     latin:'planum frontale / coronale', latinParts:[['frons','이마'],['corona','왕관']],
     en:'frontal / coronal plane', enNote:'이마를 지나는 면 · 왕관 모양',
     hanjaParts:[['冠','갓(왕관)'],['狀','모양'],['面','면']],
-    hanjaNote:'冠 왕관 + 狀 모양 + 面 면',
+    hanjaNote:'冠은 머리에 쓰는 관(왕관). 왕관을 씌우듯 머리 위에서 귀밑까지 내려오는 면이라 冠狀面 — 라틴어 corona와 같은 발상입니다.',
     koNative:'관상면', koBreak:'왕관을 쓴 듯 머리 위에서 내려오는 면',
-    why:'이마(frons)를 지나 몸을 앞·뒤로 나누는 면입니다. corona(왕관)도 같은 면 — 머리에 왕관을 씌우듯 지나가서 붙은 이름입니다.',
+    why:'이마(frons)를 지나 몸을 앞·뒤로 나누는 면입니다. 영어 front·frontal이 모두 이마에서 온 말이라, 이마를 기준으로 잡은 이름입니다.',
     trap:'frontal은 "이마", coronal은 "왕관" — 같은 면의 두 이름입니다. 어느 쪽을 써도 틀리지 않습니다.'
   },
   transversus: {
@@ -942,7 +953,7 @@ var CARDS = {
     latin:'planum transversum', latinParts:[['trans-','가로질러'],['vertere','돌다']],
     en:'transverse plane', enNote:'*across + turn* — 몸을 가로로',
     hanjaParts:[['水','물'],['平','평평']],
-    hanjaNote:'水 물 + 平 평평 — 물처럼 평평한 면',
+    hanjaNote:'水는 물이 흐르는 모양, 平은 평평함. 물을 부으면 고이는 높이의 평평한 면이라 水平面 — 라틴어 transversus와 같은 그림입니다.',
     koNative:'수평면', koBreak:'물을 부으면 고이는 높이의 면',
     why:'몸을 위·아래로 나누는 면입니다. trans(가로질러) + vertere(돌다) — 몸을 가로질러 한 바퀴 돈 단면이라는 뜻입니다.',
     trap:'transverse는 "가로지른"이라는 뜻이지 "수평"만은 아닙니다. 비스듬히 자른 단면도 transverse plane입니다.'
@@ -952,7 +963,7 @@ var CARDS = {
     latin:'flexio / extensio', latinParts:[['flectere','굽히다'],['ex- + tendere','밖으로 + 팽팽하게']],
     en:'flexion / extension', enNote:'각도가 줄어듦 / 늘어남',
     hanjaParts:[['屈','굽힐'],['曲','굽을'],['伸','펼'],['展','펼']],
-    hanjaNote:'屈 굽힐 + 曲 굽을 / 伸 펼 + 展 펼',
+    hanjaNote:'屈은 몸을 굽힌 모양, 伸은 사람(亻)이 뻗는 모양. 曲은 대나무를 구부린 그림 — 한자도 굽힘과 폄을 한 짝으로 담았습니다.',
     koNative:'굽힘 · 폄', koBreak:'굽힘(각도가 줄어듦) · 폄(각도가 늘어남)',
     why:'flectere(굽히다)와 ex+tendere(밖으로 팽팽하게) — 라틴어가 각각 "각도를 줄인다 / 늘린다"를 그대로 담았습니다. 한자 屈曲·伸展도 같은 짝입니다.',
     trap:'무릎 굽힘은 뒤로, 팔꿈치 굽힘은 앞으로 갑니다. 굴곡의 기준은 "방향"이 아니라 "관절 각도가 줄어드는가"입니다.'
@@ -962,7 +973,7 @@ var CARDS = {
     latin:'abductio / adductio', latinParts:[['ab-','멀리'],['ad-','쪽으로'],['ducere','이끌다']],
     en:'abduction / adduction', enNote:'*lead away* / *lead toward*',
     hanjaParts:[['外','바깥'],['內','안'],['轉','구를']],
-    hanjaNote:'外 바깥 + 內 안 + 轉 구를',
+    hanjaNote:'外는 바깥, 內는 안. 여기에 轉(구를)이 붙어 "바깥으로 굴려 보냄 / 안으로 굴려 들임" — 라틴어 ab-ducere(멀리 끌다)를 직역했습니다.',
     koNative:'벌림 · 모음', koBreak:'몸 중심에서 벌림 / 몸 중심으로 모음',
     why:'duct는 "이끌다(ducere)". 팔을 몸에서 멀리 끌어내면 외전, 몸 쪽으로 끌어오면 내전입니다. 신용어는 그대로 "벌림 / 모음"입니다.',
     trap:'한자 轉은 "구르다"라서 회전으로 오해하기 쉽습니다. 라틴어 duct는 "끌다" — 방향이 핵심입니다.'
@@ -972,7 +983,7 @@ var CARDS = {
     latin:'rotatio', latinParts:[['rota','바퀴'],['-atio','~함']],
     en:'rotation', enNote:'*wheel* — 뼈가 자기 축에서 돎',
     hanjaParts:[['回','돌'],['轉','구를']],
-    hanjaNote:'回 돌 + 轉 구를',
+    hanjaNote:'回는 소용돌이처럼 돌아오는 모양, 轉은 수레바퀴가 구르는 글자 — 뼈가 제 축에서 도는 회전을 라틴어 rota(바퀴)와 같은 그림으로 담았습니다.',
     koNative:'회전', koBreak:'뼈가 제 세로축을 따라 돎',
     why:'rota(바퀴)가 어원입니다. 뼈가 바퀴처럼 자기 축에서 도는 움직임 — 수평면에서 일어납니다.',
     trap:'회내(pronatio)·회외(supinatio)는 팔에서만 쓰는 특별한 회전 이름입니다. "회전"과 같은 말이 아닙니다.'
@@ -982,7 +993,7 @@ var CARDS = {
     latin:'proximalis / distalis', latinParts:[['proximus','가장 가까운'],['distare','떨어져 있다']],
     en:'proximal / distal', enNote:'몸통에 가까운 쪽 / 먼 쪽',
     hanjaParts:[['近','가까울'],['遠','멀'],['位','자리']],
-    hanjaNote:'近 가까울 + 遠 멀 + 位 자리',
+    hanjaNote:'近은 길(辶)을 따라 가까이 감, 遠은 멀리 감, 位는 사람이 선 자리 — "몸통에서 어느 자리인가"를 그대로 말합니다.',
     koNative:'몸쪽 · 먼쪽', koBreak:'몸통에서 가까운 쪽 · 먼 쪽',
     why:'proximus(가장 가까운)와 distare(떨어져 있다). 기준은 언제나 몸통입니다. 신용어는 "몸쪽 / 먼쪽"으로 기준을 그대로 말합니다.',
     trap:'손가락은 팔꿈치보다 원위, 어깨는 손목보다 근위입니다. "위·아래"가 아니라 "몸통에서의 거리"입니다.'
@@ -992,7 +1003,7 @@ var CARDS = {
     latin:'medialis / lateralis', latinParts:[['medius','가운데'],['latus','옆구리']],
     en:'medial / lateral', enNote:'*middle* / *side*',
     hanjaParts:[['內','안'],['外','바깥'],['側','곁']],
-    hanjaNote:'內 안 + 外 바깥 + 側 곁',
+    hanjaNote:'側은 사람(亻) 곁에 칼(則)을 둔 모양으로 "곁". 內·外로 어느 곁인지 가려 안쪽·가쪽이 됩니다.',
     koNative:'안쪽 · 가쪽', koBreak:'몸 중심에 가까운 면 · 먼 면',
     why:'medius(가운데)와 latus(옆구리). 위치를 말하는 이름이라 움직임 이름(내전·외전)과 짝을 이루지만 다른 말입니다.',
     trap:'내측은 "몸 중심에 가까운 쪽"이고 내전은 "안으로 모으는 움직임"입니다. 위치와 움직임을 섞으면 안 됩니다.'
@@ -1004,7 +1015,7 @@ var CARDS = {
     latin:'respiratio', latinParts:[['re-','다시'],['spirare','숨쉬다']],
     en:'respiration', enNote:'*breathe again* — inspire · expire',
     hanjaParts:[['呼','내쉴'],['吸','들이쉴']],
-    hanjaNote:'呼 내쉬는 숨 + 吸 들이쉬는 숨 — 한 쌍',
+    hanjaNote:'呼는 내쉬며 소리 냄, 吸은 빨아들임 — 같은 입(口) 부수로 들숨과 날숨을 한 짝으로 묶었습니다. 라틴어 re-spirare와 같은 짝입니다.',
     koNative:'숨쉬기', koBreak:'들숨 + 날숨 (한 짝)',
     why:'spirare(숨쉬다)에서 spirit·inspire·expire가 나왔습니다. 한자 呼吸도 "내쉼"과 "들이쉼"을 한 글자씩 나눠 담았습니다.',
     trap:'호흡은 "들이쉬는 것"만이 아닙니다. 들숨과 날숨이 한 짝이고, 코어는 주로 날숨에서 일합니다.'
@@ -1014,7 +1025,7 @@ var CARDS = {
     latin:'diaphragma', latinParts:[['dia-','가로질러'],['phragma','울타리']],
     en:'diaphragm', enNote:'*fence across* — 가로지르는 울타리',
     hanjaParts:[['橫','가로'],['膈','횡격막'],['膜','막']],
-    hanjaNote:'橫 가로 + 膈 횡격막 + 膜 막',
+    hanjaNote:'膈은 고기(月)에 가마솥(鬲)을 붙인 글자로 가슴과 배 사이에서 숨을 가르는 막을 전용으로 가리킵니다. 橫은 그 막이 가로 놓였다는 뜻입니다.',
     koNative:'가로막', koBreak:'가로 + 막 (가로지르는 막)',
     why:'그리스어 phragma는 "울타리". 가슴과 배를 가로질러 나누는 울타리라서 횡격막입니다. 우리말 "가로막"은 이 그림을 순우리말로 다시 그린 말입니다.',
     trap:'膈은 횡격막 전용 글자입니다. 횡격막은 숨을 쉬는 주동근이면서 스스로 움직이는 수의근입니다.'
@@ -1024,7 +1035,7 @@ var CARDS = {
     latin:'transversus abdominis', latinParts:[['trans-','가로질러'],['vertere','돌다'],['abdominis','배의']],
     en:'transversus abdominis', enNote:'배를 가로로 감싸는 가장 깊은 층',
     hanjaParts:[['腹','배'],['橫','가로'],['筋','근육']],
-    hanjaNote:'腹 배 + 橫 가로 + 筋 근육',
+    hanjaNote:'腹은 배, 橫은 가로로 감음, 筋은 근육 — "배를 가로로 감싸는 힘살". 橫은 수평이 아니라 허리를 한 바퀴 두른 방향입니다.',
     koNative:'배가로근', koBreak:'배 + 가로 + 근',
     why:'배 앞뒤를 가로로 한 바퀴 감싸는 근육입니다. 코르셋처럼 허리둘레를 조여 복압을 만듭니다. 라틴어와 한자어가 "가로"를 똑같이 담았고, 우리말도 배가로근입니다.',
     trap:'여기서 橫은 "수평"이 아니라 "가로로 감싼다"입니다. 날숨에 조여지고 들숨에는 이완합니다.'
@@ -1034,7 +1045,7 @@ var CARDS = {
     latin:'diaphragma pelvis', latinParts:[['pelvis','대야'],['diaphragma','가로막']],
     en:'pelvic floor', enNote:'골반 아래를 막는 "둘째 가로막"',
     hanjaParts:[['骨','뼈'],['盤','대야'],['基底','바닥'],['筋','근육']],
-    hanjaNote:'骨 뼈 + 盤 대야 + 基底 바닥 + 筋 근육',
+    hanjaNote:'盤은 그릇(皿)에 물건을 담은 모양으로 "대야". 골반은 뼈로 만든 대야이고 基底는 그 대야의 바닥 — 라틴어 pelvis(대야)와 같은 그림입니다.',
     koNative:'골반바닥근', koBreak:'골반 + 바닥 + 근',
     why:'pelvis는 라틴어로 "대야". 骨盤도 "뼈로 만든 대야"입니다. 횡격막이 위를 막고 골반기저근이 아래를 막아, 코어라는 압력 용기의 바닥이 됩니다.',
     trap:'골반기저근은 하나의 근육이 아니라 바닥을 이루는 근육 무리(항문거근 등)입니다. 날숨에 위로 끌어올려집니다.'
@@ -1044,7 +1055,7 @@ var CARDS = {
     latin:'multifidus', latinParts:[['multi-','많다'],['findere','쪼개다']],
     en:'multifidus', enNote:'*많이 쪼갠* — 여러 갈래로 붙는 근육',
     hanjaParts:[['多','많을'],['裂','쪼갤'],['筋','근육']],
-    hanjaNote:'多 많을 + 裂 쪼갤 + 筋 근육',
+    hanjaNote:'多는 고기(肉)를 겹겹이 쌓은 모양으로 "많다", 裂은 옷(衣)을 찢은 글자 — 척추뼈마다 여러 갈래로 찢어져 붙어 多裂입니다.',
     koNative:'여러갈래근', koBreak:'여러 + 갈래 + 근',
     why:'multi(많다) + findere(쪼개다) = "많이 쪼갠". 척추뼈마다 여러 갈래로 붙어 한 마디씩 붙잡습니다. 한자 多裂도 같은 구조입니다.',
     trap:'다열근은 척추 옆의 국소 안정근입니다. 겉에서 만져지는 척추기립근과는 다른 층입니다.'
@@ -1054,7 +1065,7 @@ var CARDS = {
     latin:'rectus abdominis', latinParts:[['rectus','곧은'],['abdominis','배의']],
     en:'rectus abdominis', enNote:'배 앞을 곧게 세로로 지나는 근육',
     hanjaParts:[['腹','배'],['直','곧을'],['筋','근육']],
-    hanjaNote:'腹 배 + 直 곧을 + 筋 근육',
+    hanjaNote:'直은 눈(目)으로 곧게 봄을 그린 글자 — 배 앞을 곧게 세로로 지나는 근육이라 腹直筋. 라틴어 rectus(곧은)와 같은 그림입니다.',
     koNative:'배곧은근', koBreak:'배 + 곧은 + 근',
     why:'곧게 위아래로 뻗은 근육이라 rectus(곧은), 直(곧을), 우리말 "곧은"입니다. 세 언어가 모양을 그대로 옮겼습니다.',
     trap:'"6팩"은 근육이 6개라는 뜻이 아니라, 힘살이 힘줄 마디(건획)로 나뉜 모양입니다. 복직근은 하나입니다.'
@@ -1064,7 +1075,7 @@ var CARDS = {
     latin:'obliquus externus abdominis', latinParts:[['obliquus','비스듬한'],['externus','바깥']],
     en:'external oblique', enNote:'배 바깥층을 비스듬히 가로지름',
     hanjaParts:[['外','바깥'],['腹','배'],['斜','비낄'],['筋','근육']],
-    hanjaNote:'外 바깥 + 腹 배 + 斜 비낄 + 筋',
+    hanjaNote:'斜는 삐딱한 모양을 그린 글자로 "비낄" — 배를 비스듬히 가로지르는 바깥층이라 外腹斜筋. 우리말 "빗근"의 "빗"과 같은 말입니다.',
     koNative:'배바깥빗근', koBreak:'배 + 바깥 + 빗(비스듬히) + 근',
     why:'obliquus는 "비스듬한". 한자 斜도 "비끼다"이고, 우리말은 "빗"입니다. 목빗근의 "빗"과 같은 말 — 같은 비스듬함을 세 언어가 나눠 씁니다.',
     trap:'배바깥빗근은 반대쪽으로 몸을 돌립니다(오른쪽 근육이 왼쪽 회전). 이름의 "바깥"은 층을 말합니다.'
@@ -1074,7 +1085,7 @@ var CARDS = {
     latin:'core (← cor, 심장으로 보는 설명)', latinParts:[['cor','심장'],['-e','영어 어형']],
     en:'core', enNote:'몸의 중심 · 중심부',
     hanjaParts:[['核','씨(핵)'],['心','마음(심장)']],
-    hanjaNote:'核 씨앗의 핵 + 心 심장 — "씨앗의 심"',
+    hanjaNote:'核은 나무(木) 속 씨앗의 단단한 속, 心은 심장 — "가운데의 단단한 것". 영어 core를 라틴어 cor(심장)로 보는 설명과 같은 발상입니다.',
     koNative:'코어', koBreak:'영어 그대로 — 순우리말 대체어 없음',
     why:'core는 라틴어 cor(심장) 계열로 보는 설명이 있고, 한자 核心도 "씨앗의 심"입니다. 동서양 모두 "가운데의 단단한 것"을 가리킵니다.',
     trap:'코어는 복근과 같은 말이 아닙니다. 횡격막·복횡근·골반기저근·다열근이 만드는 "압력 용기" 전체입니다.'
@@ -1084,7 +1095,7 @@ var CARDS = {
     latin:'bandha (산스크리트)', latinParts:[['bandh','묶다 · 잠그다'],['-a','명사 어미']],
     en:'bandha', enNote:'요가의 "잠금" — 몸 안의 압력을 묶음',
     hanjaParts:[['束','묶을']],
-    hanjaNote:'束 묶을 속 — 묶어 잠금',
+    hanjaNote:'束은 나무(木)를 끈으로 동여맨 모양 — 산스크리트 bandh(묶다)를 옮긴 글자입니다. 숨을 참는 게 아니라 압력을 묶어 잠그는 뜻입니다.',
     koNative:'잠금', koBreak:'묶어 잠근다 (요가의 반다)',
     why:'산스크리트 bandha는 "묶다". 물라 반다(골반기저근)와 우디아나 반다(복횡근·복압)로 코어를 잠급니다. 필라테스의 "파워하우스"와 같은 자리를 가리킵니다.',
     trap:'반다는 숨을 참는 것이 아니라 압력을 만드는 것입니다. 숨은 계속 흐르고, 날숨에서 잠금이 깊어집니다.'
@@ -1332,7 +1343,7 @@ function renderCard(id) {
   h += tier('en', '영어', 'EN', esc(c.en), esc(c.enNote || ''));
   h += tier('hanja', '한자어', '漢', '<span class="hj">' + esc(c.hanja || c.name) + '</span>' +
     (c.hanjaRead ? ' <span style="font-size:9px;color:#9A8C72;font-weight:700">' + esc(c.hanjaRead) + '</span>' : ''),
-    esc(c.hanjaNote || partsHTML(c.hanjaParts)));
+    partsHTML(c.hanjaParts));
   h += tier('ko', '우리말', 'KO', esc(c.koNative), esc(c.koBreak || ''));
   h += '</div>';
   h += '<div class="notes">' +
@@ -1645,7 +1656,10 @@ function renderQuiz() {
     h += '</div>';
     if (Q.answered) {
       var ok = it.opts[Q.picked] === it.ans;
-      h += '<div class="qfb' + (ok ? '' : ' no') + '"><b>' + (ok ? '정답 — ' : '아쉬워요 — ') + esc(it.ans) + '</b>' + esc(it.why) + '</div>';
+      h += '<div class="qfb' + (ok ? '' : ' no') + '"><b>' + (ok ? '정답 — ' : '아쉬워요 — ') + esc(it.ans) + '</b>';
+      h += fbHanja(it.card);
+      h += fbLatin(it.card, it.why);
+      h += '</div>';
     }
     h += '<div class="qfoot">' +
       (Q.answered && it.card ? '<button class="qbtn ghost" data-act="q-show" data-card="' + it.card + '" type="button">카드 보기</button>' : '') +
@@ -1654,6 +1668,34 @@ function renderQuiz() {
   }
   h += '</div></div>';
   $('sheet').innerHTML = h;
+  /* 정답 피드백이 길어졌으니, 답을 고르면 피드백이 화면 안으로 들어오게 맞춘다 */
+  if (Q.answered) {
+    var fbEl = $('sheet').querySelector('.qfb');
+    if (fbEl && fbEl.scrollIntoView) {
+      try { fbEl.scrollIntoView({ block: 'nearest' }); } catch (e) { fbEl.scrollIntoView(false); }
+    }
+  }
+}
+
+/* 피드백 — 한자 어원 풀이 (漢) */
+function fbHanja(cardId) {
+  var c = cardId ? CARDS[cardId] : null;
+  if (!c) return '';
+  var word = c.hanja || c.name;
+  var h = '<div class="fbblk hanja">' +
+    '<span class="fbtag">漢 한자 어원</span>' +
+    '<div class="fbhj">' + esc(word) + (c.hanjaRead && c.hanjaRead !== word ? '<i>' + esc(c.hanjaRead) + '</i>' : '') + '</div>';
+  if (c.hanjaParts && c.hanjaParts.length) h += '<div class="fbparts">' + partsHTML(c.hanjaParts) + '</div>';
+  h += '<p>' + esc(c.hanjaNote || '') + '</p></div>';
+  return h;
+}
+/* 피드백 — 라틴어·맥락 풀이 */
+function fbLatin(cardId, why) {
+  var c = cardId ? CARDS[cardId] : null;
+  var h = '<div class="fbblk latin"><span class="fbtag">라틴어 · 맥락</span>';
+  if (c && c.latin) h += '<div class="fblat">' + esc(c.latin) + '</div>';
+  h += '<p>' + esc(why || (c ? c.why : '')) + '</p></div>';
+  return h;
 }
 
 function summaryHTML() {
