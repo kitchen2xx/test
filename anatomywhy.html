@@ -20,17 +20,17 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-title" content="해부와이" />
 <meta name="robots" content="noindex, nofollow" />
-<meta name="description" content="관절을 움직이면 뼈·근육·신경이 켜지고, 그 이름이 왜 그렇게 생겼는지가 라틴어·영어·한자어·우리말 네 층으로 풀리는 3D 해부학 어원 학습 앱 (프로토타입)" />
-<title>해부와이 AnatomyWhy · 상지 3D × 동서양 어원</title>
+<meta name="description" content="필라테스·요가 기능해부학 7단원 학습앱 — 해부학적 자세와 3면, 호흡과 코어를 3D로 보고 라틴어·영어·한자어·우리말 네 층 어원으로 익히는 AnatomyWhy (1~2단원 공개)" />
+<title>해부와이 AnatomyWhy · 7단원 로드맵 × 3D 해부학</title>
 <style>
 :root{
   --bg:#FAF8F5; --bg2:#F4EFE7; --paper:#FFFFFF;
-  --ink:#22303E; --ink2:#4C5B6B; --ink3:#8B96A2;
-  --navy:#2C4A6E; --navy2:#3E6089; --navysoft:#E9EEF4;
-  --line:#E6E0D5; --line2:#F1ECE3;
-  --gold:#BF8A3D; --ok:#2F6B4F; --danger:#9C4A46;
-  --muscle:#C2454A; --nerve:#E8B23C; --bone:#F3ECDD;
-  --sh:0 1px 2px rgba(34,48,62,.04), 0 10px 26px -24px rgba(34,48,62,.55);
+  --ink:#1E2A36; --ink2:#4C5B6B; --ink3:#8B96A2;
+  --navy:#24405F; --navy2:#3A6390; --navysoft:#E9EEF4;
+  --line:#E6DFD2; --line2:#F1ECE3;
+  --gold:#B8863B; --ok:#2F6B4F; --danger:#9C4A46;
+  --coral:#C2454A; --teal:#2F6F72;
+  --sh:0 1px 2px rgba(34,48,62,.05), 0 12px 30px -26px rgba(34,48,62,.6);
   --r:16px;
   --serif:"Noto Serif KR","Noto Serif CJK KR","Nanum Myeongjo","AppleMyungjo","Batang",serif;
   --kr:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Noto Sans KR","Noto Sans CJK KR","Segoe UI",Roboto,sans-serif;
@@ -43,295 +43,365 @@ body{
 }
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:center;touch-action:manipulation}
 input{font:inherit;color:inherit}
+h1,h2,h3,p,ol,ul{margin:0;padding:0}
+ol,ul{list-style:none}
 :focus-visible{outline:2px solid var(--navy2);outline-offset:2px;border-radius:8px}
 ::selection{background:#DCE6F1}
 
-.stage{width:100%;height:100vh;height:100dvh;display:flex;align-items:center;justify-content:center}
+/* ---------- shell ---------- */
 .app{
   position:relative;isolation:isolate;width:100%;height:100vh;height:100dvh;max-height:100dvh;
   display:flex;flex-direction:column;background:var(--bg);overflow:hidden;
 }
-@media (min-width:520px){
-  body{background:radial-gradient(120% 100% at 50% 0%,#FFFDF9 0%,#F5F0E7 60%,#F1EBE1 100%)}
+@media (min-width:560px){
+  body{background:radial-gradient(120% 100% at 50% 0%,#FFFDF9 0%,#F5F0E7 60%,#EFE9DE 100%)}
   .app{
-    width:412px;max-width:412px;height:min(880px,96dvh);max-height:96dvh;
-    border:1px solid #E4DDD1;border-radius:36px;
-    box-shadow:0 60px 100px -60px rgba(26,38,52,.65),0 2px 0 rgba(255,255,255,.9) inset,0 0 0 6px rgba(255,255,255,.35);
+    width:430px;max-width:430px;height:min(900px,96dvh);max-height:96dvh;
+    border:1px solid #E3DCCD;border-radius:26px;overflow:hidden;
+    box-shadow:0 40px 90px -50px rgba(30,42,54,.65),0 2px 0 #fff inset;
   }
 }
-
-/* ================= 3D VIEWPORT ================= */
-.view{
-  position:relative;flex:1 1 auto;min-height:0;overflow:hidden;
-  background:radial-gradient(120% 90% at 32% 8%,#2C3E50 0%,#1E2B38 46%,#151E27 100%);
-  border-radius:0 0 26px 26px;
+@media (min-width:740px){
+  .app{width:520px;max-width:520px;height:min(940px,94dvh);max-height:94dvh;border-radius:30px}
+  .hh{padding-top:calc(24px + env(safe-area-inset-top))}
+  .titlerow h1{font-size:22px}
+  .tval .big{font-size:13.5px}
 }
-@media (min-width:520px){ .view{border-radius:35px 35px 26px 26px} }
+.screen{display:none;flex:1 1 auto;min-height:0;flex-direction:column}
+.screen.on{display:flex}
+
+/* ---------- home ---------- */
+.home{background:
+  radial-gradient(120% 60% at 50% -10%,#FFFDF8 0%,rgba(255,253,248,0) 70%),
+  var(--bg);
+}
+.hh{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:calc(20px + env(safe-area-inset-top)) 20px 6px}
+.brand{display:flex;gap:11px;align-items:flex-start}
+.mark{
+  width:36px;height:36px;border-radius:11px;flex:0 0 auto;display:grid;place-items:center;
+  background:linear-gradient(150deg,#2C4C70,#1A2C40);color:#F4E3C2;font-size:17px;
+  box-shadow:0 8px 18px -12px rgba(24,40,58,.9),0 0 0 1px rgba(255,255,255,.12) inset;
+}
+.bt h1{font-family:var(--serif);font-size:20px;font-weight:800;letter-spacing:-.5px;line-height:1.15}
+.bt span{font-size:10px;font-weight:800;letter-spacing:.14em;color:var(--gold);text-transform:uppercase}
+.bt p{font-size:11px;color:var(--ink3);margin-top:3px;letter-spacing:-.1px}
+.ringwrap{position:relative;width:56px;height:56px;flex:0 0 auto}
+.ring{width:56px;height:56px;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:4;stroke-linecap:round}
+.ringbg{stroke:#EAE3D5}
+.ringfg{stroke:url(#rg);stroke:#2C4C70;transition:stroke-dashoffset .6s cubic-bezier(.2,.8,.2,1)}
+.ringt{position:absolute;inset:0;display:grid;place-content:center;text-align:center;line-height:1}
+.ringt b{font-size:12px;font-weight:800;letter-spacing:-.4px}
+.ringt span{font-size:8px;color:var(--ink3);font-weight:700;letter-spacing:.04em}
+.hmeta{display:flex;align-items:center;gap:7px;padding:0 20px 10px;font-size:10.5px;font-weight:700;color:var(--ink3);letter-spacing:-.1px}
+.hmeta .dot{width:3px;height:3px;border-radius:50%;background:#CFC6B5;display:block}
+.hmeta #ovSub{color:var(--navy2)}
+.legend{display:flex;gap:12px;padding:0 20px 9px;font-size:9px;font-weight:800;color:#8B96A2;letter-spacing:-.05em}
+.legend span{display:inline-flex;align-items:center;gap:4px}
+.legend i{width:6px;height:6px;border-radius:2px;display:block}
+.legend i.l{background:#B8863B}
+.legend i.e{background:#3A6390}
+.legend i.q{background:#C2454A}
+.chscroll{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px 16px calc(16px + env(safe-area-inset-bottom))}
+.chlist{display:flex;flex-direction:column;gap:9px}
+.chitem{
+  position:relative;display:grid;grid-template-columns:34px 1fr auto;gap:11px;align-items:center;
+  width:100%;text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:15px;
+  padding:12px 13px;box-shadow:var(--sh);transition:transform .16s,border-color .16s,box-shadow .16s;
+}
+.chitem:active{transform:scale(.985)}
+.chitem.open:hover{border-color:#D8CDB9}
+.chitem.soon{background:#FCFAF5;border-style:dashed;box-shadow:none;opacity:.86}
+.chitem.cur{border-color:#2C4C70;box-shadow:0 0 0 1px #2C4C70,0 16px 30px -26px rgba(28,46,68,.9)}
+.cnum{
+  width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+  font-family:var(--serif);font-size:15px;font-weight:800;color:var(--navy);
+  background:linear-gradient(160deg,#F2EEE4,#E9E2D2);border:1px solid #E3DAC8;
+}
+.chitem.soon .cnum{color:#A9A192;background:#F5F1E8;border-color:#EBE4D6}
+.chitem.done .cnum{background:linear-gradient(150deg,#2F6B4F,#27563F);color:#F7EFD9;border-color:#245039}
+.cmain{min-width:0}
+.cmain b{display:block;font-size:13.5px;font-weight:800;letter-spacing:-.35px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmain p{font-size:10.5px;color:var(--ink3);letter-spacing:-.15px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmain .cbar{display:flex;gap:4px;margin-top:7px}
+.cmain .cbar i{height:3px;border-radius:99px;background:#EDE7DA;flex:1 1 0;overflow:hidden;position:relative}
+.cmain .cbar i b{display:block;height:100%;border-radius:99px;background:var(--navy2);width:0;transition:width .5s}
+.cmain .cbar i.l b{background:#B8863B}
+.cmain .cbar i.q b{background:var(--coral)}
+.cright{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.chip{font-size:9px;font-weight:800;letter-spacing:.02em;padding:3px 7px;border-radius:99px;background:#EFF3F8;color:var(--navy2);white-space:nowrap}
+.chip.soon{background:#F2EEE5;color:#9C9484}
+.chip.done{background:#E7F0E9;color:var(--ok)}
+.cpct{font-size:10.5px;font-weight:800;color:var(--ink3);letter-spacing:-.2px}
+.cgo{width:20px;height:20px;display:grid;place-items:center;color:#B9B0A0;font-size:16px}
+.hfoot{padding:16px 2px 6px;text-align:center}
+.hfoot p{font-size:9.5px;color:#AEA695;margin-top:7px;line-height:1.5}
+.hfoot button{font-size:10.5px;font-weight:700;color:#9A8F7C;text-decoration:underline;text-underline-offset:3px}
+
+/* ---------- chapter ---------- */
+.chapter{background:var(--bg)}
+.topbar{
+  display:flex;align-items:center;gap:9px;padding:calc(9px + env(safe-area-inset-top)) 12px 8px;
+  border-bottom:1px solid var(--line2);background:rgba(250,248,245,.92);z-index:5;
+}
+.back{
+  width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:21px;line-height:1;
+  color:var(--navy);background:#F1ECE1;padding-bottom:3px;
+}
+.back:active{background:#E7E0D2}
+.tbt{min-width:0;flex:1 1 auto}
+.tbt b{display:block;font-family:var(--serif);font-size:13.5px;font-weight:800;letter-spacing:-.3px}
+.tbt span{display:block;font-size:9.5px;color:var(--ink3);font-weight:700;letter-spacing:-.1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbp{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+.tbbar{width:52px;height:4px;border-radius:99px;background:#E9E2D4;overflow:hidden}
+.tbbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3A6390,#2C4C70);border-radius:99px;transition:width .5s}
+.tbp span{font-size:10px;font-weight:800;color:var(--navy2);letter-spacing:-.2px}
+
+/* stage */
+.stage{
+  position:relative;flex:1 1 0;min-height:170px;overflow:hidden;
+  background:
+    radial-gradient(90% 70% at 50% 8%,#2A3E52 0%,rgba(42,62,82,0) 62%),
+    radial-gradient(120% 90% at 50% 120%,#0A1016 0%,rgba(10,16,22,0) 60%),
+    linear-gradient(165deg,#1B2A38 0%,#111B25 55%,#0B1117 100%);
+  touch-action:none;
+}
 #scene{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
 #scene:active{cursor:grabbing}
-.view::after{
-  content:"";position:absolute;inset:0;pointer-events:none;
-  background:
-    radial-gradient(60% 44% at 66% 18%,rgba(126,170,214,.16),transparent 70%),
-    linear-gradient(180deg,rgba(12,18,24,.55) 0%,rgba(12,18,24,0) 22%,rgba(12,18,24,0) 62%,rgba(12,18,24,.72) 100%);
+.stop{
+  position:absolute;left:9px;right:9px;top:9px;display:flex;align-items:flex-start;justify-content:space-between;
+  gap:8px;pointer-events:none;z-index:4;
 }
-.vtop{
-  position:absolute;left:0;right:0;top:0;z-index:3;
-  display:flex;align-items:flex-start;justify-content:space-between;gap:8px;
-  padding:calc(10px + env(safe-area-inset-top)) 12px 0 14px;
-}
-.brand{display:flex;flex-direction:column;gap:1px;padding-top:2px}
-.brand b{font-size:14px;font-weight:800;letter-spacing:-.03em;color:#FBF7EF}
-.brand i{font-style:normal;font-size:8.5px;font-weight:800;letter-spacing:.14em;color:#93A7B9;text-transform:uppercase}
-.brand b em{font-style:normal;color:#E8B23C}
-.layers{display:flex;gap:4px}
+.stop > *{pointer-events:auto}
+.layers{display:flex;flex-wrap:wrap;gap:5px;max-width:72%}
 .lay{
-  height:27px;padding:0 9px;border-radius:9px;display:flex;align-items:center;gap:4px;
-  font-size:10px;font-weight:800;letter-spacing:-.01em;color:#B9C8D6;
-  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
-  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
-  transition:background .18s,color .18s,border-color .18s;
+  display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:99px;
+  background:rgba(15,24,33,.62);border:1px solid rgba(255,255,255,.14);color:#DDE6EE;
+  font-size:9.5px;font-weight:800;letter-spacing:-.1px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  transition:.15s;
 }
-.lay i{width:6px;height:6px;border-radius:50%;background:currentColor;display:block;opacity:.55}
-.lay.on{color:#0F1A24;background:#EAF1F7;border-color:#EAF1F7}
+.lay i{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.4;display:block}
+.lay.on{background:rgba(240,246,252,.94);color:#1B2A38;border-color:transparent;box-shadow:0 4px 12px -8px #000}
 .lay.on i{opacity:1}
-.lay[data-layer="bone"].on i{background:#B99A62}
-.lay[data-layer="muscle"].on i{background:#C2454A}
-.lay[data-layer="nerve"].on i{background:#D9A02B}
-.lay:active{transform:scale(.96)}
-
-.vsel{
-  position:absolute;left:14px;top:calc(52px + env(safe-area-inset-top));z-index:3;
-  display:flex;align-items:center;gap:6px;max-width:calc(100% - 28px);
-  padding:5px 9px 5px 8px;border-radius:9px;
-  background:rgba(14,22,30,.55);border:1px solid rgba(255,255,255,.1);
-  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
-  opacity:0;transform:translateY(-4px);transition:opacity .25s,transform .25s;pointer-events:none;
+.lay[data-key="sagittal"].on i{background:#E8836A}
+.lay[data-key="frontal"].on i{background:#6FA8DC}
+.lay[data-key="transverse"].on i{background:#E6C25C}
+.lay[data-key="core"].on i{background:#E06A6A}
+.lay[data-key="rectus"].on i{background:#D9555A}
+.lay[data-key="oblique"].on i{background:#D98B57}
+.lay[data-key="bone"].on i{background:#E8D6B4}
+.resetbtn{
+  display:inline-flex;align-items:center;gap:5px;padding:5px 10px 5px 7px;border-radius:99px;
+  background:linear-gradient(160deg,#FFE9B8,#EFC871);color:#3A2A0C;font-size:10px;font-weight:900;letter-spacing:-.1px;
+  box-shadow:0 8px 18px -10px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.35) inset;white-space:nowrap;
 }
-.vsel.on{opacity:1;transform:none}
-.vsel .dot{width:5px;height:5px;border-radius:50%;background:#E8B23C;box-shadow:0 0 8px #E8B23C;flex:0 0 5px}
-.vsel b{font-size:11px;font-weight:800;color:#F6F2EA;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vsel i{font-style:normal;font-size:8.5px;font-weight:700;color:#93A7B9;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-.vfoot{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:0 0 calc(9px + env(safe-area-inset-bottom))}
-.chips{
-  display:flex;gap:6px;padding:0 12px 8px;overflow-x:auto;overflow-y:hidden;
-  scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;
+.resetbtn span{font-size:14px;line-height:1;display:block;margin-top:-1px}
+.resetbtn:active{transform:scale(.95)}
+.resetbtn.emph{animation:btnPulse 1.6s ease-out 2}
+@keyframes btnPulse{0%{box-shadow:0 0 0 0 rgba(239,200,113,.7)}70%{box-shadow:0 0 0 12px rgba(239,200,113,0)}100%{box-shadow:0 0 0 0 rgba(239,200,113,0)}}
+.vcap{
+  position:absolute;left:10px;bottom:108px;z-index:3;pointer-events:none;opacity:0;transition:.2s;
+  display:flex;flex-direction:column;gap:1px;max-width:62%;
+  background:rgba(10,16,23,.55);border:1px solid rgba(255,255,255,.1);
+  padding:4px 8px;border-radius:8px;backdrop-filter:blur(4px);
 }
-.chips::-webkit-scrollbar{display:none}
-.mchip{
-  flex:0 0 auto;display:flex;align-items:center;gap:5px;height:30px;padding:0 10px 0 8px;
-  border-radius:10px;font-size:10.5px;font-weight:800;letter-spacing:-.02em;
-  color:#C8D5E1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);
-  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
-  transition:background .18s,color .18s;
-}
-.mchip .ic{font-size:11px;line-height:1;opacity:.9}
-.mchip.on{color:#101B25;background:#F2EDE3;border-color:#F2EDE3;box-shadow:0 6px 14px -8px rgba(0,0,0,.8)}
-.mchip:active{transform:scale(.97)}
-.scrub{display:flex;align-items:center;gap:9px;padding:0 14px}
-.play{
-  flex:0 0 30px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
-  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#F2EDE3;font-size:10px;
-}
-.play.on{background:#E8B23C;border-color:#E8B23C;color:#1A1206}
-input[type=range]{
-  -webkit-appearance:none;appearance:none;flex:1 1 auto;min-width:0;height:22px;background:transparent;
-}
-input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:99px;background:rgba(255,255,255,.22)}
-input[type=range]::-moz-range-track{height:3px;border-radius:99px;background:rgba(255,255,255,.22)}
-input[type=range]::-webkit-slider-thumb{
-  -webkit-appearance:none;width:15px;height:15px;margin-top:-6px;border-radius:50%;
-  background:#F7F1E6;border:0;box-shadow:0 2px 8px rgba(0,0,0,.55);
-}
-input[type=range]::-moz-range-thumb{width:15px;height:15px;border:0;border-radius:50%;background:#F7F1E6}
-.deg{
-  flex:0 0 58px;text-align:right;font-size:10px;font-weight:800;color:#E3D9C9;
-  font-variant-numeric:tabular-nums;letter-spacing:-.01em;
-}
-.deg b{color:#FFF6E4;font-size:12px}
+.vcap.on{opacity:1}
+.vcap b{font-size:10.5px;font-weight:800;color:#F4EBD8;letter-spacing:-.2px}
+.vcap i{font-size:8.5px;font-style:normal;color:#A9BDCE;letter-spacing:.02em}
 .hint{
-  position:absolute;left:50%;bottom:calc(78px + env(safe-area-inset-bottom));z-index:4;transform:translate(-50%,6px);
-  padding:6px 11px;border-radius:99px;background:rgba(232,178,60,.92);color:#241804;
-  font-size:10px;font-weight:800;letter-spacing:-.02em;white-space:nowrap;
-  box-shadow:0 10px 24px -12px rgba(0,0,0,.8);opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;
+  position:absolute;left:50%;bottom:96px;transform:translateX(-50%);z-index:6;
+  background:rgba(12,20,28,.78);border:1px solid rgba(255,255,255,.12);color:#E7EEF5;
+  font-size:9.5px;font-weight:700;line-height:1.4;padding:6px 11px;border-radius:99px;text-align:center;
+  max-width:92%;opacity:0;pointer-events:none;transition:.3s;letter-spacing:-.1px;backdrop-filter:blur(4px);
+  white-space:nowrap;
 }
-.hint.on{opacity:1;transform:translate(-50%,0)}
+.hint.on{opacity:1}
+.hint b{color:#FFD98A}
 
-/* ================= CARD PANEL ================= */
-.panel{
-  flex:0 0 auto;max-height:52%;display:flex;flex-direction:column;
-  padding:8px 12px 0;background:var(--bg);
+/* bottom controls */
+.sbot{position:absolute;left:0;right:0;bottom:0;z-index:4;padding:10px 10px calc(9px + env(safe-area-inset-bottom));background:linear-gradient(to top,rgba(8,13,19,.92) 0%,rgba(8,13,19,.55) 62%,rgba(8,13,19,0) 100%)}
+.motions{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:8px;justify-content:center}
+.motions::-webkit-scrollbar{display:none}
+.mchip{
+  flex:0 0 auto;display:inline-flex;align-items:center;gap:4px;padding:5px 9px;border-radius:99px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);color:#CBD8E4;
+  font-size:10px;font-weight:800;letter-spacing:-.1px;white-space:nowrap;
 }
-.card{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
-.cardhead{display:flex;align-items:center;gap:6px;flex:0 0 auto;padding:0 1px 4px}
-.kind{
-  flex:0 0 auto;height:17px;padding:0 7px;border-radius:6px;display:grid;place-items:center;
-  font-size:8.5px;font-weight:800;letter-spacing:.02em;
-  background:var(--navysoft);color:var(--navy);
+.mchip .ic{font-size:11px;opacity:.8}
+.mchip.on{background:#F3E7CE;border-color:#F3E7CE;color:#22303E;box-shadow:0 6px 14px -10px #000}
+.scrub{display:flex;align-items:center;gap:9px}
+.play{
+  width:30px;height:30px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;
+  background:#F3E7CE;color:#1B2A38;font-size:11px;padding-left:1px;box-shadow:0 6px 16px -10px #000;
 }
-.kind.muscle{background:#F7E4E3;color:#9C3B40}
-.kind.nerve{background:#FBF0D8;color:#8A6A16}
-.kind.bone{background:#F0EBE0;color:#7A6A4E}
-.kind.concept{background:#E7EFE9;color:#2F6B4F}
-.cardhead .idx{font-size:9px;font-weight:800;color:#B2AA9B;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
-.cardhead .nav{margin-left:auto;display:flex;align-items:center;gap:2px}
-.nav button{
-  width:24px;height:24px;border-radius:7px;display:grid;place-items:center;
-  font-size:15px;color:#8B96A2;background:#F4F0E8;line-height:1;
+.play.on{background:#24405F;color:#F3E7CE;padding-left:0}
+.rangewrap{flex:1 1 auto;min-width:0;padding-top:2px}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;margin:0;display:block;
 }
-.nav button:active{background:#EAE4D8}
-.spk2{
-  width:26px;height:26px;border-radius:8px;display:grid;place-items:center;margin-left:2px;
-  background:var(--navysoft);color:var(--navy);
+input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:99px;background:linear-gradient(90deg,rgba(255,255,255,.18),rgba(255,255,255,.4))}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:#F5EAD2;margin-top:-6px;
+  box-shadow:0 1px 5px rgba(0,0,0,.5),0 0 0 3px rgba(245,234,210,.18);
 }
+input[type=range]::-moz-range-track{height:3px;border-radius:99px;background:rgba(255,255,255,.3)}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border:0;border-radius:50%;background:#F5EAD2}
+.ticks{display:flex;justify-content:space-between;margin-top:-4px;font-size:8px;font-weight:700;color:#7E93A6;letter-spacing:.02em}
+.ticks span:nth-child(2){color:#5F7386}
+.deg{flex:0 0 auto;min-width:58px;text-align:right;font-size:10px;font-weight:800;color:#EAE0CB;letter-spacing:-.2px;font-variant-numeric:tabular-nums}
+.deg b{font-size:13px;color:#FFD98A}
+
+.brmode{display:flex;gap:5px;justify-content:center;margin-bottom:6px}
+.brmode button{
+  padding:4px 9px;border-radius:99px;font-size:9.5px;font-weight:800;letter-spacing:-.1px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);color:#C8D5E1;
+}
+.brmode button.on{background:#F3E7CE;color:#22303E;border-color:transparent}
+.brmode button small{font-size:8px;font-weight:700;opacity:.6;margin-left:3px}
+.phase{
+  display:flex;align-items:center;justify-content:center;gap:6px;font-size:9px;font-weight:800;color:#B9CBDA;
+  letter-spacing:-.1px;margin-bottom:3px;height:12px;
+}
+.phase b{color:#FFD98A;font-size:10.5px}
+.pdot{width:6px;height:6px;border-radius:50%;background:#6FA8DC;box-shadow:0 0 8px #6FA8DC}
+.pdot.ex{background:#E8836A;box-shadow:0 0 8px #E8836A}
+
+/* panel */
+.panel{flex:0 0 43%;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--paper);border-top:1px solid var(--line);position:relative}
+.chips{display:flex;gap:5px;overflow-x:auto;padding:8px 10px 6px;scrollbar-width:none;position:sticky;top:0;background:linear-gradient(#fff 78%,rgba(255,255,255,0));z-index:3}
+.chips::-webkit-scrollbar{display:none}
+.tchip{
+  flex:0 0 auto;display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:99px;
+  background:#F6F2EA;border:1px solid #EDE6D8;color:#6E7A87;font-size:9.5px;font-weight:800;letter-spacing:-.1px;white-space:nowrap;
+}
+.tchip .n{font-size:8px;color:#B3AA99;font-weight:800}
+.tchip.on{background:#22303E;border-color:#22303E;color:#FBF6EA}
+.tchip.on .n{color:#C9B78F}
+.tchip.seen .n::after{content:"✓";color:#2F6B4F;margin-left:1px}
+.tchip.on.seen .n::after{color:#9ED3AE}
+.card{padding:0 13px 12px}
+.cardhead{display:flex;align-items:center;gap:6px;padding:1px 0 6px}
+.kind{font-size:8.5px;font-weight:900;letter-spacing:.04em;padding:2px 6px;border-radius:5px;background:#EEF2F7;color:#3A6390}
+.kind.muscle{background:#FBECEC;color:#B2454A}
+.kind.bone{background:#F4EFE4;color:#8A7448}
+.kind.nerve{background:#FCF3DD;color:#9A7618}
+.kind.plane{background:#EAF2FB;color:#2E6DA4}
+.kind.move{background:#EDF5F2;color:#2F6F72}
+.kind.concept{background:#F1EFF8;color:#5C5580}
+.kind.breath{background:#EAF3F4;color:#2F6F72}
+.idx{font-size:8.5px;color:#B0A896;font-weight:800;letter-spacing:.02em}
+.nav{margin-left:auto;display:flex;gap:3px}
+.nav button{width:24px;height:22px;border-radius:6px;background:#F4EFE5;color:#6B7783;font-size:14px;line-height:1;display:grid;place-items:center;padding-bottom:2px}
+.spk2{width:24px;height:22px;border-radius:6px;background:#F4EFE5;color:#6B7783;display:grid;place-items:center}
 .spk2 svg{width:13px;height:13px}
-.spk2:active{background:#DCE6F0}
-.cardbody{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
-.cardbody::-webkit-scrollbar{display:none}
+.titlerow{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;padding:0 0 7px}
+.titlerow h1{font-family:var(--serif);font-size:21px;font-weight:800;letter-spacing:-.7px;line-height:1.1}
+.titlerow .hj{font-family:var(--serif);font-size:12.5px;color:#8B7C62;font-weight:700}
+.titlerow .move{font-size:8.5px;font-weight:800;color:#8F6C2E;background:#FBF1DA;padding:2px 6px;border-radius:5px;letter-spacing:-.1px}
+.tiers{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--line2)}
+.tier{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--line2);min-height:34px}
+.tlab{flex:0 0 42px;display:flex;flex-direction:column;line-height:1.1}
+.tlab b{font-size:9px;font-weight:800;color:#7E8794;letter-spacing:.02em}
+.tlab small{font-size:7.5px;font-weight:800;color:#B9B2A3;letter-spacing:.08em}
+.tval{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.tval .big{font-size:13px;font-weight:800;letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tval .big .lat{font-family:var(--serif);font-style:italic;font-weight:700;font-size:14px}
+.tval .big .hj{font-family:var(--serif);font-size:15px}
+.tval .sub{font-size:9px;color:#8B96A2;letter-spacing:-.1px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tval .sub b{font-weight:800;color:#5C6B7A;font-style:normal}
+.tspeak{width:22px;height:22px;flex:0 0 auto;border-radius:6px;background:#F6F2E9;color:#7C8794;display:grid;place-items:center}
+.tspeak svg{width:12px;height:12px}
+.notes{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.note{display:flex;gap:7px;background:#F7F4ED;border-radius:10px;padding:7px 9px}
+.note.trap{background:#FBF1EE}
+.nl{flex:0 0 auto;font-size:8.5px;font-weight:900;color:#9A7A34;letter-spacing:.02em;padding-top:1px}
+.note.trap .nl{color:#B0564C}
+.note p{font-size:10px;line-height:1.5;color:#4B5A69;letter-spacing:-.15px}
 
-.titlerow{display:flex;align-items:baseline;gap:6px;padding:2px 2px 6px;flex-wrap:wrap}
-.titlerow h1{
-  margin:0;font-size:clamp(17px,5vw,21px);font-weight:800;letter-spacing:-.045em;color:var(--ink);line-height:1.15;
-}
-.titlerow .hj{font-family:var(--serif);font-size:12px;font-weight:600;color:#8A7A60;letter-spacing:.02em}
-.titlerow .move{
-  margin-left:auto;font-size:8.5px;font-weight:800;color:#9C8E76;letter-spacing:-.01em;
-  background:#F5F1E9;border-radius:6px;padding:3px 6px;white-space:nowrap;
-}
-
-.tiers{display:flex;flex-direction:column;gap:4px;padding:0 0 1px}
-.tier{
-  display:flex;align-items:center;gap:7px;min-height:40px;padding:4px 6px 4px 5px;
-  background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 1px 2px rgba(34,48,62,.03);
-}
-.tlab{
-  flex:0 0 38px;width:38px;align-self:stretch;border-radius:7px;
-  background:linear-gradient(180deg,#345780,#2A4769);color:#fff;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;
-}
-.tlab b{font-size:11px;font-weight:800;letter-spacing:.02em}
-.tlab small{font-size:6.5px;font-weight:800;opacity:.72;letter-spacing:.06em;margin-top:1px}
-.tier[data-k="hanja"] .tlab{background:linear-gradient(180deg,#6E5A3C,#584830)}
-.tier[data-k="ko"] .tlab{background:linear-gradient(180deg,#3E6B58,#2F5546)}
-.tier[data-k="en"] .tlab{background:linear-gradient(180deg,#4A5C6E,#384855)}
-.tval{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:1px;text-align:left}
-.tval .big{
-  font-size:clamp(12.5px,3.6vw,14.5px);font-weight:800;color:var(--ink);letter-spacing:-.02em;
-  line-height:1.25;word-break:break-word;
-}
-.tval .big .lat{font-family:var(--serif);font-weight:600;font-size:clamp(13px,3.8vw,15px);letter-spacing:.01em}
-.tval .big .hj{font-family:var(--serif);font-weight:600;font-size:clamp(13.5px,3.9vw,15.5px)}
-.tval .sub{font-size:8.8px;font-weight:700;color:var(--ink3);letter-spacing:-.015em;line-height:1.35;word-break:keep-all}
-.tval .sub b{color:#9C7A45;font-weight:800}
-.tspeak{flex:0 0 22px;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;background:#F6F3ED;color:#8A93A0}
-.tspeak svg{width:11px;height:11px}
-.tspeak:active{background:#EDE7DB}
-
-.notes{display:flex;flex-direction:column;gap:4px;padding:5px 1px 0}
-.note{display:flex;gap:6px;padding:5px 7px 5px 8px;border-radius:8px;background:#FBF8F2;border-left:2px solid var(--gold)}
-.note.trap{background:#FCF6F5;border-left-color:#C08078}
-.note .nl{flex:0 0 auto;font-size:8.5px;font-weight:800;color:#A98748;letter-spacing:-.01em;padding-top:1px}
-.note.trap .nl{color:#A86E66}
-.note p{margin:0;font-size:9.6px;font-weight:600;color:#5A6775;line-height:1.45;letter-spacing:-.02em;word-break:keep-all}
-.note p b{color:#3C4C5C;font-weight:800}
-
+/* dock */
 .dock{
-  flex:0 0 auto;display:flex;align-items:center;gap:6px;
-  padding:7px 0 calc(8px + env(safe-area-inset-bottom));
+  display:flex;gap:6px;padding:7px 10px calc(8px + env(safe-area-inset-bottom));
+  background:var(--paper);border-top:1px solid var(--line);
 }
 .dbtn{
-  flex:1 1 0;min-width:0;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;gap:4px;
-  font-size:10.5px;font-weight:800;letter-spacing:-.03em;
-  border:1px solid var(--line);background:#fff;color:var(--navy);box-shadow:var(--sh);
+  flex:1 1 0;display:flex;align-items:center;justify-content:center;gap:5px;min-height:36px;
+  border-radius:10px;background:#F4EFE5;color:#3E4C5A;font-size:10.5px;font-weight:800;letter-spacing:-.2px;
 }
-.dbtn .di{font-size:11px;line-height:1;font-weight:400}
-.dbtn.primary{border-color:#2A4769;background:linear-gradient(180deg,#3C608B,#2A4769);color:#fff;box-shadow:0 10px 20px -14px rgba(44,74,110,.9)}
-.dbtn:active{transform:scale(.977)}
+.dbtn span{font-size:12px;opacity:.75}
+.dbtn.primary{background:linear-gradient(160deg,#2C4C70,#1E3550);color:#F6EBD3;box-shadow:0 8px 16px -12px rgba(20,40,60,.9)}
+.dbtn.primary span{opacity:.9}
+.dbtn:active{transform:scale(.98)}
 
-/* ================= SHEET / QUIZ ================= */
-.scrim{
-  position:absolute;inset:0;z-index:40;background:rgba(24,34,45,.42);
-  opacity:0;pointer-events:none;transition:opacity .24s;
-  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
-}
+/* sheet + quiz */
+.scrim{position:absolute;inset:0;background:rgba(12,20,28,.5);opacity:0;pointer-events:none;transition:.22s;z-index:20;backdrop-filter:blur(2px)}
 .scrim.on{opacity:1;pointer-events:auto}
 .sheet{
-  position:absolute;left:0;right:0;bottom:0;z-index:50;max-height:92%;height:92%;
-  transform:translateY(104%);pointer-events:none;display:flex;
-  transition:transform .3s cubic-bezier(.22,.75,.2,1);
+  position:absolute;left:0;right:0;bottom:0;z-index:21;max-height:86%;transform:translateY(102%);
+  transition:transform .28s cubic-bezier(.2,.8,.2,1);background:var(--paper);
+  border-radius:20px 20px 0 0;box-shadow:0 -20px 50px -30px rgba(0,0,0,.6);
 }
-.sheet.on{transform:none;pointer-events:auto}
-.sheet-in{
-  width:100%;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
-  background:#FCFAF6;border-radius:22px 22px 0 0;box-shadow:0 -24px 60px -30px rgba(20,30,40,.55);
-  padding:5px 14px calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column;
-}
-@media (min-width:520px){ .sheet-in{border-radius:30px 30px 0 0} }
-.grab{width:38px;height:4px;border-radius:99px;background:#DED7CA;margin:3px auto 8px;flex:0 0 auto}
-.sh-h{display:flex;align-items:center;gap:8px;padding:0 2px 8px;flex:0 0 auto}
-.sh-h h2{margin:0;font-size:16px;font-weight:800;letter-spacing:-.035em}
-.sh-h .x{width:28px;height:28px;border-radius:50%;background:#F1ECE2;color:var(--ink2);font-size:12px;display:grid;place-items:center;margin-left:auto}
-.qz-tabs{display:flex;gap:5px;padding:0 0 10px;flex:0 0 auto}
-.qz-tab{
-  flex:1 1 0;height:32px;border-radius:9px;font-size:10.5px;font-weight:800;letter-spacing:-.02em;
-  background:#F2EEE6;color:#8B8272;border:1px solid transparent;
-}
-.qz-tab.on{background:#fff;color:var(--navy);border-color:#D8E0E8;box-shadow:var(--sh)}
-.qz-body{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
-.qz-meta{display:flex;align-items:center;gap:6px;font-size:9.5px;font-weight:800;color:#9AA3AE;padding:0 2px 6px}
-.qz-meta .bar{flex:1 1 auto;height:4px;border-radius:99px;background:#EDE7DC;overflow:hidden}
-.qz-meta .bar i{display:block;height:100%;background:var(--navy);border-radius:99px;transition:width .3s}
-.qcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 12px 13px;box-shadow:var(--sh)}
-.qcard .qm{font-size:9px;font-weight:800;color:#A79C88;letter-spacing:.02em;margin-bottom:4px}
-.qcard .qq{font-size:13.5px;font-weight:800;line-height:1.45;letter-spacing:-.03em;color:var(--ink);word-break:keep-all}
-.qcard .qq b{color:var(--navy)}
-.qcard .qh{margin-top:6px;font-size:9.5px;font-weight:700;color:#8B96A2;line-height:1.45}
-.opts{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.sheet.on{transform:translateY(0)}
+.sheet-in{padding:8px 15px calc(16px + env(safe-area-inset-bottom));overflow-y:auto;max-height:86vh;max-height:86dvh}
+.grab{width:34px;height:4px;border-radius:99px;background:#E2DACB;margin:0 auto 10px}
+.sh-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.sh-h h2{font-family:var(--serif);font-size:16px;font-weight:800;letter-spacing:-.4px}
+.sh-h .x{width:28px;height:28px;border-radius:8px;background:#F4EFE5;color:#6B7783;display:grid;place-items:center;font-size:12px}
+.qz-tabs{display:flex;gap:5px;margin-bottom:10px}
+.qz-tab{flex:1 1 0;padding:7px 4px;border-radius:9px;background:#F6F2EA;color:#6E7A87;font-size:10px;font-weight:800;letter-spacing:-.2px}
+.qz-tab.on{background:#22303E;color:#FBF6EA}
+.qz-body{display:flex;flex-direction:column;gap:9px}
+.qz-meta{display:flex;align-items:center;gap:8px;font-size:9.5px;font-weight:800;color:#8B96A2}
+.qz-meta .bar{flex:1 1 auto;height:3px;border-radius:99px;background:#EDE7DA;overflow:hidden}
+.qz-meta .bar i{display:block;height:100%;background:#2C4C70;border-radius:99px;transition:width .3s}
+.qcard{background:#F7F4ED;border-radius:12px;padding:12px}
+.qm{font-size:8px;font-weight:900;letter-spacing:.1em;color:#B8863B;margin-bottom:5px}
+.qq{font-size:13px;font-weight:800;line-height:1.45;letter-spacing:-.35px}
+.qq b{color:#24405F}
+.qh{font-size:9.5px;color:#8B96A2;margin-top:5px;letter-spacing:-.15px}
+.opts{display:flex;flex-direction:column;gap:6px}
 .opt{
-  width:100%;display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:10px;
-  background:#fff;border:1px solid var(--line);text-align:left;
-  font-size:11.5px;font-weight:800;letter-spacing:-.025em;color:var(--ink);
-  transition:background .16s,border-color .16s,color .16s;
+  display:flex;align-items:center;gap:9px;text-align:left;padding:10px;border-radius:10px;
+  background:#fff;border:1px solid #E7E0D2;font-size:12px;font-weight:700;letter-spacing:-.25px;
 }
-.opt .on{flex:0 0 18px;width:18px;height:18px;border-radius:50%;background:#F4F0E8;color:#9C9384;font-size:9px;font-weight:800;display:grid;place-items:center}
+.opt .on{width:18px;height:18px;flex:0 0 auto;border-radius:5px;background:#F2EDE2;color:#8B8271;font-size:9px;font-weight:900;display:grid;place-items:center}
 .opt .ol{flex:1 1 auto;min-width:0}
-.opt .ol small{display:block;font-size:8.5px;font-weight:700;color:#A5ADB6;letter-spacing:.01em}
-.opt.sel{border-color:#8FA9C4;background:#F4F8FC}
-.opt.ok{border-color:#9CC7B4;background:#F1F8F4;color:#25573F}
+.opt .ol small{display:block;font-size:8.5px;font-weight:700;color:#A5ADB6;margin-top:1px}
+.opt.ok{border-color:#2F6B4F;background:#F0F7F2}
 .opt.ok .on{background:#2F6B4F;color:#fff}
-.opt.no{border-color:#E0B4AF;background:#FCF4F3;color:#8E3D38}
-.opt.no .on{background:#9C4A46;color:#fff}
-.opt:disabled{opacity:1}
-.qfb{margin-top:9px;padding:9px 10px;border-radius:10px;background:#F5F8F4;border-left:2px solid var(--ok);font-size:10px;font-weight:700;color:#3E5B4C;line-height:1.5;word-break:keep-all}
-.qfb.no{background:#FBF4F3;border-left-color:var(--danger);color:#7E423D}
-.qfb b{font-weight:800}
-.qfoot{display:flex;gap:6px;margin-top:auto;padding-top:10px}
-.qbtn{flex:1 1 0;height:42px;border-radius:11px;font-size:11.5px;font-weight:800;letter-spacing:-.02em}
-.qbtn.primary{background:linear-gradient(180deg,#3C608B,#2A4769);color:#fff;box-shadow:0 12px 22px -16px rgba(44,74,110,.95)}
-.qbtn.ghost{background:#fff;border:1px solid var(--line);color:var(--navy)}
-.qbtn:disabled{opacity:.45}
-.sumscore{display:flex;align-items:baseline;gap:6px;padding:2px 2px 10px}
-.sumscore b{font-size:34px;font-weight:800;letter-spacing:-.05em;color:var(--navy);line-height:1}
-.sumscore span{font-size:11px;font-weight:800;color:#9AA3AE}
-.sumlist{display:flex;flex-direction:column;gap:5px;overflow-y:auto}
-.sumrow{display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:9px;background:#fff;border:1px solid var(--line);font-size:10.5px;font-weight:800;color:var(--ink2)}
-.sumrow .s{kargin-left:auto;margin-left:auto;font-size:9px;color:#A5ADB6;font-weight:700}
+.opt.no{border-color:#C2454A;background:#FCF1F0}
+.opt.no .on{background:#C2454A;color:#fff}
+.opt[disabled]{opacity:1}
+.qfb{font-size:10.5px;line-height:1.55;color:#3E4C5A;background:#EFF4F0;border-radius:10px;padding:9px 10px;letter-spacing:-.15px}
+.qfb.no{background:#FCF1F0}
+.qfb b{display:block;font-size:11px;margin-bottom:2px;color:#2F6B4F}
+.qfb.no b{color:#B2454A}
+.qfoot{display:flex;gap:6px;margin-top:2px}
+.qbtn{flex:1 1 0;padding:11px;border-radius:10px;font-size:11.5px;font-weight:800;letter-spacing:-.2px}
+.qbtn.primary{background:#24405F;color:#F6EBD3}
+.qbtn.ghost{background:#F2EDE3;color:#5C6875;flex:0 0 auto;padding:11px 13px}
+.qbtn[disabled]{opacity:.4}
+.sumscore{display:flex;align-items:baseline;gap:6px;padding:4px 2px}
+.sumscore b{font-family:var(--serif);font-size:38px;line-height:1;color:#24405F;letter-spacing:-1px}
+.sumscore span{font-size:11px;font-weight:800;color:#8B96A2}
+.sumlist{display:flex;flex-direction:column;gap:4px}
+.sumrow{display:flex;align-items:center;gap:8px;padding:7px 9px;background:#F7F4ED;border-radius:8px;font-size:10.5px;font-weight:700}
 .sumrow .n{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sumrow .s{font-size:8.5px;font-weight:900;color:#B2454A}
 
 .toast{
-  position:absolute;left:50%;bottom:calc(78px + env(safe-area-inset-bottom));z-index:60;transform:translate(-50%,10px);
-  max-width:84%;background:rgba(28,40,52,.96);color:#fff;font-size:11px;font-weight:800;line-height:1.45;
-  padding:8px 12px;border-radius:11px;text-align:center;opacity:0;pointer-events:none;transition:.2s;letter-spacing:-.01em;
+  position:absolute;left:50%;bottom:calc(80px + env(safe-area-inset-bottom));z-index:60;transform:translate(-50%,10px);
+  max-width:84%;background:rgba(24,36,48,.96);color:#fff;font-size:10.5px;font-weight:800;line-height:1.45;
+  padding:8px 12px;border-radius:11px;text-align:center;opacity:0;pointer-events:none;transition:.2s;letter-spacing:-.1px;
   box-shadow:0 16px 30px -18px rgba(20,30,40,.8);
 }
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
-@media (max-height:720px){
-  .panel{max-height:56%}
-  .titlerow{padding-bottom:4px}
-  .tier{min-height:37px}
-  .note p{font-size:9.2px}
+@media (max-height:730px){
+  .panel{flex-basis:47%}
+  .titlerow h1{font-size:19px}
+  .tier{min-height:31px;padding:4px 0}
+  .note p{font-size:9.5px}
+  .note{padding:6px 8px}
 }
 
 </style>
@@ -412,7 +482,7 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border:0;border-radiu
     <p class="rp-lock-sub">비밀번호를 입력해 주세요.</p>
     <div class="rp-lock-field">
       <input type="password" id="lockInput" inputmode="numeric" autocomplete="off"
-             autocapitalize="off" spellcheck="false" aria-label="비밀번호" placeholder="••••">
+             autocapitalize="off" spellcheck="false" aria-label="비밀번호" placeholder="····">
       <button type="button" class="rp-lock-eye" id="lockEye" aria-label="비밀번호 보기">보기</button>
     </div>
     <p class="rp-lock-error" id="lockError" role="alert" hidden></p>
@@ -681,45 +751,71 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border:0;border-radiu
   };
 })();
 </script>
-<div class="stage">
-  <div class="app" id="app">
+<div class="app" id="app">
+  <!-- ============ 로드맵 ============ -->
+  <section class="screen home on" id="home">
+    <div class="hh">
+      <div class="brand">
+        <span class="mark" aria-hidden="true">◬</span>
+        <div class="bt">
+          <h1>해부와이</h1>
+          <span>AnatomyWhy</span>
+          <p>필라테스·요가 기능해부학 · 7단원</p>
+        </div>
+      </div>
+      <div class="ringwrap" aria-label="전체 진행률">
+        <svg class="ring" viewBox="0 0 48 48" aria-hidden="true">
+          <circle class="ringbg" cx="24" cy="24" r="20"></circle>
+          <circle class="ringfg" id="ringFg" cx="24" cy="24" r="20" stroke-dasharray="125.6" stroke-dashoffset="125.6"></circle>
+        </svg>
+        <div class="ringt"><b id="ovPct">0%</b><span>전체</span></div>
+      </div>
+    </div>
+    <div class="hmeta"><span id="ovSub">2 / 7 단원 공개</span><span class="dot"></span><span id="ovNote">학습·어원·퀴즈 세 칸을 채우면 완료</span></div>
+    <div class="legend">
+      <span><i class="l"></i>학습</span><span><i class="e"></i>어원 퀴즈</span><span><i class="q"></i>동작·호흡 퀴즈</span>
+    </div>
+    <div class="chscroll">
+      <ol class="chlist" id="chlist"></ol>
+      <div class="hfoot">
+        <button id="resetAll" type="button">학습 기록 초기화</button>
+        <p>진행률은 이 기기 브라우저에만 저장됩니다 · 서버 전송 없음</p>
+      </div>
+    </div>
+  </section>
 
-    <section class="view" id="view">
+  <!-- ============ 단원 ============ -->
+  <section class="screen chapter" id="chapter">
+    <header class="topbar">
+      <button class="back" id="back" data-act="back" type="button" aria-label="단원 목록으로">‹</button>
+      <div class="tbt"><b id="chTitle">1단원</b><span id="chSub">해부학 기초 언어 &amp; 움직임</span></div>
+      <div class="tbp"><div class="tbbar"><i id="chBar"></i></div><span id="chPct">0%</span></div>
+    </header>
+
+    <div class="stage" id="stage">
       <canvas id="scene"></canvas>
-      <div class="vtop">
-        <div class="brand"><b>해부<em>와이</em></b><i>AnatomyWhy · 상지</i></div>
-        <div class="layers">
-          <button class="lay on" data-layer="bone" aria-pressed="true"><i></i>뼈</button>
-          <button class="lay on" data-layer="muscle" aria-pressed="true"><i></i>근육</button>
-          <button class="lay on" data-layer="nerve" aria-pressed="true"><i></i>신경</button>
-        </div>
+      <div class="stop">
+        <div class="layers" id="layers"></div>
+        <button class="resetbtn" id="resetView" data-act="reset" type="button" aria-label="시점 초기화"><span>↺</span><em>시점</em></button>
       </div>
-      <div class="vsel" id="vsel"></div>
-      <div class="vfoot">
-        <div class="chips" id="mchips"></div>
-        <div class="scrub">
-          <button class="play" id="play" aria-label="동작 재생">▶</button>
-          <input type="range" id="angle" min="0" max="1000" value="0" aria-label="관절 각도" />
-          <span class="deg" id="deg"><b>0°</b> 굽힘</span>
-        </div>
-      </div>
-      <div class="hint" id="hint">👆 팔을 돌려 보고, 근육을 눌러 이름을 보세요</div>
-    </section>
+      <div class="vcap" id="vcap"><b></b><i></i></div>
+      <div class="hint" id="hint">👆 끌어서 돌리기 · 두 손가락 확대 · <b>↺</b> 시점 초기화</div>
+      <div class="sbot" id="sbot"></div>
+    </div>
 
-    <section class="panel">
+    <div class="panel">
+      <div class="chips" id="termchips"></div>
       <div class="card" id="card"></div>
-      <div class="dock">
-        <button class="dbtn primary" data-act="quiz" data-mode="motion"><span class="di">✥</span>동작 퀴즈</button>
-        <button class="dbtn" data-act="quiz" data-mode="ety"><span class="di">字</span>어원 퀴즈</button>
-        <button class="dbtn" data-act="review"><span class="di">↻</span>오늘 복습</button>
-      </div>
-    </section>
+    </div>
 
-    <div class="scrim" id="scrim"></div>
-    <div class="sheet" id="sheet"></div>
-    <div class="toast" id="toast"></div>
-  </div>
+    <div class="dock" id="dock"></div>
+  </section>
+
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="sheet"></div>
+  <div class="toast" id="toast"></div>
 </div>
+
 
 <script>
 void 0,
@@ -732,1256 +828,1772 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 
 </script>
 <script>
-/* 해부와이 AnatomyWhy — 상지 3D × 동서양 어원 프로토타입 */
+/* AnatomyWhy 앱 (1~2단원) */
 (function () {
   'use strict';
   var T = window.THREE;
+/* ============================================================
+   AnatomyWhy — 데이터 (7단원 · 1~2단원 카드/퀴즈)
+   ============================================================ */
+var CH = [
+  { id:'ch1', no:1, status:'open', title:'해부학 기초 언어 & 움직임',
+    sub:'해부학적 자세 · 3면 · 움직임 용어',
+    desc:'몸을 자르는 세 방향과 움직임의 이름을 라틴어·한자어로 함께' },
+  { id:'ch2', no:2, status:'open', title:'호흡과 코어 (파워하우스 · 반다)',
+    sub:'횡격막 · 복횡근 · 골반기저근 · 다열근',
+    desc:'들숨과 날숨에 코어 네 근육이 어떻게 움직이는가' },
+  { id:'ch3', no:3, status:'soon', title:'척추와 골반 (정렬과 분절)',
+    sub:'중립 척추 · 골반 경사 · 좌골 정렬',
+    desc:'경추·흉추·요추의 곡선과 골반 앞뒤 경사' },
+  { id:'ch4', no:4, status:'soon', title:'어깨 복합체와 상지',
+    sub:'견갑골 6움직임 · 회전근개 · 팔 정렬',
+    desc:'플랭크·차투랑가·기구 팔 동작의 어깨' },
+  { id:'ch5', no:5, status:'soon', title:'고관절과 하지',
+    sub:'둔근 · 무릎 정렬 · 발 아치',
+    desc:'런지·전사 자세·스쿼트의 하지' },
+  { id:'ch6', no:6, status:'soon', title:'주동근 · 길항근 & 근막 라인',
+    sub:'역할 구분 · 상호억제 · 근막 연쇄',
+    desc:'같은 동작을 만드는 근육과 막는 근육' },
+  { id:'ch7', no:7, status:'soon', title:'신경 · 안전과 보상 패턴',
+    sub:'고유수용감각 · 저림 주의 · 교정',
+    desc:'근방추·골지건기관과 흔한 보상 패턴' }
+];
 
-  /* ============================================================
-     1. 어원 카드 데이터
-     ============================================================ */
-  var CARDS = {
-    musculus: {
-      id: 'musculus', kind: '개념', name: '근육', hanja: '筋', hanjaRead: '근',
-      latin: 'musculus', latinParts: [['mus', '쥐'], ['-culus', '작은']],
-      en: 'muscle', enNote: '라틴어를 그대로 받아 씀',
-      hanjaParts: [['竹', '대나무'], ['肉', '고기'], ['力', '힘']],
-      hanjaNote: '竹 대나무 · 肉 고기 · 力 힘 — 『說文』 "筋, 肉之力也"',
-      koNative: '힘살', koBreak: '힘 + 살 (힘을 쓰는 살)',
-      why: '팔을 굽히면 피부 밑에서 근육이 쥐처럼 꿈틀거립니다. 로마인은 그래서 "작은 쥐"라 불렀고, 동아시아는 "뼈에 붙은 힘줄"로 봤습니다.',
-      trap: '오늘날 쓰는 筋肉은 근대에 만들어진 번역어입니다. 고전 한자에서 筋은 근육이 아니라 "힘줄"을 뜻했습니다.'
-    },
-    clavicula: {
-      id: 'clavicula', kind: '뼈', name: '빗장뼈', hanja: '鎖骨', hanjaRead: '쇄골',
-      latin: 'clavicula', latinParts: [['clavis', '열쇠'], ['-cula', '작은']],
-      en: 'clavicle', enNote: '*작은 열쇠* · collar-bone(옷깃뼈)',
-      hanjaParts: [['鎖', '자물쇠'], ['骨', '뼈']],
-      hanjaNote: '鎖 자물쇠 + 骨 뼈',
-      koNative: '빗장뼈', koBreak: '빗장(문을 가로질러 거는 막대) + 뼈',
-      why: '빗장으로 문을 가로질러 잠그듯, 가슴과 어깨를 가로로 잠그는 뼈입니다. 서양은 열쇠, 동양은 자물쇠 — 같은 은유입니다.',
-      trap: '鎖는 "쇠사슬"이 아니라 "자물쇠". 이 뼈의 어근 cleido-가 흉쇄유돌근·빗장밑근 이름까지 이어집니다.'
-    },
-    scapula: {
-      id: 'scapula', kind: '뼈', name: '어깨뼈', hanja: '肩胛骨', hanjaRead: '견갑골',
-      latin: 'scapula', latinParts: [['scapulae', '어깨(복수)'], ['← skapē', '삽이라는 설']],
-      en: 'scapula', enNote: 'shoulder blade — blade는 "넓적한 판"',
-      hanjaParts: [['肩', '어깨'], ['胛', '어깨뼈'], ['骨', '뼈']],
-      hanjaNote: '肩 어깨 + 胛 어깨뼈 + 骨',
-      koNative: '어깨뼈', koBreak: '어깨 + 뼈',
-      why: '삽처럼 넓고 평평한 판이 등 뒤에서 팔의 받침이 됩니다. 그래서 영어는 "어깨 판(blade)"이라 부릅니다.',
-      trap: '라틴어는 원래 복수형 scapulae(어깨 넓이). 肩胛의 胛은 어깨뼈만 가리키는 글자입니다.'
-    },
-    humerus: {
-      id: 'humerus', kind: '뼈', name: '위팔뼈', hanja: '上腕骨', hanjaRead: '상완골',
-      latin: 'humerus', latinParts: [['umerus', '어깨'], ['h-', '후대에 붙은 철자']],
-      en: 'humerus', enNote: '위팔뼈 · "어깨의 뼈"',
-      hanjaParts: [['上', '위'], ['腕', '팔'], ['骨', '뼈']],
-      hanjaNote: '上腕 위팔 + 骨',
-      koNative: '위팔뼈', koBreak: '위 + 팔 + 뼈 (어깨 쪽 팔)',
-      why: '라틴어 umerus도 上腕도 "어깨(위)의 팔"입니다. 동서양이 같은 자리에 같은 이름을 붙였습니다.',
-      trap: 'humerus(위팔뼈)와 humorous(익살스러운)는 다른 말입니다. 腕은 원래 "손목"이었습니다.'
-    },
-    radius: {
-      id: 'radius', kind: '뼈', name: '노뼈', hanja: '橈骨', hanjaRead: '요골',
-      latin: 'radius', latinParts: [['radius', '바퀴살 · 빛줄기'], ['-ius', '명사 어미']],
-      en: 'radius', enNote: '*바퀴살* → 수학의 "반지름"',
-      hanjaParts: [['橈', '노(배젓는 노)'], ['骨', '뼈']],
-      hanjaNote: '橈 노 + 骨 뼈',
-      koNative: '노뼈', koBreak: '노(배를 젓는 노) + 뼈',
-      why: '손목에서 이 뼈가 바퀴살처럼 축을 돌며 손을 뒤집습니다. 한자 橈는 노의 손잡이 모양에서 왔습니다.',
-      trap: '수학의 radius(반지름)와 같은 말. 橈는 "노"이면서 "굽다"는 뜻도 있습니다.'
-    },
-    ulna: {
-      id: 'ulna', kind: '뼈', name: '자뼈', hanja: '尺骨', hanjaRead: '척골',
-      latin: 'ulna', latinParts: [['ulna', '팔꿈치 · 아래팔'], ['← ōlenē', '그리스어 팔꿈치']],
-      en: 'ulna', enNote: '팔꿈치에서 새끼손가락 쪽으로',
-      hanjaParts: [['尺', '자(길이 단위)'], ['骨', '뼈']],
-      hanjaNote: '尺 자 + 骨 뼈',
-      koNative: '자뼈', koBreak: '자(길이를 재는 자) + 뼈',
-      why: '팔꿈치에서 곧게 뻗어 길이의 기준이 될 만해서, 동양은 "자", 우리말도 "자"라 불렀습니다.',
-      trap: '노뼈는 돌지만 자뼈는 축이라 돌지 않습니다. 尺은 길이 단위 "자"입니다.'
-    },
-    deltoideus: {
-      id: 'deltoideus', kind: '근육', name: '어깨세모근', hanja: '三角筋', hanjaRead: '삼각근',
-      latin: 'deltoideus', latinParts: [['delta', 'Δ · 삼각형'], ['-eidos', '모양']],
-      en: 'deltoid', enNote: '*Δ 모양* (그리스 문자 델타)',
-      hanjaParts: [['三角', '세모꼴'], ['筋', '근육']],
-      hanjaNote: '三角 세모 + 筋',
-      koNative: '어깨세모근', koBreak: '어깨 + 세모(삼각형) + 근',
-      why: '그리스 문자 Δ, 한자 三角, 우리말 세모 — 세 언어가 똑같은 비유를 씁니다. 어원은 언어마다 다른 게 아니라 같은 것을 다르게 그린 것입니다.',
-      trap: 'delta는 나일강 하구의 삼각주에서 온 지형어. 이 근육은 앞·중간·뒤 세 갈래 섬유입니다.'
-    },
-    biceps: {
-      id: 'biceps', kind: '근육', name: '위팔두갈래근', hanja: '上腕二頭筋', hanjaRead: '상완이두근',
-      latin: 'biceps brachii', latinParts: [['bi-', '둘'], ['-ceps', '머리'], ['brachii', '팔의']],
-      en: 'biceps brachii', enNote: '*two-headed muscle of the arm*',
-      hanjaParts: [['上腕', '위팔'], ['二頭', '두 갈래'], ['筋', '근육']],
-      hanjaNote: '上腕 + 二頭 + 筋',
-      koNative: '위팔두갈래근', koBreak: '위팔 + 두 갈래 + 근',
-      why: '시작점이 두 갈래라서. 라틴어 caput(머리)와 한자 頭가 똑같이 "갈래"를 뜻합니다. 붙는 곳이 머리처럼 불룩하기 때문입니다.',
-      trap: '二頭는 "머리 둘"이 아니라 힘살 두 갈래. 腕은 원래 "손목"이고, 한국 한자어는 일본을 거쳐 들어왔습니다.'
-    },
-    brachialis: {
-      id: 'brachialis', kind: '근육', name: '위팔근', hanja: '上腕筋', hanjaRead: '상완근',
-      latin: 'brachialis', latinParts: [['brachium', '팔'], ['-alis', '~의']],
-      en: 'brachialis', enNote: '*위팔뼈에 붙은 근육*',
-      hanjaParts: [['上腕', '위팔'], ['筋', '근육']],
-      hanjaNote: '上腕 + 筋',
-      koNative: '위팔근', koBreak: '위팔 + 근',
-      why: '위팔뼈에 딱 달라붙어서 "위팔의 근"이라는 이름 그대로입니다. 이름은 가장 수수한데 팔꿈치 굽힘의 주역입니다.',
-      trap: 'biceps brachii의 brachii와 같은 단어(brachium). 이 근육 덕분에 자세와 상관없이 팔꿈치 굽힘 힘이 일정합니다.'
-    },
-    triceps: {
-      id: 'triceps', kind: '근육', name: '위팔세갈래근', hanja: '上腕三頭筋', hanjaRead: '상완삼두근',
-      latin: 'triceps brachii', latinParts: [['tri-', '셋'], ['-ceps', '머리'], ['brachii', '팔의']],
-      en: 'triceps brachii', enNote: '*three-headed muscle of the arm*',
-      hanjaParts: [['上腕', '위팔'], ['三頭', '세 갈래'], ['筋', '근육']],
-      hanjaNote: '上腕 + 三頭 + 筋',
-      koNative: '위팔세갈래근', koBreak: '위팔 + 세 갈래 + 근',
-      why: '시작점이 셋(긴갈래·가쪽갈래·안쪽갈래)이라 "세 갈래". 라틴어 tri-와 한자 三이 그대로 대응합니다.',
-      trap: '三頭도 "머리 셋"이 아니라 갈래 셋. 팔꿈치를 펴는 힘은 이 근육이 거의 혼자 냅니다.'
-    },
-    brachioradialis: {
-      id: 'brachioradialis', kind: '근육', name: '위팔노근', hanja: '腕橈骨筋', hanjaRead: '완요골근',
-      latin: 'brachioradialis', latinParts: [['brachio-', '팔'], ['radialis', '노뼈의']],
-      en: 'brachioradialis', enNote: '팔 + 노뼈의 근육',
-      hanjaParts: [['腕', '팔'], ['橈骨', '노뼈'], ['筋', '근육']],
-      hanjaNote: '腕 + 橈骨 + 筋',
-      koNative: '위팔노근', koBreak: '위팔 + 노(뼈) + 근',
-      why: '위팔에서 시작해 노뼈에 닿는 근육 — 라틴어 어순을 한자어가 부품 그대로 옮겼습니다.',
-      trap: '이름은 노뼈지만 하는 일은 팔꿈치 굽힘. 지배 신경도 노신경입니다.'
-    },
-    pronator: {
-      id: 'pronator', kind: '근육', name: '원엎침근', hanja: '圓回內筋', hanjaRead: '원회내근',
-      latin: 'pronator teres', latinParts: [['pronator', '엎는 근'], ['teres', '둥글다']],
-      en: 'pronator teres', enNote: '*round pronator*',
-      hanjaParts: [['圓', '둥글'], ['回', '돌'], ['內', '안'], ['筋', '근육']],
-      hanjaNote: '圓 둥글 + 回 돌 + 內 안 + 筋',
-      koNative: '원엎침근', koBreak: '원(둥근) + 엎침(손바닥을 아래로)',
-      why: '둥근 근육이 노뼈를 안쪽으로 돌려 손바닥을 엎습니다. 구용어 回內는 "안으로 돈다"를 그대로 담았습니다.',
-      trap: '구용어 回內는 회전이 보이지만, 신용어 "엎침"은 손바닥 방향을 말합니다. 같은 동작의 두 이름입니다.'
-    },
-    pectoralis: {
-      id: 'pectoralis', kind: '근육', name: '큰가슴근', hanja: '大胸筋', hanjaRead: '대흉근',
-      latin: 'pectoralis major', latinParts: [['pectus', '가슴'], ['-alis', '~의'], ['major', '큰']],
-      en: 'pectoralis major', enNote: '*큰 가슴의 근육*',
-      hanjaParts: [['大', '큰'], ['胸', '가슴'], ['筋', '근육']],
-      hanjaNote: '大 큰 + 胸 가슴 + 筋',
-      koNative: '큰가슴근', koBreak: '큰 + 가슴 + 근',
-      why: '가슴 앞을 덮는 가장 큰 근육. 팔을 몸 쪽으로 모으고(내전), 어깨 앞들기를 돕습니다.',
-      trap: '胸은 "가슴" — 흉강(胸腔)과 같은 글자. 지배 신경은 가슴근신경(이 앱에는 미수록)입니다.'
-    },
-    n_musculocutaneous: {
-      id: 'n_musculocutaneous', kind: '신경', name: '근육피부신경', hanja: '筋皮神經', hanjaRead: '근피신경',
-      latin: 'n. musculocutaneus', latinParts: [['musculus', '근육'], ['cutaneus', '피부의']],
-      en: 'musculocutaneous nerve', enNote: '근육 + 피부가 한 이름에',
-      hanjaParts: [['筋', '근육'], ['皮', '피부'], ['神經', '신경']],
-      hanjaNote: '筋 + 皮 + 神經',
-      koNative: '근육피부신경', koBreak: '신용어와 같은 표기 (순우리말 대체어 없음)',
-      why: '위팔 앞칸 근육을 지배하고, 이어서 아래팔 가쪽 피부 감각을 맡습니다. 이름이 담당 구역을 그대로 나열합니다.',
-      trap: '"피부신경"이 감각만 맡는다는 뜻은 아닙니다. 운동과 감각을 한 이름에 담은 팔 신경입니다.'
-    },
-    n_radial: {
-      id: 'n_radial', kind: '신경', name: '노신경', hanja: '橈骨神經', hanjaRead: '요골신경',
-      latin: 'n. radialis', latinParts: [['radius', '노뼈'], ['-alis', '~의']],
-      en: 'radial nerve', enNote: '*노뼈를 따라가는 신경*',
-      hanjaParts: [['橈', '노'], ['骨', '뼈'], ['神經', '신경']],
-      hanjaNote: '橈骨 노뼈 + 神經',
-      koNative: '노신경', koBreak: '노(橈)뼈 + 신경',
-      why: '노뼈를 따라 팔 뒤쪽으로 내려가 손등까지 이어집니다. 노뼈가 이름의 기준입니다.',
-      trap: '노뼈만의 신경이 아니라 팔 뒤칸 전체의 신경. 위팔뼈 나선홈을 감아 "나선신경"이라 불린 적도 있습니다.'
-    },
-    n_median: {
-      id: 'n_median', kind: '신경', name: '정중신경', hanja: '正中神經', hanjaRead: '정중신경',
-      latin: 'n. medianus', latinParts: [['medius', '가운데'], ['-anus', '~의']],
-      en: 'median nerve', enNote: '*middle* — 팔 한가운데',
-      hanjaParts: [['正', '바로'], ['中', '가운데'], ['神經', '신경']],
-      hanjaNote: '正 바로 + 中 가운데 + 神經',
-      koNative: '정중신경', koBreak: '바로 + 한가운데 + 신경',
-      why: '팔의 한가운데를 따라 손바닥으로 내려갑니다. 正은 止(발) + 一(목표선) = "곧장 향하다" → "바로".',
-      trap: '통계의 median(중앙값)과 같은 어근. 손목터널증후군에서 엄지·검지·중지가 저리면 이 신경입니다.'
-    },
-    n_axillary: {
-      id: 'n_axillary', kind: '신경', name: '겨드랑신경', hanja: '腋窩神經', hanjaRead: '액와신경',
-      latin: 'n. axillaris', latinParts: [['axilla', '겨드랑이'], ['← ala', '날개']],
-      en: 'axillary nerve', enNote: '*겨드랑이의 신경*',
-      hanjaParts: [['腋', '겨드랑이'], ['窩', '움푹한 곳'], ['神經', '신경']],
-      hanjaNote: '腋 겨드랑이 + 窩 오목 + 神經',
-      koNative: '겨드랑신경', koBreak: '겨드랑이 + 신경',
-      why: '겨드랑이 오목한 곳을 지나 어깨세모근으로 들어갑니다. 한자의 窩가 그 오목함을 그대로 그립니다.',
-      trap: 'axilla는 ala(날개)의 지소형 — 팔을 날개로 본 비유. 어깨 벌림 15~90° 구간을 맡습니다.'
-    },
-    n_ulnar: {
-      id: 'n_ulnar', kind: '신경', name: '자신경', hanja: '尺骨神經', hanjaRead: '척골신경',
-      latin: 'n. ulnaris', latinParts: [['ulna', '자뼈'], ['-aris', '~의']],
-      en: 'ulnar nerve', enNote: '*자뼈를 따라가는 신경*',
-      hanjaParts: [['尺', '자'], ['骨', '뼈'], ['神經', '신경']],
-      hanjaNote: '尺骨 자뼈 + 神經',
-      koNative: '자신경', koBreak: '자(尺)뼈 + 신경',
-      why: '자뼈를 따라 새끼손가락 쪽으로 내려갑니다. 손의 섬세한 움직임 대부분을 맡습니다.',
-      trap: '팔꿈치 안쪽 "웃뼈(funny bone)"가 바로 이 신경. 위팔뼈 융기 위에서 피부 바로 밑으로 지납니다.'
-    }
-  };
-  var ORDER = ['musculus', 'biceps', 'brachialis', 'triceps', 'deltoideus', 'brachioradialis', 'pronator', 'pectoralis',
-    'humerus', 'radius', 'ulna', 'clavicula', 'scapula',
-    'n_musculocutaneous', 'n_radial', 'n_median', 'n_axillary', 'n_ulnar'];
+var CARDS = {
+  /* ---------------- 1단원 ---------------- */
+  musculus: {
+    id:'musculus', tag:'개념', name:'근육', hanja:'筋', hanjaRead:'근',
+    latin:'musculus', latinParts:[['mus','쥐'],['-culus','작은']],
+    en:'muscle', enNote:'라틴어를 그대로 받아 씀',
+    hanjaParts:[['竹','대나무'],['肉','고기'],['力','힘']],
+    hanjaNote:'竹 대나무 + 肉 고기 + 力 힘 — 『說文』 "筋, 肉之力也"',
+    koNative:'힘살', koBreak:'힘 + 살 (힘을 쓰는 살)',
+    why:'팔을 굽히면 피부 밑에서 근육이 쥐처럼 꿈틀거립니다. 로마인은 그래서 "작은 쥐"라 불렀고, 동아시아는 "뼈에 붙은 힘줄"로 봤습니다.',
+    trap:'오늘날 쓰는 筋肉은 근대에 만들어진 번역어입니다. 고전 한자에서 筋은 근육이 아니라 "힘줄"을 뜻했습니다.'
+  },
+  anatomia: {
+    id:'anatomia', tag:'개념', name:'해부학', hanja:'解剖學', hanjaRead:'해부학',
+    latin:'anatomia', latinParts:[['ana-','위로 · 다시'],['tomia','자름 (← temnein)']],
+    en:'anatomy', enNote:'*up + cutting* — 풀어서 쪼개 봄',
+    hanjaParts:[['解','풀'],['剖','쪼갤'],['學','배울']],
+    hanjaNote:'解 풀 + 剖 쪼개 + 學 배움 — 라틴어 부품을 그대로 直譯',
+    koNative:'해부', koBreak:'解 풀 + 剖 쪼갬 (한자어를 그대로 읽은 말)',
+    why:'그리스어 ana(위로·다시) + temnein(자르다)가 "해부"입니다. 한자어 解剖도 "풀어서 쪼갬" — 두 언어가 같은 그림을 그립니다.',
+    trap:'anatomia는 원래 "해부하는 일"이라는 뜻. 剖는 "쪼개다"이지 "나누다(分)"가 아닙니다.'
+  },
+  positio: {
+    id:'positio', tag:'개념', name:'해부학적 자세', hanja:'解剖學的姿勢', hanjaRead:'해부학적 자세',
+    latin:'positio anatomica', latinParts:[['positio','놓음 (← ponere)'],['anatomica','해부학의']],
+    en:'anatomical position', enNote:'모든 방향·움직임의 기준 자세',
+    hanjaParts:[['姿勢','자세']],
+    hanjaNote:'姿勢 자세 — 몸을 놓은 모양',
+    koNative:'해부학적 자세', koBreak:'선 자세 · 손바닥 앞 · 엄지 바깥 · 발끝 앞',
+    why:'똑바로 서서 손바닥을 앞으로, 엄지를 바깥으로, 발끝을 앞으로 둔 자세입니다. "안쪽·바깥·앞·뒤"라는 모든 말이 이 자세에서 출발합니다.',
+    trap:'손바닥을 뒤로 돌리면(회내) 기준이 뒤집힙니다. 그래서 해부학 그림은 늘 손바닥이 앞을 향합니다.'
+  },
+  sagittalis: {
+    id:'sagittalis', tag:'면', name:'시상면', hanja:'矢狀面', hanjaRead:'시상면',
+    latin:'planum sagittale', latinParts:[['sagitta','화살'],['-alis','~의']],
+    en:'sagittal plane', enNote:'*arrow-shaped* — 화살처럼 앞뒤로',
+    hanjaParts:[['矢','화살'],['狀','모양'],['面','면']],
+    hanjaNote:'矢 화살 + 狀 모양 + 面 면 — 라틴어를 直譯',
+    koNative:'시상면', koBreak:'화살(矢) 모양으로 몸을 좌우로 가르는 면',
+    why:'정수리를 지나는 봉합이 화살촉 모양이라 "화살면"이 되었습니다. 몸을 왼쪽·오른쪽으로 나누므로 굽힘과 폄이 이 면에서 일어납니다.',
+    trap:'정중면(正中面, median plane)은 시상면 중 정확히 한가운데 하나입니다. 시상면은 평행하게 무수히 많습니다.'
+  },
+  frontalis: {
+    id:'frontalis', tag:'면', name:'관상면', hanja:'冠狀面', hanjaRead:'관상면',
+    latin:'planum frontale / coronale', latinParts:[['frons','이마'],['corona','왕관']],
+    en:'frontal / coronal plane', enNote:'이마를 지나는 면 · 왕관 모양',
+    hanjaParts:[['冠','갓(왕관)'],['狀','모양'],['面','면']],
+    hanjaNote:'冠 왕관 + 狀 모양 + 面 면',
+    koNative:'관상면', koBreak:'왕관을 쓴 듯 머리 위에서 내려오는 면',
+    why:'이마(frons)를 지나 몸을 앞·뒤로 나누는 면입니다. corona(왕관)도 같은 면 — 머리에 왕관을 씌우듯 지나가서 붙은 이름입니다.',
+    trap:'frontal은 "이마", coronal은 "왕관" — 같은 면의 두 이름입니다. 어느 쪽을 써도 틀리지 않습니다.'
+  },
+  transversus: {
+    id:'transversus', tag:'면', name:'수평면', hanja:'水平面', hanjaRead:'수평면',
+    latin:'planum transversum', latinParts:[['trans-','가로질러'],['vertere','돌다']],
+    en:'transverse plane', enNote:'*across + turn* — 몸을 가로로',
+    hanjaParts:[['水','물'],['平','평평']],
+    hanjaNote:'水 물 + 平 평평 — 물처럼 평평한 면',
+    koNative:'수평면', koBreak:'물을 부으면 고이는 높이의 면',
+    why:'몸을 위·아래로 나누는 면입니다. trans(가로질러) + vertere(돌다) — 몸을 가로질러 한 바퀴 돈 단면이라는 뜻입니다.',
+    trap:'transverse는 "가로지른"이라는 뜻이지 "수평"만은 아닙니다. 비스듬히 자른 단면도 transverse plane입니다.'
+  },
+  flexio: {
+    id:'flexio', tag:'움직임', name:'굴곡 · 신전', hanja:'屈曲 · 伸展', hanjaRead:'굴곡 · 신전',
+    latin:'flexio / extensio', latinParts:[['flectere','굽히다'],['ex- + tendere','밖으로 + 팽팽하게']],
+    en:'flexion / extension', enNote:'각도가 줄어듦 / 늘어남',
+    hanjaParts:[['屈','굽힐'],['曲','굽을'],['伸','펼'],['展','펼']],
+    hanjaNote:'屈 굽힐 + 曲 굽을 / 伸 펼 + 展 펼',
+    koNative:'굽힘 · 폄', koBreak:'굽힘(각도가 줄어듦) · 폄(각도가 늘어남)',
+    why:'flectere(굽히다)와 ex+tendere(밖으로 팽팽하게) — 라틴어가 각각 "각도를 줄인다 / 늘린다"를 그대로 담았습니다. 한자 屈曲·伸展도 같은 짝입니다.',
+    trap:'무릎 굽힘은 뒤로, 팔꿈치 굽힘은 앞으로 갑니다. 굴곡의 기준은 "방향"이 아니라 "관절 각도가 줄어드는가"입니다.'
+  },
+  abductio: {
+    id:'abductio', tag:'움직임', name:'외전 · 내전', hanja:'外轉 · 內轉', hanjaRead:'외전 · 내전',
+    latin:'abductio / adductio', latinParts:[['ab-','멀리'],['ad-','쪽으로'],['ducere','이끌다']],
+    en:'abduction / adduction', enNote:'*lead away* / *lead toward*',
+    hanjaParts:[['外','바깥'],['內','안'],['轉','구를']],
+    hanjaNote:'外 바깥 + 內 안 + 轉 구를',
+    koNative:'벌림 · 모음', koBreak:'몸 중심에서 벌림 / 몸 중심으로 모음',
+    why:'duct는 "이끌다(ducere)". 팔을 몸에서 멀리 끌어내면 외전, 몸 쪽으로 끌어오면 내전입니다. 신용어는 그대로 "벌림 / 모음"입니다.',
+    trap:'한자 轉은 "구르다"라서 회전으로 오해하기 쉽습니다. 라틴어 duct는 "끌다" — 방향이 핵심입니다.'
+  },
+  rotatio: {
+    id:'rotatio', tag:'움직임', name:'회전', hanja:'回轉', hanjaRead:'회전',
+    latin:'rotatio', latinParts:[['rota','바퀴'],['-atio','~함']],
+    en:'rotation', enNote:'*wheel* — 뼈가 자기 축에서 돎',
+    hanjaParts:[['回','돌'],['轉','구를']],
+    hanjaNote:'回 돌 + 轉 구를',
+    koNative:'회전', koBreak:'뼈가 제 세로축을 따라 돎',
+    why:'rota(바퀴)가 어원입니다. 뼈가 바퀴처럼 자기 축에서 도는 움직임 — 수평면에서 일어납니다.',
+    trap:'회내(pronatio)·회외(supinatio)는 팔에서만 쓰는 특별한 회전 이름입니다. "회전"과 같은 말이 아닙니다.'
+  },
+  proximalis: {
+    id:'proximalis', tag:'개념', name:'근위 · 원위', hanja:'近位 · 遠位', hanjaRead:'근위 · 원위',
+    latin:'proximalis / distalis', latinParts:[['proximus','가장 가까운'],['distare','떨어져 있다']],
+    en:'proximal / distal', enNote:'몸통에 가까운 쪽 / 먼 쪽',
+    hanjaParts:[['近','가까울'],['遠','멀'],['位','자리']],
+    hanjaNote:'近 가까울 + 遠 멀 + 位 자리',
+    koNative:'몸쪽 · 먼쪽', koBreak:'몸통에서 가까운 쪽 · 먼 쪽',
+    why:'proximus(가장 가까운)와 distare(떨어져 있다). 기준은 언제나 몸통입니다. 신용어는 "몸쪽 / 먼쪽"으로 기준을 그대로 말합니다.',
+    trap:'손가락은 팔꿈치보다 원위, 어깨는 손목보다 근위입니다. "위·아래"가 아니라 "몸통에서의 거리"입니다.'
+  },
+  medialis: {
+    id:'medialis', tag:'개념', name:'내측 · 외측', hanja:'內側 · 外側', hanjaRead:'내측 · 외측',
+    latin:'medialis / lateralis', latinParts:[['medius','가운데'],['latus','옆구리']],
+    en:'medial / lateral', enNote:'*middle* / *side*',
+    hanjaParts:[['內','안'],['外','바깥'],['側','곁']],
+    hanjaNote:'內 안 + 外 바깥 + 側 곁',
+    koNative:'안쪽 · 가쪽', koBreak:'몸 중심에 가까운 면 · 먼 면',
+    why:'medius(가운데)와 latus(옆구리). 위치를 말하는 이름이라 움직임 이름(내전·외전)과 짝을 이루지만 다른 말입니다.',
+    trap:'내측은 "몸 중심에 가까운 쪽"이고 내전은 "안으로 모으는 움직임"입니다. 위치와 움직임을 섞으면 안 됩니다.'
+  },
 
-  var MOTIONS = {
-    elbowFlex: {
-      key: 'elbowFlex', name: '팔꿈치 굽힘', short: '굽힘', sec: 'Elbow flexion', la: 'Flexio cubiti', icon: '↩',
-      joint: 'elbow', degUnit: '굽힘',
-      agonist: ['biceps', 'brachialis'], antagonist: ['triceps'], synergist: [],
-      nerve: 'n_musculocutaneous', bones: ['humerus', 'radius', 'ulna'],
-      line: '위팔두갈래근이 수축해 노뼈를 들어 올립니다. 위팔세갈래근은 늘어납니다.'
-    },
-    elbowExt: {
-      key: 'elbowExt', name: '팔꿈치 폄', short: '폄', sec: 'Elbow extension', la: 'Extensio cubiti', icon: '↪',
-      joint: 'elbow', degUnit: '굽힘',
-      agonist: ['triceps'], antagonist: ['biceps', 'brachialis'], synergist: [],
-      nerve: 'n_radial', bones: ['humerus', 'ulna'],
-      line: '위팔세갈래근이 팔꿈치를 폅니다. 위팔두갈래근은 길항근으로 늘어납니다.'
-    },
-    abduction: {
-      key: 'abduction', name: '어깨 벌림', short: '벌림', sec: 'Shoulder abduction', la: 'Abductio humeri', icon: '↗',
-      joint: 'shoulderAbd', degUnit: '벌림',
-      agonist: ['deltoideus'], antagonist: ['pectoralis'], synergist: [],
-      nerve: 'n_axillary', bones: ['humerus', 'scapula'],
-      line: '어깨세모근 중간섬유가 위팔뼈를 옆으로 들어 올립니다.'
-    },
-    shoulderFlex: {
-      key: 'shoulderFlex', name: '어깨 앞들기', short: '앞들기', sec: 'Shoulder flexion', la: 'Flexio humeri', icon: '↑',
-      joint: 'shoulderFlex', degUnit: '앞들기',
-      agonist: ['deltoideus', 'pectoralis'], antagonist: ['triceps'], synergist: [],
-      nerve: 'n_axillary', bones: ['humerus', 'clavicula', 'scapula'],
-      line: '어깨세모근 앞섬유와 큰가슴근이 팔을 앞으로 들어 올립니다.'
-    }
-  };
+  /* ---------------- 2단원 ---------------- */
+  respiratio: {
+    id:'respiratio', tag:'호흡', name:'호흡', hanja:'呼吸', hanjaRead:'호흡',
+    latin:'respiratio', latinParts:[['re-','다시'],['spirare','숨쉬다']],
+    en:'respiration', enNote:'*breathe again* — inspire · expire',
+    hanjaParts:[['呼','내쉴'],['吸','들이쉴']],
+    hanjaNote:'呼 내쉬는 숨 + 吸 들이쉬는 숨 — 한 쌍',
+    koNative:'숨쉬기', koBreak:'들숨 + 날숨 (한 짝)',
+    why:'spirare(숨쉬다)에서 spirit·inspire·expire가 나왔습니다. 한자 呼吸도 "내쉼"과 "들이쉼"을 한 글자씩 나눠 담았습니다.',
+    trap:'호흡은 "들이쉬는 것"만이 아닙니다. 들숨과 날숨이 한 짝이고, 코어는 주로 날숨에서 일합니다.'
+  },
+  diaphragma: {
+    id:'diaphragma', tag:'근육', name:'횡격막', hanja:'橫膈膜', hanjaRead:'횡격막',
+    latin:'diaphragma', latinParts:[['dia-','가로질러'],['phragma','울타리']],
+    en:'diaphragm', enNote:'*fence across* — 가로지르는 울타리',
+    hanjaParts:[['橫','가로'],['膈','횡격막'],['膜','막']],
+    hanjaNote:'橫 가로 + 膈 횡격막 + 膜 막',
+    koNative:'가로막', koBreak:'가로 + 막 (가로지르는 막)',
+    why:'그리스어 phragma는 "울타리". 가슴과 배를 가로질러 나누는 울타리라서 횡격막입니다. 우리말 "가로막"은 이 그림을 순우리말로 다시 그린 말입니다.',
+    trap:'膈은 횡격막 전용 글자입니다. 횡격막은 숨을 쉬는 주동근이면서 스스로 움직이는 수의근입니다.'
+  },
+  tva: {
+    id:'tva', tag:'근육', name:'복횡근', hanja:'腹橫筋', hanjaRead:'복횡근',
+    latin:'transversus abdominis', latinParts:[['trans-','가로질러'],['vertere','돌다'],['abdominis','배의']],
+    en:'transversus abdominis', enNote:'배를 가로로 감싸는 가장 깊은 층',
+    hanjaParts:[['腹','배'],['橫','가로'],['筋','근육']],
+    hanjaNote:'腹 배 + 橫 가로 + 筋 근육',
+    koNative:'배가로근', koBreak:'배 + 가로 + 근',
+    why:'배 앞뒤를 가로로 한 바퀴 감싸는 근육입니다. 코르셋처럼 허리둘레를 조여 복압을 만듭니다. 라틴어와 한자어가 "가로"를 똑같이 담았고, 우리말도 배가로근입니다.',
+    trap:'여기서 橫은 "수평"이 아니라 "가로로 감싼다"입니다. 날숨에 조여지고 들숨에는 이완합니다.'
+  },
+  pelvic: {
+    id:'pelvic', tag:'근육', name:'골반기저근', hanja:'骨盤基底筋', hanjaRead:'골반기저근',
+    latin:'diaphragma pelvis', latinParts:[['pelvis','대야'],['diaphragma','가로막']],
+    en:'pelvic floor', enNote:'골반 아래를 막는 "둘째 가로막"',
+    hanjaParts:[['骨','뼈'],['盤','대야'],['基底','바닥'],['筋','근육']],
+    hanjaNote:'骨 뼈 + 盤 대야 + 基底 바닥 + 筋 근육',
+    koNative:'골반바닥근', koBreak:'골반 + 바닥 + 근',
+    why:'pelvis는 라틴어로 "대야". 骨盤도 "뼈로 만든 대야"입니다. 횡격막이 위를 막고 골반기저근이 아래를 막아, 코어라는 압력 용기의 바닥이 됩니다.',
+    trap:'골반기저근은 하나의 근육이 아니라 바닥을 이루는 근육 무리(항문거근 등)입니다. 날숨에 위로 끌어올려집니다.'
+  },
+  multifidus: {
+    id:'multifidus', tag:'근육', name:'다열근', hanja:'多裂筋', hanjaRead:'다열근',
+    latin:'multifidus', latinParts:[['multi-','많다'],['findere','쪼개다']],
+    en:'multifidus', enNote:'*많이 쪼갠* — 여러 갈래로 붙는 근육',
+    hanjaParts:[['多','많을'],['裂','쪼갤'],['筋','근육']],
+    hanjaNote:'多 많을 + 裂 쪼갤 + 筋 근육',
+    koNative:'여러갈래근', koBreak:'여러 + 갈래 + 근',
+    why:'multi(많다) + findere(쪼개다) = "많이 쪼갠". 척추뼈마다 여러 갈래로 붙어 한 마디씩 붙잡습니다. 한자 多裂도 같은 구조입니다.',
+    trap:'다열근은 척추 옆의 국소 안정근입니다. 겉에서 만져지는 척추기립근과는 다른 층입니다.'
+  },
+  rectus: {
+    id:'rectus', tag:'근육', name:'복직근', hanja:'腹直筋', hanjaRead:'복직근',
+    latin:'rectus abdominis', latinParts:[['rectus','곧은'],['abdominis','배의']],
+    en:'rectus abdominis', enNote:'배 앞을 곧게 세로로 지나는 근육',
+    hanjaParts:[['腹','배'],['直','곧을'],['筋','근육']],
+    hanjaNote:'腹 배 + 直 곧을 + 筋 근육',
+    koNative:'배곧은근', koBreak:'배 + 곧은 + 근',
+    why:'곧게 위아래로 뻗은 근육이라 rectus(곧은), 直(곧을), 우리말 "곧은"입니다. 세 언어가 모양을 그대로 옮겼습니다.',
+    trap:'"6팩"은 근육이 6개라는 뜻이 아니라, 힘살이 힘줄 마디(건획)로 나뉜 모양입니다. 복직근은 하나입니다.'
+  },
+  obliquus: {
+    id:'obliquus', tag:'근육', name:'외복사근', hanja:'外腹斜筋', hanjaRead:'외복사근',
+    latin:'obliquus externus abdominis', latinParts:[['obliquus','비스듬한'],['externus','바깥']],
+    en:'external oblique', enNote:'배 바깥층을 비스듬히 가로지름',
+    hanjaParts:[['外','바깥'],['腹','배'],['斜','비낄'],['筋','근육']],
+    hanjaNote:'外 바깥 + 腹 배 + 斜 비낄 + 筋',
+    koNative:'배바깥빗근', koBreak:'배 + 바깥 + 빗(비스듬히) + 근',
+    why:'obliquus는 "비스듬한". 한자 斜도 "비끼다"이고, 우리말은 "빗"입니다. 목빗근의 "빗"과 같은 말 — 같은 비스듬함을 세 언어가 나눠 씁니다.',
+    trap:'배바깥빗근은 반대쪽으로 몸을 돌립니다(오른쪽 근육이 왼쪽 회전). 이름의 "바깥"은 층을 말합니다.'
+  },
+  core: {
+    id:'core', tag:'개념', name:'코어', hanja:'核心', hanjaRead:'핵심',
+    latin:'core (← cor, 심장으로 보는 설명)', latinParts:[['cor','심장'],['-e','영어 어형']],
+    en:'core', enNote:'몸의 중심 · 중심부',
+    hanjaParts:[['核','씨(핵)'],['心','마음(심장)']],
+    hanjaNote:'核 씨앗의 핵 + 心 심장 — "씨앗의 심"',
+    koNative:'코어', koBreak:'영어 그대로 — 순우리말 대체어 없음',
+    why:'core는 라틴어 cor(심장) 계열로 보는 설명이 있고, 한자 核心도 "씨앗의 심"입니다. 동서양 모두 "가운데의 단단한 것"을 가리킵니다.',
+    trap:'코어는 복근과 같은 말이 아닙니다. 횡격막·복횡근·골반기저근·다열근이 만드는 "압력 용기" 전체입니다.'
+  },
+  bandha: {
+    id:'bandha', tag:'개념', name:'반다(잠금)', hanja:'束', hanjaRead:'속',
+    latin:'bandha (산스크리트)', latinParts:[['bandh','묶다 · 잠그다'],['-a','명사 어미']],
+    en:'bandha', enNote:'요가의 "잠금" — 몸 안의 압력을 묶음',
+    hanjaParts:[['束','묶을']],
+    hanjaNote:'束 묶을 속 — 묶어 잠금',
+    koNative:'잠금', koBreak:'묶어 잠근다 (요가의 반다)',
+    why:'산스크리트 bandha는 "묶다". 물라 반다(골반기저근)와 우디아나 반다(복횡근·복압)로 코어를 잠급니다. 필라테스의 "파워하우스"와 같은 자리를 가리킵니다.',
+    trap:'반다는 숨을 참는 것이 아니라 압력을 만드는 것입니다. 숨은 계속 흐르고, 날숨에서 잠금이 깊어집니다.'
+  }
+};
 
-  var ETY = [
-    { la: 'cleido- (clavis)', mean: '열쇠', hanja: '鎖', cardId: 'clavicula' },
-    { la: 'bi-', mean: '둘', hanja: '二頭', cardId: 'biceps' },
-    { la: 'tri-', mean: '셋', hanja: '三頭', cardId: 'triceps' },
-    { la: 'caput / -ceps', mean: '머리(갈래)', hanja: '頭', cardId: 'biceps' },
-    { la: 'radius', mean: '바퀴살 · 노', hanja: '橈', cardId: 'radius' },
-    { la: 'ulna', mean: '자 · 팔꿈치', hanja: '尺', cardId: 'ulna' },
-    { la: 'medius', mean: '가운데', hanja: '正中', cardId: 'n_median' },
-    { la: 'axilla', mean: '겨드랑이', hanja: '腋', cardId: 'n_axillary' },
-    { la: 'pectus', mean: '가슴', hanja: '胸', cardId: 'pectoralis' },
-    { la: 'cutaneus', mean: '피부', hanja: '皮', cardId: 'n_musculocutaneous' },
-    { la: 'delta', mean: '삼각형', hanja: '三角', cardId: 'deltoideus' },
-    { la: 'teres', mean: '둥글다', hanja: '圓', cardId: 'pronator' }
-  ];
-  var HANJA_POOL = ['鎖', '二頭', '三頭', '頭', '橈', '尺', '正中', '腋', '胸', '皮', '三角', '圓', '骨', '筋', '神經', '腕', '窩'];
+var CHCARDS = {
+  ch1:['musculus','anatomia','positio','sagittalis','frontalis','transversus','flexio','abductio','rotatio','proximalis','medialis'],
+  ch2:['respiratio','diaphragma','tva','pelvic','multifidus','rectus','obliquus','core','bandha']
+};
 
-  /* ============================================================
-     2. 상태
-     ============================================================ */
-  var LS = 'anatomywhy.v1';
-  var state = { seen: {}, wrong: {}, wrongMotions: {}, answered: 0, correct: 0 };
+/* 어원 퀴즈 재료 — 라틴 부품 → 한자 부품 */
+var ETY = {
+  ch1:[
+    { la:'sagitta', mean:'화살', hanja:'矢', cardId:'sagittalis' },
+    { la:'corona', mean:'왕관', hanja:'冠', cardId:'frontalis' },
+    { la:'flectere', mean:'굽히다', hanja:'屈', cardId:'flexio' },
+    { la:'tendere', mean:'팽팽하게', hanja:'伸', cardId:'flexio' },
+    { la:'ab-', mean:'멀리', hanja:'外', cardId:'abductio' },
+    { la:'ad-', mean:'쪽으로', hanja:'內', cardId:'abductio' },
+    { la:'rota', mean:'바퀴', hanja:'回', cardId:'rotatio' },
+    { la:'proximus', mean:'가장 가까운', hanja:'近', cardId:'proximalis' },
+    { la:'tomia', mean:'자름', hanja:'剖', cardId:'anatomia' }
+  ],
+  ch2:[
+    { la:'phragma', mean:'울타리', hanja:'膈', cardId:'diaphragma' },
+    { la:'dia-', mean:'가로질러', hanja:'橫', cardId:'diaphragma' },
+    { la:'abdominis', mean:'배의', hanja:'腹', cardId:'tva' },
+    { la:'pelvis', mean:'대야', hanja:'盤', cardId:'pelvic' },
+    { la:'multi-', mean:'많다', hanja:'多', cardId:'multifidus' },
+    { la:'findere', mean:'쪼개다', hanja:'裂', cardId:'multifidus' },
+    { la:'rectus', mean:'곧은', hanja:'直', cardId:'rectus' },
+    { la:'obliquus', mean:'비스듬한', hanja:'斜', cardId:'obliquus' },
+    { la:'cor', mean:'심장', hanja:'心', cardId:'core' },
+    { la:'bandh', mean:'묶다', hanja:'束', cardId:'bandha' }
+  ]
+};
+var HANJA_POOL = ['矢','冠','屈','伸','外','內','回','近','遠','剖','橫','膈','腹','盤','多','裂','直','斜','心','束','筋','骨','膜','面','轉','位','側','水','平','解'];
+
+/* 1단원 동작 프리셋 */
+var MOTIONS = {
+  flex:  { key:'flex',  label:'굴곡·신전', icon:'↩', plane:'sagittal',
+           min:-40, max:120, neg:'신전', pos:'굴곡', en:'flexion / extension' },
+  abd:   { key:'abd',   label:'외전·내전', icon:'↗', plane:'frontal',
+           min:-25, max:110, neg:'내전', pos:'외전', en:'abduction / adduction' },
+  rot:   { key:'rot',   label:'회전', icon:'↻', plane:'transverse',
+           min:-45, max:45, neg:'왼쪽 회전', pos:'오른쪽 회전', en:'rotation' },
+  elbow: { key:'elbow', label:'팔꿈치 굽힘', icon:'⌐', plane:'sagittal',
+           min:0, max:145, neg:'폄', pos:'굽힘', en:'elbow flexion / extension' }
+};
+
+/* 단원별 움직임/호흡 퀴즈 (직접 작성) */
+var QUIZ = {
+  ch1:[
+    { q:'오른팔을 옆으로 들어 올리는 <b>외전(abduction)</b>은 어느 면에서 일어날까?',
+      opts:['시상면','관상면','수평면','정중면'], ans:'관상면', card:'abductio',
+      why:'외전은 좌우로 벌어지는 움직임 — 몸을 앞뒤로 나누는 관상면 위에서 일어납니다.' },
+    { q:'팔꿈치를 굽히는 <b>굴곡</b>이 일어나는 면은?',
+      opts:['시상면','관상면','수평면','경사면'], ans:'시상면', card:'flexio',
+      why:'굽힘과 폄은 앞뒤 방향 — 몸을 좌우로 나누는 시상면의 움직임입니다.' },
+    { q:'서서 몸통을 좌우로 돌리는 <b>회전</b>은 어느 면에서 일어날까?',
+      opts:['시상면','관상면','수평면','정중면'], ans:'수평면', card:'rotatio',
+      why:'회전은 세로축을 따라 도는 움직임 — 몸을 위아래로 나누는 수평면에서 잘립니다.' },
+    { q:'<b>flexio</b>의 뜻은?',
+      opts:['굽힘','폄','벌림','모음'], ans:'굽힘', card:'flexio',
+      why:'flectere(굽히다) — 관절 각도가 줄어드는 움직임입니다.' },
+    { q:'<b>abductio</b>의 우리말 신용어는?',
+      opts:['벌림','모음','엎침','뒤침'], ans:'벌림', card:'abductio',
+      why:'ab-(멀리) + ducere(이끌다) = 몸에서 멀리 끌어낸다 → 벌림.' },
+    { q:'<b>proximal</b>(근위)이 가리키는 쪽은?',
+      opts:['몸통에 가까운 쪽','몸통에서 먼 쪽','손바닥 쪽','등 쪽'], ans:'몸통에 가까운 쪽', card:'proximalis',
+      why:'proximus(가장 가까운) — 기준은 언제나 몸통입니다.' },
+    { q:'해부학적 자세에서 <b>손바닥</b>은 어느 쪽을 향할까?',
+      opts:['앞','뒤','안쪽','위'], ans:'앞', card:'positio',
+      why:'손바닥 앞, 엄지 바깥, 발끝 앞 — 이것이 모든 방향의 기준입니다.' },
+    { q:'<b>sagitta</b>의 뜻은?',
+      opts:['화살','왕관','바퀴','대야'], ans:'화살', card:'sagittalis',
+      why:'화살(矢) 모양 — 시상면의 어원입니다.' }
+  ],
+  ch2:[
+    { q:'들숨에 수축하며 아래로 내려와 흉강을 넓히는 <b>주동근</b>은?',
+      opts:['횡격막','복횡근','골반기저근','다열근'], ans:'횡격막', card:'diaphragma',
+      why:'횡격막이 내려가며 흉강 부피를 키우고, 그 압력 차로 공기가 들어옵니다.' },
+    { q:'날숨에 허리둘레를 코르셋처럼 조이는 근육은?',
+      opts:['복횡근','복직근','외복사근','다열근'], ans:'복횡근', card:'tva',
+      why:'복횡근은 배를 가로로 감싸 날숨에 조여지며 복압을 만듭니다.' },
+    { q:'날숨에 위로 끌어올려지는 "코어의 바닥"은?',
+      opts:['골반기저근','횡격막','복직근','척추기립근'], ans:'골반기저근', card:'pelvic',
+      why:'골반기저근은 횡격막과 짝을 이뤄 날숨에 위로 올라오며 압력을 받칩니다.' },
+    { q:'요추 뼈마디를 국소적으로 붙잡는 안정근은?',
+      opts:['다열근','광배근','복직근','중둔근'], ans:'다열근', card:'multifidus',
+      why:'다열근은 척추뼈마다 붙어 한 마디씩 안정시킵니다 — 겉의 척추기립근과 다른 층.' },
+    { q:'흉식호흡(필라테스)에서 가장 크게 움직이는 부위는?',
+      opts:['갈비뼈','배','골반','어깨'], ans:'갈비뼈', card:'respiratio',
+      why:'흉식호흡은 갈비뼈가 옆·뒤로 열리며 가슴이 넓어지는 호흡입니다.' },
+    { q:'복식호흡(요가)에서 팽창하는 부위는?',
+      opts:['배','가슴 위쪽','목','등'], ans:'배', card:'respiratio',
+      why:'복식호흡은 횡격막이 깊게 내려가 배가 앞으로 나오는 호흡입니다.' },
+    { q:'필라테스의 "파워하우스"에 대응하는 요가의 "잠금"은?',
+      opts:['반다','아사나','프라나','만트라'], ans:'반다', card:'bandha',
+      why:'bandha는 "묶다" — 물라 반다·우디아나 반다가 코어를 잠급니다.' },
+    { q:'영어 <b>core</b>와 한자 核心이 함께 가리키는 것은?',
+      opts:['몸의 중심','배 근육 6개','폐','척추뼈'], ans:'몸의 중심', card:'core',
+      why:'core는 심장(cor) 계열, 核心은 "씨앗의 심" — 둘 다 가운데의 단단한 것을 뜻합니다.' }
+  ]
+};
+
+var QUIZ_TITLE = { ch1:'동작 · 용어 퀴즈', ch2:'호흡 · 코어 퀴즈' };
+
+
+/* ============================================================
+   UI · 상태 · 진행률 · 카드 · 퀴즈
+   ============================================================ */
+var $ = function (id) { return document.getElementById(id); };
+function esc(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/* ---------- 저장 ---------- */
+var LS = 'anatomywhy.v2';
+var S = { seen: {}, ety: {}, mot: {}, wrong: {}, last: 'ch1' };
+(function loadS() {
   try {
     var raw = JSON.parse(localStorage.getItem(LS) || '{}');
     if (raw && typeof raw === 'object') {
-      state.seen = raw.seen || {};
-      state.wrong = raw.wrong || {};
-      state.wrongMotions = raw.wrongMotions || {};
-      state.answered = raw.answered || 0;
-      state.correct = raw.correct || 0;
+      S.seen = raw.seen || {}; S.ety = raw.ety || {}; S.mot = raw.mot || {};
+      S.wrong = raw.wrong || {}; S.last = raw.last || 'ch1';
     }
   } catch (e) { }
-  function save() { try { localStorage.setItem(LS, JSON.stringify(state)); } catch (e) { } }
+})();
+function saveS() { try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) { } }
 
-  var $ = function (id) { return document.getElementById(id); };
-  var currentId = 'musculus';
-  var selectedTile = null;
-  var activeMotion = 'elbowFlex';
-  var playState = { playing: false, p: 0 };
+function chById(id) { for (var i = 0; i < CH.length; i++) if (CH[i].id === id) return CH[i]; return CH[0]; }
+function chCards(id) { return CHCARDS[id] || []; }
+function seenN(id) {
+  var ids = chCards(id), n = 0, m = S.seen[id] || {};
+  for (var i = 0; i < ids.length; i++) if (m[ids[i]]) n++;
+  return n;
+}
+function chapPct(id) {
+  var c = chById(id);
+  if (c.status !== 'open') return 0;
+  var ids = chCards(id);
+  var learn = ids.length ? seenN(id) / ids.length : 0;
+  return Math.min(1, learn * 0.4 + (S.ety[id] || 0) * 0.3 + (S.mot[id] || 0) * 0.3);
+}
+function overallPct() {
+  var sum = 0;
+  for (var i = 0; i < CH.length; i++) sum += chapPct(CH[i].id);
+  return sum / CH.length;
+}
 
-  /* ============================================================
-     3. 카드
-     ============================================================ */
-  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-  function partsHTML(parts) {
-    return (parts || []).map(function (p) {
-      return '<span><b>' + esc(p[0]) + '</b> ' + esc(p[1]) + '</span>';
-    }).join(' · ');
+/* ---------- 토스트 ---------- */
+var toastT = null;
+function toast(msg) {
+  var el = $('toast'); if (!el) return;
+  el.textContent = msg; el.classList.add('on');
+  clearTimeout(toastT);
+  toastT = setTimeout(function () { el.classList.remove('on'); }, 2800);
+}
+
+/* ---------- 음성 ---------- */
+var SPEAKER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>';
+function speak(text, lang) {
+  if (!('speechSynthesis' in window)) { toast('이 브라우저는 음성 읽기를 지원하지 않아요'); return; }
+  try {
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = lang || 'ko-KR'; u.rate = 0.88;
+    window.speechSynthesis.speak(u);
+  } catch (e) { }
+}
+
+/* ---------- 로드맵 ---------- */
+function renderHome() {
+  var pct = overallPct();
+  var C = 2 * Math.PI * 20;
+  var fg = $('ringFg');
+  if (fg) { fg.setAttribute('stroke-dasharray', C.toFixed(1)); fg.setAttribute('stroke-dashoffset', (C * (1 - pct)).toFixed(1)); }
+  $('ovPct').textContent = Math.round(pct * 100) + '%';
+  var done = 0;
+  for (var i = 0; i < CH.length; i++) if (CH[i].status === 'open' && chapPct(CH[i].id) >= 0.999) done++;
+  $('ovSub').textContent = '2 / 7 단원 공개';
+  $('ovNote').textContent = done ? done + '단원 완료 · 7단원 전체 기준 ' + Math.round(pct * 100) + '%' : '1·2단원 완료 = 전체 29%';
+
+  var h = '';
+  CH.forEach(function (c) {
+    var p = chapPct(c.id);
+    var open = c.status === 'open';
+    var cls = 'chitem' + (open ? ' open' : ' soon') + (p >= 0.999 ? ' done' : '') + (open && p > 0 && p < 1 ? ' cur' : '');
+    var ids = chCards(c.id);
+    var lw = ids.length ? Math.round(seenN(c.id) / ids.length * 100) : 0;
+    var ew = Math.round((S.ety[c.id] || 0) * 100);
+    var qw = Math.round((S.mot[c.id] || 0) * 100);
+    h += '<li><button class="' + cls + '" type="button" data-ch="' + c.id + '">' +
+      '<span class="cnum">' + c.no + '</span>' +
+      '<span class="cmain"><b>' + esc(c.title) + '</b><p>' + esc(c.sub) + '</p>' +
+      (open
+        ? '<span class="cbar"><i class="l"><b style="width:' + lw + '%"></b></i><i class="e"><b style="width:' + ew + '%"></b></i><i class="q"><b style="width:' + qw + '%"></b></i></span>'
+        : '') +
+      '</span>' +
+      '<span class="cright">' +
+      (open
+        ? '<span class="chip' + (p >= 0.999 ? ' done' : '') + '">' + (p >= 0.999 ? '완료' : p > 0 ? '학습 중' : '시작') + '</span><span class="cpct">' + Math.round(p * 100) + '%</span>'
+        : '<span class="chip soon">예정</span>') +
+      '<span class="cgo">' + (open ? '›' : '·') + '</span>' +
+      '</span></button></li>';
+  });
+  $('chlist').innerHTML = h;
+}
+
+
+/* ============================================================
+   단원 화면 · 카드 · 스테이지 컨트롤
+   ============================================================ */
+var cur = { ch: 'ch1', card: 'musculus' };
+var hinted = false;
+
+var KIND_CLASS = { '개념': 'concept', '근육': 'muscle', '뼈': 'bone', '신경': 'nerve', '면': 'plane', '움직임': 'move', '호흡': 'breath' };
+
+function partsHTML(parts) {
+  return (parts || []).map(function (p) {
+    return '<span><b>' + esc(p[0]) + '</b> ' + esc(p[1]) + '</span>';
+  }).join(' · ');
+}
+
+function renderCard(id) {
+  var c = CARDS[id]; if (!c) return;
+  cur.card = id;
+  var ids = chCards(cur.ch);
+  var idx = ids.indexOf(id) + 1;
+  var h = '';
+  h += '<div class="cardhead">' +
+    '<span class="kind ' + (KIND_CLASS[c.tag] || 'concept') + '">' + esc(c.tag) + '</span>' +
+    '<span class="idx">' + (idx > 0 ? idx + ' / ' + ids.length : '') + '</span>' +
+    '<div class="nav"><button data-act="prev" aria-label="이전 카드">‹</button><button data-act="next" aria-label="다음 카드">›</button></div>' +
+    '<button class="spk2" data-act="speak-all" aria-label="발음 듣기">' + SPEAKER + '</button>' +
+    '</div>';
+  h += '<div class="titlerow"><h1>' + esc(c.name) + '</h1>' +
+    (c.hanja ? '<span class="hj">' + esc(c.hanja) + (c.hanjaRead && c.hanjaRead !== c.name ? ' ' + esc(c.hanjaRead) : '') + '</span>' : '') +
+    (cur.ch === 'ch1' && MOTIONS[ST.motion] ? '<span class="move">' + esc(MOTIONS[ST.motion].label) + ' 중</span>' : '') +
+    '</div>';
+  h += '<div class="tiers">';
+  h += tier('la', '라틴', 'LA', '<span class="lat">' + esc(c.latin) + '</span>', partsHTML(c.latinParts));
+  h += tier('en', '영어', 'EN', esc(c.en), esc(c.enNote || ''));
+  h += tier('hanja', '한자어', '漢', '<span class="hj">' + esc(c.hanja || c.name) + '</span>' +
+    (c.hanjaRead ? ' <span style="font-size:9px;color:#9A8C72;font-weight:700">' + esc(c.hanjaRead) + '</span>' : ''),
+    esc(c.hanjaNote || partsHTML(c.hanjaParts)));
+  h += tier('ko', '우리말', 'KO', esc(c.koNative), esc(c.koBreak || ''));
+  h += '</div>';
+  h += '<div class="notes">' +
+    '<div class="note"><span class="nl">왜?</span><p>' + esc(c.why) + '</p></div>' +
+    '<div class="note trap"><span class="nl">함정</span><p>' + esc(c.trap) + '</p></div>' +
+    '</div>';
+  $('card').innerHTML = h;
+
+  markSeen(cur.ch, id);
+  highlightChips();
+  var cardEl = $('card');
+  if (cardEl) cardEl.scrollTop = 0;
+  var p = document.querySelector('.panel'); if (p) p.scrollTop = 0;
+  setCaption(c.name, c.latin);
+  if (window.__focus3D) window.__focus3D(cur.ch, id);
+}
+
+var capT = null;
+function setCaption(name, latin) {
+  var el = $('vcap'); if (!el) return;
+  el.innerHTML = '<b>' + esc(name) + '</b><i>' + esc(latin || '') + '</i>';
+  el.classList.add('on');
+  clearTimeout(capT);
+  capT = setTimeout(function () { el.classList.remove('on'); }, 3200);
+}
+function tier(k, label, sub, big, subline) {
+  return '<div class="tier"><span class="tlab"><b>' + label + '</b><small>' + sub + '</small></span>' +
+    '<span class="tval"><span class="big">' + big + '</span>' +
+    (subline ? '<span class="sub">' + subline + '</span>' : '') + '</span>' +
+    '<button class="tspeak" data-act="tier-speak" data-lang="' + k + '" aria-label="발음 듣기">' + SPEAKER + '</button></div>';
+}
+
+function markSeen(chId, cardId) {
+  S.seen[chId] = S.seen[chId] || {};
+  if (!S.seen[chId][cardId]) {
+    S.seen[chId][cardId] = 1;
+    saveS();
+    updateChapterBar();
+    if ($('home').classList.contains('on')) renderHome();
   }
-  var SPEAKER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>';
-  function speak(text, lang) {
-    if (!('speechSynthesis' in window) || !window.SpeechSynthesisUtterance) { toast('이 브라우저는 음성 읽기를 지원하지 않아요'); return; }
-    try {
-      window.speechSynthesis.cancel();
-      var u = new SpeechSynthesisUtterance(text);
-      u.lang = lang || 'ko-KR'; u.rate = 0.9;
-      window.speechSynthesis.speak(u);
-    } catch (e) { }
-  }
+}
 
-  function tier(k, label, sub, big, subline) {
-    return '<div class="tier" data-k="' + k + '">' +
-      '<span class="tlab"><b>' + label + '</b><small>' + sub + '</small></span>' +
-      '<span class="tval"><span class="big">' + big + '</span>' +
-      (subline ? '<span class="sub">' + subline + '</span>' : '') + '</span>' +
-      '<button class="tspeak" data-act="tier-speak" data-lang="' + k + '" aria-label="발음 듣기">' + SPEAKER + '</button>' +
-      '</div>';
-  }
-
-  function renderCard(id) {
-    var c = CARDS[id] || CARDS.musculus;
-    currentId = c.id;
-    var idx = ORDER.indexOf(c.id) + 1;
-    var m = activeMotion ? MOTIONS[activeMotion] : null;
-    var kindClass = c.kind === '근육' ? 'muscle' : c.kind === '신경' ? 'nerve' : c.kind === '뼈' ? 'bone' : 'concept';
-
-    var h = '';
-    h += '<div class="cardhead">' +
-      '<span class="kind ' + kindClass + '">' + esc(c.kind) + '</span>' +
-      '<span class="idx">' + idx + ' / ' + ORDER.length + '</span>' +
-      '<div class="nav">' +
-      '<button data-act="prev" aria-label="이전 카드">‹</button>' +
-      '<button data-act="next" aria-label="다음 카드">›</button>' +
-      '</div>' +
-      '<button class="spk2" data-act="speak" aria-label="발음 듣기">' + SPEAKER + '</button>' +
-      '</div>';
-
-    h += '<div class="cardbody">';
-    h += '<div class="titlerow"><h1>' + esc(c.name) + '</h1>' +
-      (c.hanja ? '<span class="hj">' + esc(c.hanja) + ' ' + esc(c.hanjaRead) + '</span>' : '') +
-      (m ? '<span class="move">' + esc(m.name) + '</span>' : '') +
-      '</div>';
-
-    h += '<div class="tiers">';
-    h += tier('la', '라틴', 'LA', '<span class="lat">' + esc(c.latin) + '</span>', partsHTML(c.latinParts));
-    h += tier('en', '영어', 'EN', esc(c.en), esc(c.enNote || ''));
-    h += tier('hanja', '한자어', '漢', '<span class="hj">' + esc(c.hanja || c.name) + '</span>' + (c.hanjaRead ? ' <span style="font-size:10px;color:#9A8C72;font-weight:700">' + esc(c.hanjaRead) + '</span>' : ''), esc(c.hanjaNote || partsHTML(c.hanjaParts)));
-    h += tier('ko', '우리말', 'KO', esc(c.koNative), esc(c.koBreak || ''));
-    h += '</div>';
-
-    h += '<div class="notes">' +
-      '<div class="note"><span class="nl">왜?</span><p>' + esc(c.why) + '</p></div>' +
-      '<div class="note trap"><span class="nl">함정</span><p>' + esc(c.trap) + '</p></div>' +
-      '</div>';
-    h += '</div>';
-
-    $('card').innerHTML = h;
-    markSeen(c.id);
-  }
-  function markSeen(id) { state.seen[id] = (state.seen[id] || 0) + 1; save(); }
-
-  /* ============================================================
-     4. 3D
-     ============================================================ */
-  var W = {
-    renderer: null, scene: null, camera: null, view: null, canvas: null,
-    torso: null, shoulder: null, elbow: null,
-    layers: { bone: [], muscle: [], nerve: [] },
-    muscles: [], nerves: [], pickables: [], rings: {}, cam: null, camGoal: null,
-    muscleOn: true, nerveOn: true, fitZoom: 1.0, userZoom: 14.2, ready: false
-  };
-  var DEG = Math.PI / 180;
-  var DOWN = new T.Vector3(0, -1, 0);
-  var _v1 = new T.Vector3(), _v2 = new T.Vector3(), _v3 = new T.Vector3(), _dir = new T.Vector3(), _off = new T.Vector3(), _q = new T.Quaternion();
-
-  function matBone(tint) {
-    return new T.MeshStandardMaterial({ color: tint || 0xFFF7E9, roughness: 0.44, metalness: 0.02, emissive: 0x4a3a24, emissiveIntensity: 0.25 });
-  }
-  function addMesh(geo, mat, tissue, parent, list, pick) {
-    var m = new T.Mesh(geo, mat);
-    if (tissue) m.userData.tissue = tissue;
-    parent.add(m);
-    if (list) list.push(m);
-    if (tissue && pick !== false) W.pickables.push(m);
-    return m;
-  }
-  function anchor(parent, x, y, z) {
-    var o = new T.Object3D(); o.position.set(x, y, z); parent.add(o); return o;
-  }
-  function boneTube(points, radius, parent, mat, tissue, list, radial) {
-    var curve = new T.CatmullRomCurve3(points.map(function (p) { return new T.Vector3(p[0], p[1], p[2]); }));
-    return addMesh(new T.TubeGeometry(curve, 24, radius, radial || 10, false), mat, tissue, parent, list);
-  }
-
-  function buildScene() {
-    var canvas = $('scene');
-    W.canvas = canvas; W.view = $('view');
-    var renderer;
-    try {
-      renderer = new T.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: 'high-performance', preserveDrawingBuffer: true });
-    } catch (e) {
-      $('view').innerHTML = '<div style="position:absolute;inset:0;display:grid;place-items:center;color:#C9D6E2;font-size:12px;text-align:center;padding:30px;line-height:1.6">이 브라우저에서 3D(WebGL)를 열 수 없어요.<br>Chrome·Safari 최신 버전에서 다시 열어 주세요.</div>';
-      return;
-    }
-    W.renderer = renderer;
-    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
-    if ('outputColorSpace' in renderer) renderer.outputColorSpace = T.SRGBColorSpace;
-    renderer.toneMapping = T.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
-
-    var scene = new T.Scene(); W.scene = scene;
-    var camera = new T.PerspectiveCamera(36, 1, 0.1, 300); W.camera = camera;
-
-    scene.add(new T.HemisphereLight(0xEAF3FF, 0x0E141A, 1.0));
-    var key = new T.DirectionalLight(0xFFF6EA, 3.4); key.position.set(7, 9, 9); scene.add(key);
-    var rim = new T.DirectionalLight(0x86B6FF, 2.2); rim.position.set(-8, 4, -9); scene.add(rim);
-    var warm = new T.DirectionalLight(0xFFC98F, 0.9); warm.position.set(-7, -5, 8); scene.add(warm);
-
-    var root = new T.Group(); scene.add(root);
-    var torso = new T.Group(); root.add(torso); W.torso = torso;
-    var shoulder = new T.Group(); torso.add(shoulder); W.shoulder = shoulder;
-    var elbow = new T.Group(); elbow.position.set(0, -3.0, 0); shoulder.add(elbow); W.elbow = elbow;
-    W.fitPts = [anchor(shoulder, 0, 0, 0), anchor(elbow, 0, -0.1, 0), anchor(elbow, 0, -3.5, 0),
-      anchor(torso, -1.62, 0.6, 0.15), anchor(torso, 0.85, 0.5, -0.08)];
-
-    /* ---- 뼈 ---- */
-    var BL = W.layers.bone;
-    var bm = matBone();
-    var bm2 = matBone(0xEDE3D0);
-    var bm3 = matBone(0xF7F1E4);
-    var boneMats = [bm, bm2, bm3];
-
-    boneTube([[-1.58, 0.58, 0.22], [-1.05, 0.82, 0.3], [-0.4, 0.78, 0.24], [0.22, 0.66, 0.02], [0.78, 0.52, -0.08]], 0.072, torso, bm3, 'clavicula', BL, 10);
-    var sternum = addMesh(new T.BoxGeometry(0.17, 0.7, 0.22), bm2, null, torso, BL);
-    sternum.position.set(-1.63, 0.28, 0.14);
-
-    var shp = new T.Shape();
-    shp.moveTo(0.0, 0.42); shp.quadraticCurveTo(0.5, 0.52, 0.9, 0.34);
-    shp.lineTo(0.86, 0.12); shp.lineTo(0.58, -0.72); shp.quadraticCurveTo(0.4, -0.86, 0.22, -0.62);
-    shp.lineTo(0.06, 0.1); shp.closePath();
-    var scapGeo = new T.ExtrudeGeometry(shp, { depth: 0.09, bevelEnabled: true, bevelSize: 0.035, bevelThickness: 0.03, bevelSegments: 2, steps: 1, curveSegments: 8 });
-    var scap = addMesh(scapGeo, bm, 'scapula', torso, BL);
-    scap.position.set(-0.72, 0.42, -0.42); scap.rotation.set(-0.12, 0.16, 0.06);
-
-    var spineBar = addMesh(new T.CapsuleGeometry(0.055, 0.66, 4, 8), bm3, null, torso, BL);
-    spineBar.position.set(-0.22, 0.46, -0.28); spineBar.rotation.set(0, 0.05, -1.42);
-    var acr = addMesh(new T.CapsuleGeometry(0.085, 0.26, 4, 10), bm3, 'scapula', torso, BL);
-    acr.position.set(0.62, 0.52, -0.12); acr.rotation.set(0.35, 0, -1.25);
-    var cor = addMesh(new T.CapsuleGeometry(0.045, 0.16, 4, 8), bm3, null, torso, BL);
-    cor.position.set(0.16, 0.42, 0.16); cor.rotation.set(1.1, 0.2, 0.25);
-
-    var hum = new T.Group();
-    boneTube([[0.0, 0.02, 0.0], [0.04, -0.7, 0.01], [0.03, -1.6, 0.0], [0.0, -2.4, 0.0], [-0.01, -2.86, 0.02]], 0.112, hum, bm, 'humerus', BL, 12);
-    var hhead = addMesh(new T.SphereGeometry(0.235, 22, 18), bm, 'humerus', hum, BL);
-    hhead.position.set(-0.03, 0.01, 0.02); hhead.scale.set(1, 0.94, 0.9);
-    var gt = addMesh(new T.SphereGeometry(0.105, 14, 12), bm, null, hum, BL);
-    gt.position.set(0.15, 0.11, -0.05);
-    var c1 = addMesh(new T.SphereGeometry(0.115, 16, 12), bm, 'humerus', hum, BL);
-    c1.position.set(0.105, -2.92, 0.02); c1.scale.set(1.1, 0.95, 1.1);
-    var c2 = addMesh(new T.SphereGeometry(0.1, 16, 12), bm, 'humerus', hum, BL);
-    c2.position.set(-0.095, -2.92, 0.02);
-    shoulder.add(hum);
-
-    var rad = new T.Group();
-    boneTube([[0.085, -0.02, 0.02], [0.11, -0.9, 0.03], [0.13, -1.9, 0.04], [0.155, -2.5, 0.05]], 0.058, rad, bm2, 'radius', BL, 10);
-    var rhead = addMesh(new T.CylinderGeometry(0.088, 0.075, 0.085, 16), bm2, 'radius', rad, BL);
-    rhead.position.set(0.085, -0.04, 0.02);
-    var rstyl = addMesh(new T.SphereGeometry(0.052, 12, 10), bm2, null, rad, BL);
-    rstyl.position.set(0.155, -2.55, 0.05);
-    elbow.add(rad);
-
-    var uln = new T.Group();
-    boneTube([[-0.075, -0.04, -0.05], [-0.09, -0.9, -0.03], [-0.1, -1.9, 0.0], [-0.12, -2.5, 0.02]], 0.064, uln, bm, 'ulna', BL, 10);
-    var olec = addMesh(new T.SphereGeometry(0.105, 16, 12), bm, 'ulna', uln, BL);
-    olec.position.set(-0.075, 0.03, -0.14); olec.scale.set(0.95, 0.85, 1.25);
-    elbow.add(uln);
-
-    var hand = new T.Group(); hand.position.set(0.01, -2.55, 0.03);
-    var palm = addMesh(new T.CapsuleGeometry(0.17, 0.2, 4, 12), bm3, null, hand, BL);
-    palm.position.set(0, -0.24, 0.01); palm.scale.set(1.02, 1, 0.46);
-    for (var fi = 0; fi < 4; fi++) {
-      var fx = -0.105 + fi * 0.07;
-      var fl = 0.24 - Math.abs(fi - 1.2) * 0.022;
-      var fg = addMesh(new T.CapsuleGeometry(0.042, fl, 3, 8), bm3, null, hand, BL);
-      fg.position.set(fx, -0.52 - fl * 0.26, 0.01); fg.rotation.z = fx * 0.35;
-    }
-    var thumb = addMesh(new T.CapsuleGeometry(0.038, 0.2, 3, 8), bm3, null, hand, BL);
-    thumb.position.set(0.155, -0.33, 0.06); thumb.rotation.z = -0.75;
-    elbow.add(hand);
-
-    /* ---- 근육 ---- */
-    // 근섬유: 양 끝이 힘줄에서 만나고 가운데가 불룩한 곡선 다발
-    function fiberGeometry(angle) {
-      var bulge = 1.05;
-      var curve = new T.QuadraticBezierCurve3(
-        new T.Vector3(0, 0, 0),
-        new T.Vector3(Math.cos(angle) * bulge, -0.5, Math.sin(angle) * bulge),
-        new T.Vector3(0, -1, 0)
-      );
-      var SEG = 14, RAD = 6;
-      var frames = curve.computeFrenetFrames(SEG, false);
-      var pos = [], idx = [], nor = [];
-      for (var i = 0; i <= SEG; i++) {
-        var t = i / SEG;
-        var p = curve.getPointAt(t);
-        var N = frames.normals[Math.min(i, SEG - 1)];
-        var B = frames.binormals[Math.min(i, SEG - 1)];
-        var r = 0.44 * Math.pow(Math.sin(Math.PI * t), 0.34);
-        for (var j = 0; j <= RAD; j++) {
-          var a = (j / RAD) * Math.PI * 2;
-          var nx = Math.cos(a) * N.x + Math.sin(a) * B.x;
-          var ny = Math.cos(a) * N.y + Math.sin(a) * B.y;
-          var nz = Math.cos(a) * N.z + Math.sin(a) * B.z;
-          pos.push(p.x + nx * r, p.y + ny * r, p.z + nz * r);
-          nor.push(nx, ny, nz);
-        }
-      }
-      for (var i2 = 0; i2 < SEG; i2++) {
-        for (var j2 = 0; j2 < RAD; j2++) {
-          var a0 = i2 * (RAD + 1) + j2, b0 = a0 + RAD + 1;
-          idx.push(a0, b0, a0 + 1, b0, b0 + 1, a0 + 1);
-        }
-      }
-      var g = new T.BufferGeometry();
-      g.setAttribute('position', new T.Float32BufferAttribute(pos, 3));
-      g.setAttribute('normal', new T.Float32BufferAttribute(nor, 3));
-      g.setIndex(idx);
-      return g;
-    }
-    var CORE_GEO = (function () {
-      var pts = [], N = 16;
-      for (var i = 0; i <= N; i++) {
-        var t = i / N;
-        var r = Math.pow(Math.sin(Math.PI * t), 0.5) * (1.0 - 0.14 * t);
-        pts.push(new T.Vector2(Math.max(0.0008, r), -1 + t));
-      }
-      return new T.LatheGeometry(pts, 16);
-    })();
-    var FIBER_GEOS = [];
-    for (var fg = 0; fg < 6; fg++) FIBER_GEOS.push(fiberGeometry((fg / 6) * Math.PI * 2));
-    var muscleGeo = FIBER_GEOS[0];
-    function muscleMat(base) {
-      return new T.MeshStandardMaterial({ color: base, roughness: 0.44, metalness: 0.02, flatShading: true, transparent: true, opacity: 0.58, depthWrite: true, emissive: 0x1e0505, emissiveIntensity: 0.3 });
-    }
-    var MDEF = [
-      { id: 'deltoideus', heads: [
-        { r: 0.46, o: [0.42, 0.6, 0.0, 'torso'], i: [0.15, -0.9, 0.0, 'shoulder'], col: 0xBE4448 }
-      ] },
-      { id: 'biceps', heads: [
-        { r: 0.34, o: [0.13, 0.42, 0.14, 'torso'], i: [0.08, -0.1, 0.15, 'elbow'], col: 0xC4454A },
-        { r: 0.3, o: [-0.04, 0.36, 0.22, 'torso'], i: [0.07, -0.12, 0.15, 'elbow'], col: 0xCE4C51 }
-      ] },
-      { id: 'brachialis', heads: [
-        { r: 0.32, o: [0.04, -1.5, 0.15, 'shoulder'], i: [-0.02, -0.2, 0.13, 'elbow'], col: 0xB8403F }
-      ] },
-      { id: 'triceps', heads: [
-        { r: 0.34, o: [-0.03, 0.3, -0.26, 'torso'], i: [0.02, 0.0, -0.16, 'elbow'], col: 0xB93E42 },
-        { r: 0.3, o: [0.14, -0.7, -0.15, 'shoulder'], i: [0.02, -0.02, -0.17, 'elbow'], col: 0xB23A40 }
-      ] },
-      { id: 'brachioradialis', heads: [
-        { r: 0.24, o: [0.19, -2.42, 0.05, 'shoulder'], i: [0.14, -2.32, 0.09, 'elbow'], col: 0xBC4448 }
-      ] },
-      { id: 'pronator', heads: [
-        { r: 0.2, o: [-0.17, -2.88, 0.05, 'shoulder'], i: [0.14, -1.32, 0.12, 'elbow'], col: 0xB44044 }
-      ] },
-      { id: 'pectoralis', heads: [
-        { r: 0.26, o: [-0.5, 0.3, 0.18, 'torso'], i: [0.05, -0.44, 0.2, 'shoulder'], flat: 0.55, col: 0xA2353B }
-      ] }
-    ];
-
-    function muscleMats(base) {
-      var b0 = muscleMat(base);
-      var ag = muscleMat(0xDC3B36); ag.emissive.setHex(0x5e0a08); ag.emissiveIntensity = 0.6; ag.roughness = 0.38; ag.opacity = 0.98;
-      var sy = muscleMat(0xD8575A); sy.emissive.setHex(0x3a0806); sy.emissiveIntensity = 0.45; sy.opacity = 0.62;
-      var hi = muscleMat(0xF06A5C); hi.emissive.setHex(0x7a3418); hi.emissiveIntensity = 0.7; hi.opacity = 0.95;
-      var an = new T.MeshStandardMaterial({ color: 0x8E837E, roughness: 0.85, metalness: 0.02, transparent: true, opacity: 0.16, depthWrite: false });
-      return { base: b0, agon: ag, syn: sy, hi: hi, ant: an };
-    }
-
-    var musclesRoot = new T.Group(); root.add(musclesRoot);
-    var FIBERS = 4;
-    MDEF.forEach(function (d) {
-      d.heads.forEach(function (hd) {
-        var mats = muscleMats(hd.col || 0xC4454A);
-        var A = anchor(hd.o[3] === 'shoulder' ? shoulder : torso, hd.o[0], hd.o[1], hd.o[2]);
-        var B = anchor(hd.i[3] === 'torso' ? torso : hd.i[3] === 'shoulder' ? shoulder : elbow, hd.i[0], hd.i[1], hd.i[2]);
-        var coreMats = {
-          base: mats.base.clone(), agon: mats.agon.clone(), syn: mats.syn.clone(),
-          hi: mats.hi.clone(), ant: mats.ant.clone()
-        };
-        ['base', 'agon', 'syn', 'hi'].forEach(function (k) {
-          var mm = coreMats[k];
-          mm.opacity = (k === 'agon' ? 0.55 : k === 'syn' ? 0.4 : k === 'hi' ? 0.5 : 0.32);
-          mm.transparent = true; mm.depthWrite = true; mm.flatShading = false;
-          mm.color.multiplyScalar(0.86);
-        });
-        coreMats.ant = mats.ant.clone(); coreMats.ant.opacity = 0.1;
-        var core = new T.Mesh(CORE_GEO, coreMats.base);
-        core.userData.tissue = d.id;
-        musclesRoot.add(core); W.pickables.push(core); W.layers.muscle.push(core);
-        W.muscles.push({ id: d.id, mesh: core, mats: coreMats, A: A, B: B, r: hd.r * 0.86, flat: hd.flat || 1, isCore: true });
-        var ring = hd.r * 0.8;
-        for (var j = 0; j < FIBERS; j++) {
-          var m = new T.Mesh(FIBER_GEOS[j % 6], mats.base);
-          m.userData.tissue = d.id;
-          musclesRoot.add(m); W.pickables.push(m); W.layers.muscle.push(m);
-          W.muscles.push({
-            id: d.id, mesh: m, mats: mats, A: A, B: B,
-            ring: ring * (0.9 + 0.2 * (((j * 3) % 4) / 3)), flat: hd.flat || 1
-          });
-        }
-      });
-    });
-
-    /* ---- 신경 ---- */
-    function nerveMat() {
-      return new T.MeshStandardMaterial({ color: 0xFFD36A, emissive: 0xE09A18, emissiveIntensity: 0.9, roughness: 0.35, metalness: 0.05 });
-    }
-    var NERVE_DEF = [
-      { id: 'n_musculocutaneous', segs: [
-        { p: 'shoulder', pts: [[0.0, 0.6, -0.16], [-0.1, 0.3, 0.02], [-0.14, -0.4, 0.12], [-0.06, -1.6, 0.16], [0.0, -2.86, 0.1]] },
-        { p: 'elbow', pts: [[0.0, 0.14, 0.1], [0.06, -0.6, 0.12], [0.12, -1.4, 0.12], [0.16, -2.3, 0.1]] }] },
-      { id: 'n_radial', segs: [
-        { p: 'shoulder', pts: [[0.06, 0.58, -0.2], [0.2, -0.2, -0.24], [0.22, -1.2, -0.18], [0.14, -2.2, -0.1], [0.12, -2.86, 0.04]] },
-        { p: 'elbow', pts: [[0.12, 0.12, 0.04], [0.16, -0.7, 0.02], [0.14, -1.6, -0.02], [0.1, -2.3, -0.06]] }] },
-      { id: 'n_median', segs: [
-        { p: 'shoulder', pts: [[0.0, 0.6, -0.2], [-0.18, -0.4, 0.0], [-0.12, -1.8, 0.14], [-0.02, -2.86, 0.12]] },
-        { p: 'elbow', pts: [[0.0, 0.14, 0.12], [0.02, -0.7, 0.15], [0.05, -1.6, 0.12], [0.06, -2.3, 0.08]] }] },
-      { id: 'n_axillary', segs: [
-        { p: 'shoulder', pts: [[0.02, 0.62, -0.18], [0.18, 0.35, -0.26], [0.4, 0.05, -0.22], [0.5, -0.3, -0.08], [0.3, -0.56, 0.0]] }] },
-      { id: 'n_ulnar', segs: [
-        { p: 'shoulder', pts: [[0.0, 0.58, -0.22], [-0.22, -0.7, -0.06], [-0.16, -1.9, -0.02], [-0.14, -2.86, -0.04]] },
-        { p: 'elbow', pts: [[-0.14, 0.14, -0.04], [-0.12, -0.7, 0.0], [-0.09, -1.8, 0.04], [-0.06, -2.4, 0.04]] }] }
-    ];
-    NERVE_DEF.forEach(function (nd) {
-      var mat = nerveMat();
-      var n = { id: nd.id, mat: mat, beads: [], segCount: nd.segs.length };
-      nd.segs.forEach(function (sg, si) {
-        var parent = sg.p === 'torso' ? torso : sg.p === 'shoulder' ? shoulder : elbow;
-        var curve = new T.CatmullRomCurve3(sg.pts.map(function (p) { return new T.Vector3(p[0], p[1], p[2]); }));
-        var m = new T.Mesh(new T.TubeGeometry(curve, 30, 0.03, 6, false), mat);
-        m.userData.tissue = nd.id;
-        parent.add(m); W.layers.nerve.push(m); W.pickables.push(m);
-        var pm = new T.Mesh(new T.TubeGeometry(curve, 20, 0.085, 5, false), new T.MeshBasicMaterial({ visible: false }));
-        pm.userData.tissue = nd.id;
-        parent.add(pm); W.pickables.push(pm);
-        var beadMat = new T.MeshBasicMaterial({ color: 0xFFEAA8, transparent: true, opacity: 0.9, blending: T.AdditiveBlending, depthWrite: false });
-        for (var k = 0; k < 3; k++) {
-          var b = new T.Mesh(new T.SphereGeometry(0.032, 8, 6), beadMat.clone());
-          b.visible = false;
-          parent.add(b); W.layers.nerve.push(b);
-          n.beads.push({ mesh: b, curve: curve, seg: si });
-        }
-      });
-      W.nerves.push(n);
-    });
-
-    /* 팔신경얼기 */
-    var plexMat = nerveMat(); plexMat.emissiveIntensity = 0.4;
-    var plex = { mat: plexMat, beads: [] };
-    [[[-0.8, 1.16, -0.34], [-0.55, 0.98, -0.32], [-0.28, 0.78, -0.26], [0.0, 0.58, -0.19]],
-      [[-0.7, 1.02, -0.3], [-0.45, 0.86, -0.28], [-0.2, 0.7, -0.23], [0.02, 0.56, -0.18]],
-      [[-0.6, 0.9, -0.36], [-0.38, 0.8, -0.3], [-0.12, 0.66, -0.24], [0.04, 0.55, -0.2]]].forEach(function (ptsArr) {
-        var curve = new T.CatmullRomCurve3(ptsArr.map(function (p) { return new T.Vector3(p[0], p[1], p[2]); }));
-        var m = new T.Mesh(new T.TubeGeometry(curve, 22, 0.024, 6, false), plexMat);
-        torso.add(m); W.layers.nerve.push(m);
-        var beadMat = new T.MeshBasicMaterial({ color: 0xFFEAA8, transparent: true, opacity: 0.9, blending: T.AdditiveBlending, depthWrite: false });
-        for (var k = 0; k < 2; k++) {
-          var b = new T.Mesh(new T.SphereGeometry(0.03, 8, 6), beadMat.clone());
-          b.visible = false; torso.add(b); W.layers.nerve.push(b);
-          plex.beads.push({ mesh: b, curve: curve });
-        }
-      });
-    W.plexus = plex;
-
-    /* 관절 링 */
-    var rElbow = new T.Mesh(new T.TorusGeometry(0.185, 0.011, 8, 28), new T.MeshBasicMaterial({ color: 0xFFD98A, transparent: true, opacity: 0, depthWrite: false }));
-    rElbow.position.set(0, -3.0, 0); rElbow.rotation.y = Math.PI / 2;
-    shoulder.add(rElbow); W.layers.nerve.push(rElbow); W.rings.elbow = rElbow;
-    var rSh = new T.Mesh(new T.TorusGeometry(0.33, 0.011, 8, 32), new T.MeshBasicMaterial({ color: 0xFFD98A, transparent: true, opacity: 0, depthWrite: false }));
-    rSh.rotation.y = Math.PI / 2;
-    shoulder.add(rSh); W.layers.nerve.push(rSh); W.rings.shoulder = rSh;
-
-    /* 카메라 */
-    W.cam = { theta: 0.38, phi: 1.44, radius: 14.2, target: new T.Vector3(0.85, -3.1, 0) };
-    W.camGoal = { theta: 0.38, phi: 1.44, radius: 14.2, tx: 0.85, ty: -3.1, tz: 0 };
-    updateCamera(true);
-
-    resize();
-    window.addEventListener('resize', resize);
-    if (window.ResizeObserver) new ResizeObserver(function () { resize(); }).observe(W.view);
-    bindOrbit();
-    W.ready = true;
-    requestAnimationFrame(loop);
-  }
-
-  function resize() {
-    if (!W.renderer) return;
-    var w = W.view.clientWidth || 360, h = W.view.clientHeight || 400;
-    W.renderer.setSize(w, h, false);
-    W.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
-    W.camera.aspect = w / h;
-    W.camera.updateProjectionMatrix();
-  }
-  function updateCamera(instant) {
-    var c = W.cam, g = W.camGoal;
-    if (!instant) {
-      c.theta += (g.theta - c.theta) * 0.18;
-      c.phi += (g.phi - c.phi) * 0.18;
-      c.radius += (g.radius - c.radius) * 0.12;
-      c.target.x += (g.tx - c.target.x) * 0.12;
-      c.target.y += (g.ty - c.target.y) * 0.12;
-      c.target.z += (g.tz - c.target.z) * 0.12;
-    } else {
-      c.theta = g.theta; c.phi = g.phi; c.radius = g.radius;
-      c.target.set(g.tx, g.ty, g.tz);
-    }
-    var t = c.target;
-    W.camera.position.set(
-      t.x + c.radius * Math.sin(c.phi) * Math.sin(c.theta),
-      t.y + c.radius * Math.cos(c.phi),
-      t.z + c.radius * Math.sin(c.phi) * Math.cos(c.theta)
-    );
-    W.camera.lookAt(t);
-  }
-
-  function bindOrbit() {
-    var el = W.canvas, dragging = false, lx = 0, ly = 0, moved = 0, t0 = 0, pinch = 0;
-    var pts = {};
-    el.addEventListener('pointerdown', function (e) {
-      pts[e.pointerId] = { x: e.clientX, y: e.clientY };
-      if (Object.keys(pts).length > 1) { dragging = false; return; }
-      dragging = true; moved = 0; lx = e.clientX; ly = e.clientY; t0 = performance.now();
-      try { el.setPointerCapture(e.pointerId); } catch (err) { }
-      hideHint();
-    });
-    el.addEventListener('pointermove', function (e) {
-      if (pts[e.pointerId]) { pts[e.pointerId].x = e.clientX; pts[e.pointerId].y = e.clientY; }
-      var ids = Object.keys(pts);
-      if (ids.length === 2) {
-        var a = pts[ids[0]], b = pts[ids[1]];
-        var d = Math.hypot(a.x - b.x, a.y - b.y);
-        if (pinch) {
-          W.fitZoom = Math.max(0.7, Math.min(2.0, W.fitZoom - (d - pinch) * 0.004));
-        }
-        pinch = d; dragging = false; return;
-      }
-      if (!dragging) return;
-      var dx = e.clientX - lx, dy = e.clientY - ly;
-      lx = e.clientX; ly = e.clientY;
-      moved += Math.abs(dx) + Math.abs(dy);
-      if (moved < 3) return;
-      W.camGoal.theta -= dx * 0.0062;
-      W.camGoal.phi = Math.max(0.62, Math.min(2.25, W.camGoal.phi - dy * 0.0055));
-      W.cam.theta = W.camGoal.theta; W.cam.phi = W.camGoal.phi;
-    });
-    function up(e) {
-      delete pts[e.pointerId];
-      if (Object.keys(pts).length < 2) pinch = 0;
-      if (!dragging) return;
-      dragging = false;
-      if (moved < 9 && performance.now() - t0 < 700) pickAt(e.clientX, e.clientY);
-    }
-    el.addEventListener('pointerup', up);
-    el.addEventListener('pointercancel', function (e) { delete pts[e.pointerId]; dragging = false; pinch = 0; });
-    el.addEventListener('wheel', function (e) {
-      e.preventDefault();
-      W.fitZoom = Math.max(0.7, Math.min(2.0, W.fitZoom + e.deltaY * 0.0012));
-      hideHint();
-    }, { passive: false });
-  }
-
-  function visibleChain(o) {
-    var p = o;
-    while (p) { if (!p.visible) return false; p = p.parent; }
-    return true;
-  }
-  function pickAt(cx, cy) {
-    if (!W.ready) return;
-    var r = W.canvas.getBoundingClientRect();
-    var ndc = new T.Vector2(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
-    var ray = new T.Raycaster();
-    ray.setFromCamera(ndc, W.camera);
-    var hits = ray.intersectObjects(W.pickables, false);
-    for (var i = 0; i < hits.length; i++) {
-      var o = hits[i].object;
-      if (!visibleChain(o)) continue;
-      var id = o.userData.tissue;
-      if (id && CARDS[id]) { selectTissue(id, true); return; }
-    }
-  }
-
-  function poseAngles() {
-    var p = playState.p, m = activeMotion ? MOTIONS[activeMotion] : null;
-    var e = 0, a = 0, f = 0;
-    if (m) {
-      if (m.key === 'elbowFlex') e = 145 * p;
-      else if (m.key === 'elbowExt') e = 145 * (1 - p);
-      else if (m.key === 'abduction') a = 110 * p;
-      else if (m.key === 'shoulderFlex') f = 110 * p;
-    }
-    return { e: e, a: a, f: f };
-  }
-
-  var _lastSync = 0;
-  function applyPose(time) {
-    if (!W.ready) return;
-    var ang = poseAngles();
-    W.shoulder.rotation.set((-ang.f - 5) * DEG, 0, (ang.a + 15) * DEG);
-    W.elbow.rotation.set((-(ang.e + 6)) * DEG, 0, 0);
-
-    var m = activeMotion ? MOTIONS[activeMotion] : null;
-    var p = playState.p;
-
-    W.muscles.forEach(function (mu) {
-      var id = mu.id;
-      var role = 'idle';
-      if (m && id !== '_sup') {
-        if (m.agonist.indexOf(id) >= 0) role = 'agon';
-        else if (m.antagonist.indexOf(id) >= 0) role = 'ant';
-        else if (m.synergist.indexOf(id) >= 0) role = 'syn';
-      }
-      var sel = selectedTile === id;
-      var mat = role === 'agon' ? mu.mats.agon : role === 'ant' ? mu.mats.ant : role === 'syn' ? mu.mats.syn : (sel ? mu.mats.hi : mu.mats.base);
-      if (mu.mesh.material !== mat) mu.mesh.material = mat;
-
-      var c = role === 'agon' ? p : role === 'syn' ? p * 0.5 : 0;
-      mu.A.getWorldPosition(_v1);
-      mu.B.getWorldPosition(_v2);
-      _dir.subVectors(_v2, _v1);
-      var len = _dir.length() || 0.001;
-      _dir.multiplyScalar(1 / len);
-      _q.setFromUnitVectors(DOWN, _dir);
-      var rr = mu.ring * (1 + 0.16 * c);
-      mu.mesh.position.copy(_v1);
-      mu.mesh.quaternion.copy(_q);
-      mu.mesh.scale.set(rr, len * (1 - 0.05 * c), rr * mu.flat);
-      mu.mesh.visible = W.muscleOn;
-    });
-
-    W.nerves.forEach(function (n) {
-      var on = m && m.nerve === n.id;
-      var dim = m && !on;
-      n.mat.emissiveIntensity = on ? 1.2 : dim ? 0.15 : 0.5;
-      n.mat.opacity = dim ? 0.32 : 1;
-      n.mat.transparent = dim;
-    });
-
-    var pulseOn = W.nerveOn;
-    W.nerves.forEach(function (n, ni) {
-      var isOn = m && m.nerve === n.id && pulseOn;
-      n.beads.forEach(function (b, bi) {
-        if (!isOn) { b.mesh.visible = false; return; }
-        var span = n.segCount;
-        var u = (time * 0.6 + (bi / n.beads.length) * span + ni * 0.11) % span;
-        var lp = u - b.seg;
-        var vis = lp >= 0 && lp <= 1;
-        b.mesh.visible = vis;
-        if (vis) {
-          b.mesh.position.copy(b.curve.getPointAt(Math.min(0.9999, Math.max(0, lp))));
-          b.mesh.material.opacity = 0.9 * Math.sin(Math.PI * lp);
-          b.mesh.scale.setScalar(1 + 0.25 * Math.sin(time * 6 + bi));
-        }
-      });
-    });
-    if (W.plexus) {
-      W.plexus.beads.forEach(function (b, bi) {
-        var lp = (time * 0.45 + bi * 0.5) % 1;
-        b.mesh.visible = W.nerveOn;
-        b.mesh.position.copy(b.curve.getPointAt(lp));
-        b.mesh.material.opacity = 0.45 * Math.sin(Math.PI * lp);
-      });
-    }
-
-    if (W.rings.elbow) W.rings.elbow.material.opacity = (m && m.joint === 'elbow') ? 0.5 + 0.28 * Math.sin(time * 4) : 0;
-    if (W.rings.shoulder) W.rings.shoulder.material.opacity = (m && m.joint !== 'elbow') ? 0.45 + 0.26 * Math.sin(time * 4) : 0;
-
-    // 포즈에 맞춘 자동 프레이밍 (투영 결과 기준 반복 보정)
-    var vh = W.view.clientHeight || 500, vw = W.view.clientWidth || 400;
-    var insetTop = 52, insetBottom = 96;
-    var half = Math.tan(W.camera.fov * DEG / 2);
-    var safeL = -0.9, safeR = 0.9;
-    var safeT = 1 - 2 * insetTop / vh, safeB = -1 + 2 * insetBottom / vh;
-    var safeCx = (safeL + safeR) / 2, safeCy = (safeT + safeB) / 2;
-    var tx0 = W.camGoal.tx, ty0 = W.camGoal.ty, r0 = W.cam.radius || 15;
-    var cam = W.camera;
-    for (var it = 0; it < 11; it++) {
-      cam.position.set(tx0 + r0 * Math.sin(W.cam.phi) * Math.sin(W.cam.theta), ty0 + r0 * Math.cos(W.cam.phi), r0 * Math.sin(W.cam.phi) * Math.cos(W.cam.theta));
-      cam.lookAt(tx0, ty0, 0);
-      cam.updateMatrixWorld();
-      var mnX = 1e9, mxX = -1e9, mnY = 1e9, mxY = -1e9;
-      for (var fi3 = 0; fi3 < W.fitPts.length; fi3++) {
-        W.fitPts[fi3].getWorldPosition(_v3);
-        _v3.project(cam);
-        if (_v3.x < mnX) mnX = _v3.x; if (_v3.x > mxX) mxX = _v3.x;
-        if (_v3.y < mnY) mnY = _v3.y; if (_v3.y > mxY) mxY = _v3.y;
-      }
-      var cw = Math.max(0.001, mxX - mnX), chh = Math.max(0.001, mxY - mnY);
-      var f = Math.max(cw / (safeR - safeL), chh / (safeT - safeB));
-      f = Math.min(1.35, Math.max(it < 8 ? 0.88 : 1.0, f));
-      var halfW = r0 * half * cam.aspect, halfH = r0 * half;
-      tx0 += (((mnX + mxX) / 2) - safeCx) * halfW;
-      ty0 += (((mnY + mxY) / 2) - safeCy) * halfH;
-      r0 *= f;
-    }
-    W.camGoal.radius = Math.max(9.5, Math.min(40, r0 * 1.02 * W.fitZoom));
-    W.camGoal.tx = tx0;
-    W.camGoal.ty = ty0;
-    updateCamera(false);
-
-    if (playState.playing && time - _lastSync > 0.09) { _lastSync = time; syncSlider(); }
-  }
-
-  function loop(tms) {
-    requestAnimationFrame(loop);
-    var time = tms / 1000;
-    if (!W.ready) return;
-    if (playState.playing) playState.p = 0.5 - 0.5 * Math.cos(time * 0.95);
-    applyPose(time);
-    W.renderer.render(W.scene, W.camera);
-  }
-
-  function selectTissue(id, fromScene) {
-    if (!CARDS[id]) return;
-    selectedTile = id;
-    renderCard(id);
+function renderChips() {
+  var ids = chCards(cur.ch);
+  var h = '';
+  ids.forEach(function (id) {
     var c = CARDS[id];
-    var el = $('vsel');
-    el.innerHTML = '<span class="dot"></span><b>' + esc(c.name) + '</b><i>' + esc(c.latin) + '</i>';
-    el.classList.add('on');
-    if (fromScene) hideHint();
-  }
-
-  /* ============================================================
-     5. 컨트롤
-     ============================================================ */
-  function setMotion(key, play, silent) {
-    activeMotion = key;
-    playState.p = 0;
-    playState.playing = !!play;
-    document.querySelectorAll('.mchip').forEach(function (b) {
-      var on = b.getAttribute('data-motion') === key;
-      b.classList.toggle('on', on);
-      if (on && b.scrollIntoView) { try { b.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' }); } catch (e) { } }
-    });
-    $('play').classList.toggle('on', playState.playing);
-    $('play').textContent = playState.playing ? '❚❚' : '▶';
-    syncSlider();
-    var m = MOTIONS[key];
-    if (!m) return;
-    var first = m.agonist[0];
-    selectedTile = first;
-    if (!silent) {
-      renderCard(first);
-      var c = CARDS[first];
-      $('vsel').innerHTML = '<span class="dot"></span><b>' + esc(m.name) + '</b><i>' + esc(c.name) + '</i>';
-      $('vsel').classList.add('on');
-      toast(m.line);
+    var seen = (S.seen[cur.ch] || {})[id];
+    h += '<button class="tchip' + (seen ? ' seen' : '') + '" data-act="term" data-card="' + id + '" type="button">' +
+      '<span class="n">' + (ids.indexOf(id) + 1) + '</span>' + esc(c.name) + '</button>';
+  });
+  $('termchips').innerHTML = h;
+  highlightChips();
+}
+function highlightChips() {
+  var els = document.querySelectorAll('#termchips .tchip');
+  for (var i = 0; i < els.length; i++) {
+    var id = els[i].getAttribute('data-card');
+    var on = id === cur.card;
+    els[i].classList.toggle('on', on);
+    els[i].classList.toggle('seen', !!(S.seen[cur.ch] || {})[id]);
+    if (on && els[i].scrollIntoView) {
+      try { els[i].scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' }); } catch (e) { }
     }
   }
-  function syncSlider() {
-    var m = activeMotion ? MOTIONS[activeMotion] : null;
-    $('angle').value = Math.round(playState.p * 1000);
-    if (m) {
-      var ang = poseAngles();
-      var d = m.joint === 'elbow' ? ang.e : m.joint === 'shoulderAbd' ? ang.a : ang.f;
-      $('deg').innerHTML = '<b>' + Math.round(d) + '°</b> ' + m.degUnit;
-    }
-  }
+}
 
-  function setLayer(k, on) {
-    W.layers[k].forEach(function (o) { o.visible = on; });
-    if (k === 'muscle') W.muscleOn = on;
-    if (k === 'nerve') W.nerveOn = on;
-  }
-
-  function bindUI() {
-    document.addEventListener('click', function (e) {
-      var t = e.target.closest ? e.target.closest('[data-act]') : null;
-      if (t) {
-        var act = t.getAttribute('data-act');
-        if (act === 'prev' || act === 'next') {
-          var i = ORDER.indexOf(currentId);
-          var n = act === 'prev' ? (i - 1 + ORDER.length) % ORDER.length : (i + 1) % ORDER.length;
-          selectTissue(ORDER[n]); return;
-        }
-        if (act === 'speak') { var cc = CARDS[currentId]; speak(cc.latin + '. ' + cc.name, 'en-US'); return; }
-        if (act === 'tier-speak') {
-          var k = t.getAttribute('data-lang'), c = CARDS[currentId];
-          if (k === 'la') speak(c.latin, 'en-US');
-          else if (k === 'en') speak(c.en, 'en-US');
-          else if (k === 'hanja') speak(c.hanjaRead || c.name, 'ko-KR');
-          else speak(c.koNative, 'ko-KR');
-          return;
-        }
-        if (act === 'quiz') { openQuiz(t.getAttribute('data-mode') || 'motion'); return; }
-        if (act === 'review') { startReview(); return; }
-        if (act === 'qtab') { if (t.getAttribute('data-val') !== Q.tab) openQuiz(t.getAttribute('data-val')); return; }
-        if (act === 'opt') { answerQuiz(parseInt(t.getAttribute('data-i'), 10)); return; }
-        if (act === 'qnext') { nextQuestion(); return; }
-        if (act === 'qclose') { closeSheet(); return; }
-        if (act === 'qshow') { var cid = t.getAttribute('data-card'); closeSheet(); if (cid) selectTissue(cid); return; }
-        if (act === 'qrestart') { openQuiz(Q.tab === 'ety' ? 'ety' : 'motion'); return; }
-        return;
-      }
-      var lay = e.target.closest ? e.target.closest('[data-layer]') : null;
-      if (lay) {
-        var k2 = lay.getAttribute('data-layer');
-        var on = !lay.classList.contains('on');
-        lay.classList.toggle('on', on);
-        setLayer(k2, on);
-        return;
-      }
-      var mc = e.target.closest ? e.target.closest('[data-motion]') : null;
-      if (mc) { setMotion(mc.getAttribute('data-motion'), true); return; }
-    });
-
-    $('play').addEventListener('click', function () {
-      playState.playing = !playState.playing;
-      this.classList.toggle('on', playState.playing);
-      this.textContent = playState.playing ? '❚❚' : '▶';
-      hideHint();
-    });
-    $('angle').addEventListener('input', function () {
-      playState.playing = false;
-      $('play').classList.remove('on');
-      $('play').textContent = '▶';
-      playState.p = parseInt(this.value, 10) / 1000;
-      hideHint();
-      syncSlider();
-    });
-    $('scrim').addEventListener('click', closeSheet);
-  }
-
-  /* ============================================================
-     6. 퀴즈
-     ============================================================ */
-  var Q = { tab: 'motion', items: [], i: 0, correct: 0, answered: false, picked: -1, done: false, mode: 'motion' };
-
-  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
-  function pickOthers(pool, ans, n) {
-    var o = shuffle(pool.filter(function (x) { return x !== ans; })).slice(0, n);
-    return shuffle(o.concat([ans]));
-  }
-  function idsOfKind(k) { return Object.keys(CARDS).filter(function (x) { return CARDS[x].kind === k; }); }
-
-  function buildMotionItems(onlyKeys) {
-    var out = [];
+/* ---------- 스테이지 컨트롤 ---------- */
+function renderStageControls() {
+  if (cur.ch === 'ch1') {
+    $('layers').innerHTML = [
+      ['sagittal', '시상면', true], ['frontal', '관상면', true], ['transverse', '수평면', true]
+    ].map(function (l) {
+      return '<button class="lay' + (l[2] ? ' on' : '') + '" data-act="layer" data-key="' + l[0] + '" type="button"><i></i>' + l[1] + '</button>';
+    }).join('');
+    var mh = '';
     Object.keys(MOTIONS).forEach(function (k) {
-      if (onlyKeys && onlyKeys.indexOf(k) < 0) return;
       var m = MOTIONS[k];
-      out.push({
-        kind: 'motion', type: 'muscle', motion: k,
-        q: '<b>' + m.name + '</b> · ' + m.sec + ' — 주동근은?',
-        hint: '수축해 뼈를 움직이는 근육을 고르세요',
-        ans: m.agonist[0], opts: pickOthers(idsOfKind('근육'), m.agonist[0], 3),
-        why: CARDS[m.agonist[0]].why, cardId: m.agonist[0]
-      });
-      out.push({
-        kind: 'motion', type: 'nerve', motion: k,
-        q: '<b>' + m.name + '</b> — 지배 신경은?',
-        hint: '노란 신호가 흐르는 신경을 떠올려 보세요',
-        ans: m.nerve, opts: pickOthers(idsOfKind('신경'), m.nerve, 3),
-        why: CARDS[m.nerve].why, cardId: m.nerve
-      });
+      mh += '<button class="mchip' + (k === ST.motion ? ' on' : '') + '" data-act="motion" data-m="' + k + '" type="button">' +
+        '<span class="ic">' + m.icon + '</span>' + m.label + '</button>';
     });
-    return shuffle(out);
+    $('sbot').innerHTML = '<div class="motions" id="motions">' + mh + '</div>' + scrubHTML(-100, 100, 0, ['신전', '0', '굴곡']);
+  } else {
+    $('layers').innerHTML = [
+      ['core', '코어 4', true], ['rectus', '복직근', true], ['oblique', '복사근', false], ['bone', '뼈', true]
+    ].map(function (l) {
+      return '<button class="lay' + (l[2] ? ' on' : '') + '" data-act="layer" data-key="' + l[0] + '" type="button"><i></i>' + l[1] + '</button>';
+    }).join('');
+    $('sbot').innerHTML =
+      '<div class="brmode">' +
+      '<button data-act="brmode" data-v="thoracic" class="' + (ST.brmode === 'thoracic' ? 'on' : '') + '" type="button">흉식호흡<small>필라테스</small></button>' +
+      '<button data-act="brmode" data-v="abdominal" class="' + (ST.brmode === 'abdominal' ? 'on' : '') + '" type="button">복식호흡<small>요가</small></button>' +
+      '</div>' +
+      '<div class="phase" id="phase"><span class="pdot" id="pdot"></span><b id="phTxt">들숨</b><span id="phSub">횡격막이 내려가고 갈비뼈가 열립니다</span></div>' +
+      scrubHTML(0, 100, Math.round(ST.breath * 100), ['날숨 · 코어 수축', '들숨 · 가득']);
   }
-  function buildEtyItems(onlyCardIds) {
-    var pool = ETY.filter(function (e) { return !onlyCardIds || onlyCardIds.indexOf(e.cardId) >= 0; });
-    if (!pool.length) pool = ETY.slice();
-    return shuffle(pool).slice(0, 8).map(function (e) {
-      return {
-        kind: 'ety',
-        q: '라틴어 부품 <b>' + e.la + '</b>(' + e.mean + ')에 대응하는 한자 부품은?',
-        hint: '한자어는 라틴어 부품을 1:1로 直譯했습니다',
-        ans: e.hanja, opts: pickOthers(HANJA_POOL, e.hanja, 3),
-        why: CARDS[e.cardId] ? CARDS[e.cardId].why : '',
-        cardId: e.cardId, label: e.la + ' = ' + e.hanja
-      };
-    });
-  }
+  bindScrub();
+  syncPlay();
+  syncReadout();
+}
 
-  function openQuiz(mode) {
-    Q.tab = mode === 'ety' ? 'ety' : 'motion';
-    Q.mode = mode === 'review' ? 'review' : Q.tab;
-    Q.items = Q.tab === 'ety' ? buildEtyItems() : buildMotionItems();
-    Q.i = 0; Q.correct = 0; Q.answered = false; Q.picked = -1; Q.done = false;
-    $('scrim').classList.add('on');
-    $('sheet').classList.add('on');
-    renderQuiz();
+function scrubHTML(min, max, val, ticks) {
+  var t = ticks.map(function (s) { return '<span>' + s + '</span>'; }).join('');
+  return '<div class="scrub">' +
+    '<button class="play" id="play" data-act="play" aria-label="재생" type="button">▶</button>' +
+    '<div class="rangewrap"><input type="range" id="angle" min="' + min + '" max="' + max + '" value="' + val + '" aria-label="각도">' +
+    '<div class="ticks">' + t + '</div></div>' +
+    '<span class="deg" id="deg">중립</span></div>';
+}
+function bindScrub() {
+  var el = $('angle'); if (!el) return;
+  el.addEventListener('input', function () {
+    var v = parseInt(this.value, 10);
+    stopPlay();
+    if (cur.ch === 'ch1') { ST.val = v; }
+    else { ST.breath = v / 100; }
+    syncReadout();
+    hideHint();
+  });
+}
+function syncPlay() {
+  var b = $('play'); if (!b) return;
+  var on = cur.ch === 'ch1' ? ST.playing : ST.bplay;
+  b.classList.toggle('on', on);
+  b.textContent = on ? '❚❚' : '▶';
+}
+function stopPlay() {
+  if (cur.ch === 'ch1') ST.playing = false; else ST.bplay = false;
+  syncPlay();
+}
+function syncReadout() {
+  var el = $('deg'); if (!el) return;
+  if (cur.ch === 'ch1') {
+    var m = MOTIONS[ST.motion], a = ST.val / 100;
+    var d = a < 0 ? m.min * -a : m.max * a;
+    d = Math.round(d);
+    var term = d === 0 ? '중립' : (a < 0 ? m.neg : m.pos);
+    el.innerHTML = (d === 0 ? '<b>0°</b> 중립' : '<b>' + d + '°</b> ' + term);
+    var L = document.querySelector('.ticks span:first-child'), R = document.querySelector('.ticks span:last-child');
+    if (L) L.textContent = m.neg; if (R) R.textContent = m.pos;
+  } else {
+    el.innerHTML = '<b>' + Math.round(ST.breath * 100) + '%</b> 들숨';
   }
-  function closeSheet() {
-    $('scrim').classList.remove('on');
-    $('sheet').classList.remove('on');
+}
+function updateChapterBar() {
+  var p = chapPct(cur.ch);
+  var bar = $('chBar'), pc = $('chPct');
+  if (bar) bar.style.width = (p * 100).toFixed(0) + '%';
+  if (pc) pc.textContent = Math.round(p * 100) + '%';
+}
+
+function updateDock() {
+  var isCh1 = cur.ch === 'ch1';
+  $('dock').innerHTML =
+    '<button class="dbtn" data-act="quiz-ety" type="button"><span>漢</span>어원 퀴즈</button>' +
+    '<button class="dbtn primary" data-act="quiz-mot" type="button"><span>' + (isCh1 ? '✥' : '◍') + '</span>' +
+    (isCh1 ? '동작 퀴즈' : '호흡 퀴즈') + '</button>' +
+    '<button class="dbtn" data-act="review" type="button"><span>↻</span>오늘 복습</button>';
+}
+
+/* ---------- 화면 전환 ---------- */
+function showScreen(name) {
+  $('home').classList.toggle('on', name === 'home');
+  $('chapter').classList.toggle('on', name === 'chapter');
+}
+function openChapter(id, cardId) {
+  var c = chById(id);
+  if (c.status !== 'open') { toast(c.no + '단원은 준비 중이에요 — 1·2단원 먼저'); return; }
+  cur.ch = id;
+  S.last = id; saveS();
+  $('chTitle').textContent = c.no + '단원';
+  $('chSub').textContent = c.title;
+  showScreen('chapter');
+  renderStageControls();
+  if (window.__ensureScene) window.__ensureScene(id);
+  renderChips();
+  updateDock();
+  var pick = cardId || (S.seen[id] && seenN(id) < chCards(id).length ? firstUnseen(id) : (S.seen[id] ? chCards(id)[0] : chCards(id)[0]));
+  renderCard(pick);
+  updateChapterBar();
+  if (!hinted) { showHint(); hinted = true; }
+  if (location.hash !== '#' + id) { try { history.replaceState(null, '', '#' + id); } catch (e) { } }
+}
+function firstUnseen(id) {
+  var ids = chCards(id), m = S.seen[id] || {};
+  for (var i = 0; i < ids.length; i++) if (!m[ids[i]]) return ids[i];
+  return ids[0];
+}
+function goHome() {
+  showScreen('home');
+  renderHome();
+  if (window.__pause3D) window.__pause3D();
+  try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
+}
+
+/* ---------- 힌트 ---------- */
+var hintT = null;
+function showHint() {
+  var h = $('hint'); if (!h) return;
+  h.classList.add('on');
+  clearTimeout(hintT);
+  hintT = setTimeout(function () { h.classList.remove('on'); }, 6500);
+}
+function hideHint() { var h = $('hint'); if (h) h.classList.remove('on'); clearTimeout(hintT); }
+
+/* ---------- 스테이지 상태 ---------- */
+var ST = {
+  motion: 'flex', val: 0, playing: false,
+  brmode: 'thoracic', breath: 0, bplay: true,
+  layers: { ch1: { sagittal: true, frontal: true, transverse: true },
+            ch2: { core: true, rectus: true, oblique: false, bone: true } }
+};
+
+
+/* ============================================================
+   퀴즈
+   ============================================================ */
+var Q = { ch: 'ch1', kind: 'mot', items: [], i: 0, correct: 0, answered: false, picked: -1, done: false, review: false };
+
+function shuffle(a) {
+  a = a.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
   }
+  return a;
+}
+function pickOthers(pool, ans, n) {
+  var o = shuffle(pool.filter(function (x) { return x !== ans; })).slice(0, n);
+  return shuffle(o.concat([ans]));
+}
 
-  function renderQuiz() {
-    var title = Q.mode === 'review' ? '오늘 복습' : (Q.tab === 'ety' ? '어원 퀴즈' : '동작 퀴즈');
-    var h = '<div class="grab"></div>';
-    h += '<div class="sh-h"><h2>' + title + '</h2><button class="x" data-act="qclose" aria-label="닫기">✕</button></div>';
-    if (Q.mode !== 'review') {
-      h += '<div class="qz-tabs">' +
-        '<button class="qz-tab' + (Q.tab === 'motion' ? ' on' : '') + '" data-act="qtab" data-val="motion">동작 · 주동근/신경</button>' +
-        '<button class="qz-tab' + (Q.tab === 'ety' ? ' on' : '') + '" data-act="qtab" data-val="ety">어원 짝맞추기</button>' +
-        '</div>';
-    }
-    h += '<div class="qz-body" id="qzbody"></div>';
-    $('sheet').innerHTML = '<div class="sheet-in">' + h + '</div>';
-    var box = $('qzbody');
+function buildMotItems(ch) {
+  return shuffle(QUIZ[ch] || []).map(function (q) {
+    return { kind: 'mot', q: q.q, opts: q.opts.slice(), ans: q.ans, why: q.why, card: q.card, hint: '' };
+  });
+}
+function buildEtyItems(ch, onlyCards) {
+  var pool = (ETY[ch] || []).filter(function (e) { return !onlyCards || onlyCards.indexOf(e.cardId) >= 0; });
+  if (!pool.length) pool = (ETY[ch] || []).slice();
+  return shuffle(pool).map(function (e) {
+    return {
+      kind: 'ety',
+      q: '라틴어 부품 <b>' + e.la + '</b> (' + e.mean + ')에 대응하는 한자는?',
+      opts: pickOthers(HANJA_POOL, e.hanja, 3),
+      ans: e.hanja, why: CARDS[e.cardId] ? CARDS[e.cardId].why : '',
+      card: e.cardId, hint: '', label: e.la + ' = ' + e.hanja
+    };
+  });
+}
 
-    if (Q.done || !Q.items.length) { box.innerHTML = summaryHTML(); return; }
+function openQuiz(kind) {
+  Q.ch = cur.ch;
+  Q.kind = kind; Q.review = false; Q.done = false;
+  if (kind === 'mot') Q.items = buildMotItems(cur.ch);
+  else Q.items = buildEtyItems(cur.ch, null).slice(0, 6);
+  Q.i = 0; Q.correct = 0; Q.answered = false; Q.picked = -1;
+  openSheet();
+  renderQuiz();
+}
+function openReview() {
+  var wrong = Object.keys(S.wrong[cur.ch] || {});
+  if (!wrong.length) { toast('틀린 카드가 없어요 — 퀴즈부터 풀어 보세요'); return; }
+  Q.ch = cur.ch; Q.kind = 'ety'; Q.review = true; Q.done = false;
+  Q.items = buildEtyItems(cur.ch, wrong).slice(0, 8);
+  Q.i = 0; Q.correct = 0; Q.answered = false; Q.picked = -1;
+  openSheet();
+  renderQuiz();
+}
+function openSheet() {
+  $('scrim').classList.add('on');
+  $('sheet').classList.add('on');
+}
+function closeSheet() {
+  $('scrim').classList.remove('on');
+  $('sheet').classList.remove('on');
+}
+
+function renderQuiz() {
+  var title = Q.review ? '오늘 복습' : (Q.kind === 'mot' ? QUIZ_TITLE[Q.ch] : '어원 퀴즈');
+  var h = '<div class="sheet-in"><div class="grab"></div>' +
+    '<div class="sh-h"><h2>' + title + '</h2><button class="x" data-act="q-close" aria-label="닫기">✕</button></div>';
+  if (!Q.review && !Q.done) {
+    h += '<div class="qz-tabs">' +
+      '<button class="qz-tab' + (Q.kind === 'mot' ? ' on' : '') + '" data-act="q-tab" data-v="mot" type="button">' + (cur.ch === 'ch1' ? '동작 · 용어' : '호흡 · 코어') + '</button>' +
+      '<button class="qz-tab' + (Q.kind === 'ety' ? ' on' : '') + '" data-act="q-tab" data-v="ety" type="button">어원 짝맞추기</button>' +
+      '</div>';
+  }
+  h += '<div class="qz-body">';
+  if (Q.done || !Q.items.length) {
+    h += summaryHTML();
+  } else {
     var it = Q.items[Q.i];
     var pct = Math.round((Q.i / Q.items.length) * 100);
-    var b = '';
-    b += '<div class="qz-meta"><span>' + (Q.i + 1) + ' / ' + Q.items.length + '</span><span class="bar"><i style="width:' + pct + '%"></i></span><span>정답 ' + Q.correct + '</span></div>';
-    b += '<div class="qcard"><div class="qm">' + (it.kind === 'motion' ? (it.type === 'muscle' ? 'MOTION → MUSCLE' : 'MOTION → NERVE') : 'LATIN → 漢字') + '</div>' +
-      '<div class="qq">' + it.q + '</div>' + (it.hint ? '<div class="qh">' + it.hint + '</div>' : '') + '</div>';
-    b += '<div class="opts">';
+    h += '<div class="qz-meta"><span>' + (Q.i + 1) + ' / ' + Q.items.length + '</span>' +
+      '<span class="bar"><i style="width:' + pct + '%"></i></span><span>정답 ' + Q.correct + '</span></div>';
+    h += '<div class="qcard"><div class="qm">' + (it.kind === 'mot' ? (Q.ch === 'ch1' ? 'MOTION' : 'BREATH') : 'LATIN → 漢字') + '</div>' +
+      '<div class="qq">' + it.q + '</div>' +
+      (it.hint ? '<div class="qh">' + it.hint + '</div>' : '') + '</div>';
+    h += '<div class="opts">';
     it.opts.forEach(function (o, i) {
       var cls = 'opt';
       if (Q.answered) {
         if (o === it.ans) cls += ' ok';
         else if (i === Q.picked) cls += ' no';
-      } else if (i === Q.picked) cls += ' sel';
-      var label = it.kind === 'motion'
-        ? CARDS[o].name + (it.type === 'nerve' ? '<small>' + CARDS[o].hanja + ' ' + CARDS[o].hanjaRead + '</small>' : '')
-        : o;
-      b += '<button class="' + cls + '" data-act="opt" data-i="' + i + '"' + (Q.answered ? ' disabled' : '') + '>' +
-        '<span class="on">' + String.fromCharCode(65 + i) + '</span><span class="ol">' + label + '</span></button>';
+      }
+      h += '<button class="' + cls + '" data-act="q-opt" data-i="' + i + '" type="button"' + (Q.answered ? ' disabled' : '') + '>' +
+        '<span class="on">' + String.fromCharCode(65 + i) + '</span><span class="ol">' + esc(o) + '</span></button>';
     });
-    b += '</div>';
+    h += '</div>';
     if (Q.answered) {
       var ok = it.opts[Q.picked] === it.ans;
-      b += '<div class="qfb' + (ok ? '' : ' no') + '"><b>' + (ok ? '정답' : '아쉬워요') + ' — ' +
-        (it.kind === 'motion' ? CARDS[it.ans].name : it.ans) + '</b><br>' + esc(it.why) + '</div>';
+      h += '<div class="qfb' + (ok ? '' : ' no') + '"><b>' + (ok ? '정답 — ' : '아쉬워요 — ') + esc(it.ans) + '</b>' + esc(it.why) + '</div>';
     }
-    b += '<div class="qfoot">' +
-      (Q.answered ? '<button class="qbtn ghost" data-act="qshow" data-card="' + it.cardId + '">카드 보기</button>' : '') +
-      '<button class="qbtn primary" data-act="qnext"' + (Q.answered ? '' : ' disabled') + '>' + (Q.i === Q.items.length - 1 ? '결과 보기' : '다음') + '</button>' +
-      '</div>';
-    box.innerHTML = b;
+    h += '<div class="qfoot">' +
+      (Q.answered && it.card ? '<button class="qbtn ghost" data-act="q-show" data-card="' + it.card + '" type="button">카드 보기</button>' : '') +
+      '<button class="qbtn primary" data-act="q-next" type="button"' + (Q.answered ? '' : ' disabled') + '>' +
+      (Q.i === Q.items.length - 1 ? '결과 보기' : '다음') + '</button></div>';
   }
+  h += '</div></div>';
+  $('sheet').innerHTML = h;
+}
 
-  function answerQuiz(i) {
-    if (Q.answered) return;
-    var it = Q.items[Q.i]; if (!it) return;
-    Q.picked = i; Q.answered = true;
-    var ok = it.opts[i] === it.ans;
-    if (ok) Q.correct++;
-    else markWrong(it);
-    state.answered++; if (ok) state.correct++; save();
-    renderQuiz();
+function summaryHTML() {
+  var total = Q.items.length || 1;
+  var frac = Q.correct / total;
+  var wrongItems = Q.items.filter(function (it) { return it._wrong; });
+  var h = '<div class="sumscore"><b>' + Q.correct + '</b><span>/ ' + total + ' 정답</span></div>';
+  h += '<div class="qfb' + (frac >= 0.7 ? '' : ' no') + '"><b>' + (frac >= 0.7 ? '이 단원 퀴즈 통과' : '조금 더 해 봐요') + '</b>' +
+    (frac >= 0.7 ? '틀린 카드는 "오늘 복습"에 쌓여 다음에 다시 나옵니다.' : '70% 이상이면 진행률에 반영됩니다. 틀린 카드는 오늘 복습에 쌓였어요.') + '</div>';
+  if (wrongItems.length) {
+    h += '<div class="sumlist" style="margin-top:8px">';
+    wrongItems.forEach(function (it) {
+      h += '<div class="sumrow"><span class="n">' + esc(CARDS[it.card] ? CARDS[it.card].name : it.label || '') + '</span><span class="s">오답</span></div>';
+    });
+    h += '</div>';
   }
-  function markWrong(it) {
-    it._wrong = true;
-    if (it.kind === 'motion') state.wrongMotions[it.motion] = (state.wrongMotions[it.motion] || 0) + 1;
-    else if (it.cardId) state.wrong[it.cardId] = (state.wrong[it.cardId] || 0) + 1;
-    save();
+  h += '<div class="qfoot"><button class="qbtn ghost" data-act="q-restart" type="button">다시 풀기</button>' +
+    '<button class="qbtn primary" data-act="q-close" type="button">닫기</button></div>';
+  return h;
+}
+
+function answerQuiz(i) {
+  if (Q.answered || Q.done) return;
+  var it = Q.items[Q.i]; if (!it) return;
+  Q.picked = i; Q.answered = true;
+  var ok = it.opts[i] === it.ans;
+  if (ok) Q.correct++; else markWrong(it);
+  renderQuiz();
+}
+function markWrong(it) {
+  it._wrong = true;
+  if (it.card) {
+    S.wrong[Q.ch] = S.wrong[Q.ch] || {};
+    S.wrong[Q.ch][it.card] = (S.wrong[Q.ch][it.card] || 0) + 1;
+    saveS();
   }
-  function nextQuestion() {
-    if (!Q.answered) return;
-    if (Q.i >= Q.items.length - 1) { Q.done = true; renderQuiz(); return; }
-    Q.i++; Q.answered = false; Q.picked = -1;
-    renderQuiz();
+}
+function nextQuestion() {
+  if (!Q.answered) return;
+  if (Q.i >= Q.items.length - 1) { finishQuiz(); return; }
+  Q.i++; Q.answered = false; Q.picked = -1;
+  renderQuiz();
+}
+function finishQuiz() {
+  Q.done = true;
+  var frac = Q.correct / (Q.items.length || 1);
+  if (!Q.review && frac >= 0.7) {
+    if (Q.kind === 'mot') S.mot[Q.ch] = Math.max(S.mot[Q.ch] || 0, Math.round(frac * 100) / 100);
+    else S.ety[Q.ch] = Math.max(S.ety[Q.ch] || 0, Math.round(frac * 100) / 100);
+    saveS();
   }
-  function summaryHTML() {
-    var wrongItems = Q.items.filter(function (it) { return it._wrong; });
-    var h = '<div class="sumscore"><b>' + Q.correct + '</b><span>/ ' + Q.items.length + ' 정답</span></div>';
-    h += '<div class="qfb">' + (Q.correct === Q.items.length ? '전부 맞혔어요. 이 동작은 이제 이름까지 붙습니다.' : '틀린 문제는 "오늘 복습"에 쌓였어요. 다음에 다시 나옵니다.') + '</div>';
-    if (wrongItems.length) {
-      h += '<div class="sumlist" style="margin-top:9px">';
-      wrongItems.forEach(function (it) {
-        h += '<div class="sumrow"><span class="n">' + (it.kind === 'motion' ? MOTIONS[it.motion].name + ' · ' + (it.type === 'muscle' ? '주동근' : '신경') : it.label) + '</span><span class="s">오답</span></div>';
-      });
-      h += '</div>';
+  renderQuiz();
+  updateChapterBar();
+  renderHome();
+  if (Q.ch === cur.ch && cur.ch === 'ch2') { /* noop */ }
+}
+function restartQuiz() { openQuiz(Q.kind); }
+
+
+/* ============================================================
+   3D 엔진 · 1단원 (해부학적 자세 · 3면 · 움직임)
+   ============================================================ */
+var DEG = Math.PI / 180;
+var R = { renderer: null, canvas: null, W: {}, active: null };
+
+function initRenderer() {
+  var canvas = $('scene');
+  try {
+    R.renderer = new T.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
+  } catch (e) {
+    $('stage').innerHTML = '<div style="position:absolute;inset:0;display:grid;place-items:center;color:#C9D6E2;font-size:12px;text-align:center;padding:30px;line-height:1.7">이 브라우저에서 3D(WebGL)를 열 수 없어요.<br>Chrome·Safari 최신 버전에서 다시 열어 주세요.</div>';
+    return false;
+  }
+  R.canvas = canvas;
+  R.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  if ('outputColorSpace' in R.renderer) R.renderer.outputColorSpace = T.SRGBColorSpace;
+  R.renderer.toneMapping = T.ACESFilmicToneMapping;
+  R.renderer.toneMappingExposure = 1.06;
+  R.renderer.setClearAlpha(0);
+  bindOrbit();
+  return true;
+}
+
+/* ---------- 궤도 카메라 ---------- */
+function Orbit(cam, dom) {
+  this.cam = cam; this.dom = dom;
+  this.center = new T.Vector3();
+  this.sphere = 1; this.fitR = 3;
+  this.theta = 0.3; this.phi = 1.35; this.zoom = 1;
+  this.tTheta = 0.3; this.tPhi = 1.35; this.tZoom = 1;
+  this.home = { theta: 0.3, phi: 1.35, zoom: 1 };
+  this.minZoom = 0.6; this.maxZoom = 1.9;
+  this.insetTop = 56; this.insetBottom = 100;
+}
+Orbit.prototype.set = function (center, sphere, theta, phi) {
+  this.center.copy(center); this.sphere = sphere;
+  this.home = { theta: theta, phi: phi, zoom: 1 };
+  this.theta = this.tTheta = theta;
+  this.phi = this.tPhi = phi;
+  this.zoom = this.tZoom = 1;
+  this.fit();
+};
+Orbit.prototype.fit = function () {
+  var w = this.dom.clientWidth || 360, h = this.dom.clientHeight || 300;
+  this.cam.aspect = w / h; this.cam.updateProjectionMatrix();
+  var vf = this.cam.fov * DEG;
+  var hf = 2 * Math.atan(Math.tan(vf / 2) * (w / h));
+  /* 컨트롤이 덮는 위·아래 여백을 빼고 모델이 들어오게 — 작은 화면에서 발이 가려지지 않도록 */
+  var usable = Math.max(120, h - this.insetTop - this.insetBottom);
+  var dV = this.sphere / Math.sin(vf / 2) * Math.min(1.35, h / usable);
+  var dH = this.sphere / Math.sin(hf / 2);
+  this.fitR = Math.max(dV, dH) * 0.96;
+  this.radius = this.fitR * this.zoom;
+};
+Orbit.prototype.reset = function () {
+  /* 즉시 복귀 — 느린 기기에서도 한 번에 제자리로 (사파리에서 모델이 사라진 뒤 되찾기) */
+  this.tTheta = this.theta = this.home.theta;
+  this.tPhi = this.phi = this.home.phi;
+  this.tZoom = this.zoom = this.home.zoom;
+};
+Orbit.prototype.step = function () {
+  this.theta += (this.tTheta - this.theta) * 0.26;
+  this.phi += (this.tPhi - this.phi) * 0.26;
+  this.zoom += (this.tZoom - this.zoom) * 0.24;
+  this.radius = this.fitR * this.zoom;
+  var t = this.center;
+  var h = this.dom.clientHeight || 300;
+  var offPx = 12;
+  var off = (offPx / h) * (2 * this.radius * Math.tan(this.cam.fov * DEG / 2));
+  var ty = t.y - off;
+  var sp = Math.sin(this.phi), cp = Math.cos(this.phi);
+  this.cam.position.set(
+    t.x + this.radius * sp * Math.sin(this.theta),
+    ty + this.radius * cp,
+    t.z + this.radius * sp * Math.cos(this.theta)
+  );
+  this.cam.lookAt(t.x, ty, t.z);
+};
+
+var PTR = { map: {}, drag: false, moved: 0, lx: 0, ly: 0, pinch: 0, t0: 0 };
+function activeW() { return R.W[R.active]; }
+function bindOrbit() {
+  var el = R.canvas;
+  el.addEventListener('pointerdown', function (e) {
+    PTR.map[e.pointerId] = { x: e.clientX, y: e.clientY };
+    var n = Object.keys(PTR.map).length;
+    if (n > 1) { PTR.drag = false; PTR.pinch = 0; return; }
+    PTR.drag = true; PTR.moved = 0; PTR.lx = e.clientX; PTR.ly = e.clientY; PTR.t0 = performance.now();
+    try { el.setPointerCapture(e.pointerId); } catch (err) { }
+    hideHint();
+  });
+  el.addEventListener('pointermove', function (e) {
+    if (PTR.map[e.pointerId]) { PTR.map[e.pointerId].x = e.clientX; PTR.map[e.pointerId].y = e.clientY; }
+    var ids = Object.keys(PTR.map);
+    var W = activeW(); if (!W) return;
+    if (ids.length === 2) {
+      var a = PTR.map[ids[0]], b = PTR.map[ids[1]];
+      var d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (PTR.pinch) {
+        var k = d / (PTR.pinch || d);
+        W.orbit.tZoom = Math.max(W.orbit.minZoom, Math.min(W.orbit.maxZoom, W.orbit.tZoom / k));
+        W.orbit.zoom = Math.max(W.orbit.minZoom, Math.min(W.orbit.maxZoom, W.orbit.zoom / k));
+      }
+      PTR.pinch = d; PTR.drag = false;
+      return;
     }
-    h += '<div class="qfoot"><button class="qbtn ghost" data-act="qrestart">다시 풀기</button><button class="qbtn primary" data-act="qclose">닫기</button></div>';
-    return h;
+    if (!PTR.drag) return;
+    var dx = e.clientX - PTR.lx, dy = e.clientY - PTR.ly;
+    PTR.lx = e.clientX; PTR.ly = e.clientY;
+    PTR.moved += Math.abs(dx) + Math.abs(dy);
+    if (PTR.moved < 3) return;
+    W.orbit.tTheta -= dx * 0.008;
+    W.orbit.theta -= dx * 0.008;
+    W.orbit.tPhi = Math.max(0.55, Math.min(2.35, W.orbit.tPhi - dy * 0.006));
+    W.orbit.phi = Math.max(0.55, Math.min(2.35, W.orbit.phi - dy * 0.006));
+  });
+  function up(e) {
+    delete PTR.map[e.pointerId];
+    if (Object.keys(PTR.map).length < 2) PTR.pinch = 0;
+    if (!PTR.drag) { return; }
+    PTR.drag = false;
+    if (PTR.moved < 9 && performance.now() - PTR.t0 < 600) {
+      var W = activeW();
+      if (W && W.pick) W.pick(e.clientX, e.clientY);
+    }
+  }
+  el.addEventListener('pointerup', up);
+  el.addEventListener('pointercancel', function (e) { delete PTR.map[e.pointerId]; PTR.drag = false; PTR.pinch = 0; });
+  el.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    var W = activeW(); if (!W) return;
+    var z = W.orbit.tZoom * (1 + e.deltaY * 0.0012);
+    W.orbit.tZoom = Math.max(W.orbit.minZoom, Math.min(W.orbit.maxZoom, z));
+    hideHint();
+  }, { passive: false });
+  el.addEventListener('dblclick', function () { resetView(true); });
+  /* 사파리 페이지 확대 제스처 차단 — 3D 위에서 화면 전체가 확대되면 모델이 사라져 보임 */
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (k) {
+    el.addEventListener(k, function (e) { e.preventDefault(); }, { passive: false });
+  });
+}
+
+function resize3D() {
+  if (!R.renderer) return;
+  var el = $('stage'); if (!el) return;
+  var w = el.clientWidth || 360, h = el.clientHeight || 300;
+  R.renderer.setSize(w, h, false);
+  R.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  var W = activeW();
+  if (W) { W.cam.aspect = w / h; W.cam.updateProjectionMatrix(); W.orbit.fit(); }
+}
+
+function resetView(quiet) {
+  var W = activeW(); if (!W) return;
+  W.orbit.reset();
+  if (!quiet) toast('시점을 처음 자리로 돌렸어요');
+  hideHint();
+}
+window.addEventListener('resize', resize3D);
+window.addEventListener('orientationchange', function () { setTimeout(resize3D, 260); });
+document.addEventListener('visibilitychange', function () { if (!document.hidden) setTimeout(resize3D, 80); });
+
+/* ---------- 공통 헬퍼 ---------- */
+function tube(pts, r, mat, parent, radial) {
+  var curve = new T.CatmullRomCurve3(pts.map(function (p) { return new T.Vector3(p[0], p[1], p[2]); }));
+  var m = new T.Mesh(new T.TubeGeometry(curve, 26, r, radial || 8, false), mat);
+  parent.add(m);
+  return m;
+}
+function ball(r, mat, parent, x, y, z, sx, sy, sz) {
+  var m = new T.Mesh(new T.SphereGeometry(r, 18, 14), mat);
+  m.position.set(x, y, z); m.scale.set(sx || 1, sy || 1, sz || 1);
+  parent.add(m); return m;
+}
+function box(w, h, d, mat, parent, x, y, z) {
+  var m = new T.Mesh(new T.BoxGeometry(w, h, d), mat);
+  m.position.set(x, y, z); parent.add(m); return m;
+}
+function radialTex(inner, outer) {
+  var c = document.createElement('canvas'); c.width = c.height = 256;
+  var g = c.getContext('2d');
+  var grd = g.createRadialGradient(128, 128, 6, 128, 128, 126);
+  grd.addColorStop(0, inner); grd.addColorStop(0.55, outer); grd.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = grd; g.fillRect(0, 0, 256, 256);
+  var t = new T.CanvasTexture(c); if ('colorSpace' in t) t.colorSpace = T.SRGBColorSpace;
+  return t;
+}
+function labelSprite(kr, en, color) {
+  var c = document.createElement('canvas'); c.width = 512; c.height = 140;
+  var g = c.getContext('2d');
+  g.textBaseline = 'alphabetic';
+  /* pill background for legibility over the planes */
+  var tw = 10 + 62 * kr.length + 18;
+  g.fillStyle = 'rgba(8,13,19,.78)';
+  g.strokeStyle = color || 'rgba(255,255,255,.3)';
+  g.lineWidth = 3;
+  var x0 = 4, y0 = 8, w0 = Math.min(500, Math.max(tw, 190)), h0 = 124, r0 = 24;
+  g.beginPath();
+  g.moveTo(x0 + r0, y0); g.lineTo(x0 + w0 - r0, y0); g.quadraticCurveTo(x0 + w0, y0, x0 + w0, y0 + r0);
+  g.lineTo(x0 + w0, y0 + h0 - r0); g.quadraticCurveTo(x0 + w0, y0 + h0, x0 + w0 - r0, y0 + h0);
+  g.lineTo(x0 + r0, y0 + h0); g.quadraticCurveTo(x0, y0 + h0, x0, y0 + h0 - r0);
+  g.lineTo(x0, y0 + r0); g.quadraticCurveTo(x0, y0, x0 + r0, y0); g.closePath();
+  g.fill(); g.stroke();
+  g.fillStyle = '#FFF7E8';
+  g.font = '700 58px -apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif';
+  g.fillText(kr, 24, 72);
+  g.globalAlpha = 0.7;
+  g.fillStyle = '#E7EEF5';
+  g.font = '800 24px -apple-system,"Apple SD Gothic Neo","Helvetica Neue",sans-serif';
+  g.fillText(en, 26, 112);
+  var tex = new T.CanvasTexture(c); if ('colorSpace' in tex) tex.colorSpace = T.SRGBColorSpace;
+  var s = new T.Sprite(new T.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: false, opacity: 0.95 }));
+  s.scale.set(0.44, 0.12, 1);
+  return s;
+}
+function lights(scene) {
+  scene.add(new T.HemisphereLight(0xC4DCF2, 0x0B1218, 1.25));
+  var key = new T.DirectionalLight(0xFFF3E2, 2.9); key.position.set(2.6, 4.4, 5.2); scene.add(key);
+  var rim = new T.DirectionalLight(0x74A9F0, 2.0); rim.position.set(-4.2, 2.2, -4.4); scene.add(rim);
+  var fill = new T.DirectionalLight(0xFFC48E, 0.8); fill.position.set(-1.6, -2.4, 3.4); scene.add(fill);
+}
+function floorDisc(scene, y, r) {
+  var m = new T.Mesh(new T.CircleGeometry(r, 48), new T.MeshBasicMaterial({
+    map: radialTex('rgba(120,165,205,.30)', 'rgba(90,130,170,.07)'),
+    transparent: true, depthWrite: false, blending: T.AdditiveBlending
+  }));
+  m.rotation.x = -Math.PI / 2; m.position.y = y; scene.add(m);
+  return m;
+}
+
+/* ============================================================
+   1단원 — 해부학적 자세 · 3면 · 움직임
+   ============================================================ */
+function buildCh1() {
+  var W = { ready: false, name: 'ch1' };
+  var scene = new T.Scene(); W.scene = scene;
+  var cam = new T.PerspectiveCamera(34, 1, 0.1, 100); W.cam = cam;
+  lights(scene);
+  floorDisc(scene, 0.001, 1.15);
+
+  var bone = new T.MeshStandardMaterial({ color: 0xF3E6CB, roughness: 0.46, metalness: 0.03, emissive: 0x3A2911, emissiveIntensity: 0.3 });
+  var bone2 = new T.MeshStandardMaterial({ color: 0xE2D1AE, roughness: 0.52, metalness: 0.02, emissive: 0x2E2009, emissiveIntensity: 0.24 });
+  var skin = new T.MeshBasicMaterial({ color: 0x9DC2DC, transparent: true, opacity: 0.05, depthWrite: false, side: T.DoubleSide });
+
+  var root = new T.Group(); scene.add(root);
+  var torso = new T.Group(); root.add(torso);     // 회전(몸통 비틀기)용
+  var armR = new T.Group(); armR.position.set(0.176, 1.452, 0); torso.add(armR);
+  var elbowR = new T.Group(); elbowR.position.set(0, -0.29, 0); armR.add(elbowR);
+
+  /* --- 척추 · 골반 (하지와 함께 고정) --- */
+  tube([[0, 0.93, -0.035], [0, 1.02, -0.052], [0, 1.14, -0.045], [0, 1.28, -0.058], [0, 1.42, -0.048], [0, 1.53, -0.012]], 0.019, bone, root, 8);
+  for (var v = 0; v < 12; v++) {
+    var vy = 0.99 + v * 0.045;
+    var sp = box(0.026, 0.014, 0.028, bone2, root, 0, vy, -0.068 - (v > 7 ? 0.006 : 0));
+    sp.rotation.x = 0.24;
+  }
+  /* 골반 */
+  var ppts1 = [[0.048, 0], [0.068, 0.010], [0.083, 0.026], [0.088, 0.044], [0.080, 0.060], [0.066, 0.067]];
+  var pbowl = new T.Mesh(new T.LatheGeometry(ppts1.map(function (p) { return new T.Vector2(p[0], p[1]); }), 32), bone2);
+  pbowl.position.set(0, 0.858, -0.004); pbowl.scale.z = 0.78; root.add(pbowl);
+  var sac = box(0.046, 0.07, 0.02, bone2, root, 0, 0.915, -0.058); sac.rotation.x = -0.22;
+  box(0.024, 0.018, 0.016, bone2, root, 0, 0.852, 0.05);
+  /* 다리 */
+  [-1, 1].forEach(function (s) {
+    tube([[0.070 * s, 0.878, 0.0], [0.079 * s, 0.80, 0.004], [0.083 * s, 0.60, 0.006], [0.084 * s, 0.475, 0.004]], 0.023, bone, root, 8);
+    ball(0.026, bone2, root, 0.084 * s, 0.462, 0.016, 1, 1.05, 0.75);
+    tube([[0.084 * s, 0.452, 0.004], [0.083 * s, 0.30, 0.006], [0.081 * s, 0.095, 0.008]], 0.019, bone, root, 8);
+    tube([[0.100 * s, 0.435, 0.0], [0.099 * s, 0.28, 0.0], [0.095 * s, 0.10, 0.004]], 0.008, bone2, root, 6);
+    ball(0.031, bone2, root, 0.081 * s, 0.058, 0.005, 1, 0.85, 1);
+    box(0.058, 0.026, 0.115, bone2, root, 0.081 * s, 0.036, 0.038);
+    box(0.05, 0.018, 0.045, bone2, root, 0.081 * s, 0.026, 0.118);
+  });
+  /* 몸통 뼈 */
+  [-1, 1].forEach(function (s) {
+    tube([[0.012 * s, 1.458, 0.075], [0.07 * s, 1.468, 0.052], [0.13 * s, 1.472, 0.018], [0.176 * s, 1.462, -0.004]], 0.0105, bone, root, 7);
+    var scap = box(0.088, 0.108, 0.010, bone2, torso, 0.118 * s, 1.375, -0.062);
+    scap.rotation.z = -0.12 * s; scap.rotation.y = 0.16 * s;
+    /* 갈비뼈 */
+    for (var i = 0; i < 9; i++) {
+      var y0 = 1.462 - i * 0.028;
+      var t = i / 8;
+      var w = 0.072 + 0.085 * Math.sin(Math.PI * (0.16 + 0.72 * t));
+      tube([[0.018 * s, y0, -0.055], [w * 0.55 * s, y0 - 0.004, -0.062], [w * s, y0 - 0.014, -0.004],
+        [w * 0.72 * s, y0 - 0.03, 0.062], [0.03 * s, y0 - 0.044, 0.092]], 0.0072, bone2, torso, 6);
+    }
+  });
+  var sternum = box(0.036, 0.15, 0.018, bone, torso, 0, 1.375, 0.098); sternum.rotation.x = 0.06;
+
+  /* 머리 · 목 */
+  for (var cv = 0; cv < 3; cv++) {
+    ball(0.020, bone2, torso, 0, 1.492 + cv * 0.028, -0.004 + cv * 0.004, 1.15, 0.9, 1.15);
+  }
+  var skull = ball(0.077, bone, torso, 0, 1.626, 0.006, 0.95, 1.12, 1.0);
+  var face = ball(0.050, bone2, torso, 0, 1.585, 0.041, 0.92, 0.86, 0.8);
+  var jaw = box(0.058, 0.026, 0.05, bone2, torso, 0, 1.563, 0.03);
+  jaw.rotation.x = 0.1;
+  [-1, 1].forEach(function (s) {
+    var brow = box(0.038, 0.010, 0.014, bone2, torso, 0.024 * s, 1.652, 0.066);
+    brow.rotation.z = -0.18 * s;
+    ball(0.016, bone2, torso, 0.045 * s, 1.617, 0.052, 1, 0.8, 0.8);
+  });
+
+  /* --- 오른팔 (움직이는 쪽) --- */
+  function armBones(armGrp, elGrp, side) {
+    tube([[0, 0.02, 0], [0, -0.10, 0], [0, -0.20, 0], [0, -0.285, 0]], 0.017, bone, armGrp, 8);
+    ball(0.026, bone, armGrp, 0, 0.006, 0, 1, 1, 1);
+    tube([[0.012, -0.012, 0.012], [0.016, -0.10, 0.010], [0.017, -0.24, 0.008]], 0.0095, bone2, elGrp, 6);
+    tube([[-0.011, -0.012, -0.008], [-0.012, -0.10, -0.006], [-0.010, -0.245, -0.004]], 0.0085, bone, elGrp, 6);
+    ball(0.024, bone2, elGrp, 0, -0.008, 0, 1, 1, 1);
+    box(0.046, 0.062, 0.020, bone2, elGrp, 0.002, -0.283, 0.006);
+    for (var f = 0; f < 4; f++) {
+      box(0.009, 0.042, 0.010, bone2, elGrp, -0.016 + f * 0.011, -0.333, 0.008);
+    }
+    box(0.010, 0.034, 0.010, bone2, elGrp, 0.030, -0.28, 0.012);
+  }
+  armBones(armR, elbowR, 1);
+  var armL = new T.Group(); armL.position.set(-0.176, 1.452, 0); torso.add(armL);
+  var elbowL = new T.Group(); elbowL.position.set(0, -0.29, 0); armL.add(elbowL);
+  armBones(armL, elbowL, -1);
+  armL.rotation.z = -0.05;
+
+  /* --- 투명 몸 실루엣 --- */
+  var body = new T.Group(); torso.add(body);
+  ball(0.098, skin, body, 0, 1.612, 0.002, 1, 1.16, 1.02);
+  ball(1, skin, torso, 0, 1.34, -0.005, 0.155, 0.175, 0.098);
+  ball(1, skin, torso, 0, 1.10, 0.005, 0.128, 0.135, 0.088);
+  ball(1, skin, root, 0, 0.925, -0.005, 0.152, 0.10, 0.095);
+  [armR, armL].forEach(function (a) {
+    ball(1, skin, a, 0, -0.145, 0, 0.052, 0.16, 0.052);
+  });
+  [elbowR, elbowL].forEach(function (e) {
+    ball(1, skin, e, 0, -0.13, 0, 0.042, 0.15, 0.042);
+    ball(1, skin, e, 0, -0.30, 0.004, 0.036, 0.055, 0.026);
+  });
+  [-1, 1].forEach(function (s) {
+    ball(1, skin, root, 0.078 * s, 0.69, 0.004, 0.072, 0.25, 0.072);
+    ball(1, skin, root, 0.083 * s, 0.28, 0.006, 0.055, 0.205, 0.055);
+  });
+
+  /* --- 3면 --- */
+  W.planes = {};
+  function planeGroup(key, w, h, color, pos, rot, kr, en, labelPos) {
+    var g = new T.Group();
+    var geo = new T.PlaneGeometry(w, h);
+    var mesh = new T.Mesh(geo, new T.MeshBasicMaterial({
+      color: color, transparent: true, opacity: 0.055, side: T.DoubleSide,
+      depthWrite: false, blending: T.AdditiveBlending
+    }));
+    g.add(mesh);
+    var edges = new T.LineSegments(new T.EdgesGeometry(geo), new T.LineBasicMaterial({ color: color, transparent: true, opacity: 0.42, depthWrite: false }));
+    g.add(edges);
+    g.position.set(pos[0], pos[1], pos[2]);
+    if (rot) g.rotation.set(rot[0], rot[1], rot[2]);
+    g.visible = true;
+    root.add(g);
+    var lb = labelSprite(kr, en, '#' + color.toString(16).padStart(6, '0'));
+    lb.position.set(labelPos[0], labelPos[1], labelPos[2]);
+    root.add(lb);
+    W.planes[key] = { group: g, mesh: mesh, edges: edges, label: lb, base: 0.055 };
+    return g;
+  }
+  planeGroup('sagittal', 1.02, 1.92, 0xE8836A, [0, 0.92, 0], [0, Math.PI / 2, 0], '시상면', 'SAGITTAL', [-0.02, 1.75, 0.42]);
+  planeGroup('frontal', 1.06, 1.92, 0x6FA8DC, [0, 0.92, 0], null, '관상면', 'FRONTAL', [0.40, 1.82, 0.02]);
+  planeGroup('transverse', 1.06, 0.80, 0xE6C25C, [0, 1.10, 0], [-Math.PI / 2, 0, 0], '수평면', 'TRANSVERSE', [0.36, 1.20, 0.30]);
+
+  /* --- 카메라 --- */
+  W.orbit = new Orbit(cam, $('stage'));
+  W.orbit.set(new T.Vector3(0, 0.84, 0), 0.98, 0.26, 1.34);
+
+  /* --- 움직임 적용 --- */
+  function applyMotion(deg) {
+    armR.rotation.set(0, 0, 0);
+    armL.rotation.set(0, 0, -0.05);
+    elbowR.rotation.set(0, 0, 0);
+    torso.rotation.set(0, 0, 0);
+    var k = ST.motion;
+    if (k === 'flex') armR.rotation.x = -deg * DEG;
+    else if (k === 'abd') armR.rotation.z = deg * DEG;
+    else if (k === 'rot') torso.rotation.y = deg * DEG;
+    else if (k === 'elbow') elbowR.rotation.x = -deg * DEG;
+    /* 해당 면 강조 */
+    var m = MOTIONS[k];
+    Object.keys(W.planes).forEach(function (pk) {
+      var p = W.planes[pk];
+      var on = !!(ST.layers.ch1 || {})[pk];
+      p.group.visible = on; p.label.visible = on;
+      var act = pk === m.plane;
+      p.mesh.material.opacity = act ? 0.135 : 0.045;
+      p.edges.material.opacity = act ? 0.85 : 0.3;
+      p.label.material.opacity = act ? 1 : 0.5;
+    });
   }
 
-  function startReview() {
-    var ids = Object.keys(state.wrong);
-    var mks = Object.keys(state.wrongMotions);
-    if (!ids.length && !mks.length) { toast('오늘 틀린 카드가 없어요. 퀴즈부터 풀어 보세요.'); return; }
-    var items = [];
-    if (ids.length) items = items.concat(buildEtyItems(ids));
-    if (mks.length) items = items.concat(buildMotionItems(mks));
-    if (!items.length) { toast('복습할 카드가 없어요'); return; }
-    Q.items = shuffle(items).slice(0, 10);
-    Q.tab = 'motion'; Q.mode = 'review'; Q.i = 0; Q.correct = 0; Q.answered = false; Q.picked = -1; Q.done = false;
-    $('scrim').classList.add('on');
-    $('sheet').classList.add('on');
-    renderQuiz();
-  }
+  var lastUI = 0;
+  W.update = function (t) {
+    if (ST.playing && cur.ch === 'ch1') {
+      ST.val = 100 * Math.sin(t * 0.8);
+      if (t - lastUI > 0.12) {
+        lastUI = t;
+        var el = $('angle'); if (el) el.value = ST.val;
+        syncReadout();
+      }
+    }
+    var m = MOTIONS[ST.motion], a = ST.val / 100;
+    applyMotion(a < 0 ? m.min * -a : m.max * a);
+  };
 
-  /* ============================================================
-     7. 기타 UI
-     ============================================================ */
-  var toastT = null;
-  function toast(msg) {
-    var el = $('toast');
-    el.textContent = msg; el.classList.add('on');
-    clearTimeout(toastT);
-    toastT = setTimeout(function () { el.classList.remove('on'); }, 3000);
-  }
-  var hintT = null;
-  function showHint() {
-    var h = $('hint'); if (!h) return;
-    h.classList.add('on');
-    hintT = setTimeout(function () { h.classList.remove('on'); }, 7000);
-  }
-  function hideHint() { var h = $('hint'); if (h) h.classList.remove('on'); clearTimeout(hintT); }
+  W.setLayer = function (key, on) {
+    var p = W.planes[key]; if (!p) return;
+    p.group.visible = on; p.label.visible = on;
+  };
 
-  /* ============================================================
-     8. 시작
-     ============================================================ */
-  function init() {
-    $('mchips').innerHTML = Object.keys(MOTIONS).map(function (k) {
-      var m = MOTIONS[k];
-      return '<button class="mchip' + (k === activeMotion ? ' on' : '') + '" data-motion="' + k + '" title="' + m.name + ' · ' + m.sec + '"><span class="ic">' + m.icon + '</span>' + m.short + '</button>';
-    }).join('');
-
-    renderCard('musculus');
-    bindUI();
-    buildScene();
-    setMotion('elbowFlex', false, true); // 3D는 바로 조작 가능, 카드는 오프닝 유지
-    selectedTile = null;
-    syncSlider();
-    showHint();
-  }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
-
-  window.__ANATOMY = {
-    state: function () { return { card: currentId, motion: activeMotion, p: playState.p, playing: playState.playing, ready: W.ready }; },
-    setMotion: function (k) { setMotion(k, false); },
-    setProgress: function (p) { playState.playing = false; playState.p = p; syncSlider(); },
-    select: function (id) { selectTissue(id, false); },
-    cards: function () { return ORDER.slice(); },
-    cardData: function (id) { return CARDS[id]; },
-    openQuiz: openQuiz, answer: answerQuiz, next: nextQuestion,
-    quizState: function () {
-      var it = Q.items[Q.i];
-      return { tab: Q.tab, mode: Q.mode, i: Q.i, n: Q.items.length, correct: Q.correct, done: Q.done, answered: Q.answered, ans: it ? it.ans : null, q: it ? it.q : null, opts: it ? it.opts : null };
-    },
-    layer: setLayer,
-    setCam: function (t, ph, r) { W.camGoal.theta = t; W.camGoal.phi = ph; W.fitZoom = 1.0; W.cam.theta = t; W.cam.phi = ph; W.cam.radius = r; updateCamera(true); },
-    screenBounds: function () {
-      var ys = [], xs = [];
-      W.fitPts.forEach(function (o) {
-        var v = new T.Vector3(); o.getWorldPosition(v); v.project(W.camera);
-        xs.push((v.x * 0.5 + 0.5) * W.view.clientWidth);
-        ys.push((-v.y * 0.5 + 0.5) * W.view.clientHeight);
-      });
-      return { top: Math.round(Math.min.apply(null, ys)), bottom: Math.round(Math.max.apply(null, ys)),
-               left: Math.round(Math.min.apply(null, xs)), right: Math.round(Math.max.apply(null, xs)),
-               h: W.view.clientHeight, w: W.view.clientWidth };
-    },
-    muscleInfo: function () {
-      return W.muscles.map(function (mu) {
-        var a = new T.Vector3(), b = new T.Vector3();
-        mu.A.getWorldPosition(a); mu.B.getWorldPosition(b);
-        return { id: mu.def.id, a: a.toArray().map(function (n) { return +n.toFixed(2); }), b: b.toArray().map(function (n) { return +n.toFixed(2); }), len: +mu.mesh.scale.y.toFixed(2), r: mu.def.r };
-      });
-    },
-    resetProgress: function () { try { localStorage.removeItem(LS); } catch (e) { } },
-    sceneInfo: function () {
-      var meshes = 0, tris = 0;
-      W.scene.traverse(function (o) { if (o.isMesh && o.geometry) { meshes++; var g = o.geometry; tris += (g.index ? g.index.count : (g.attributes.position ? g.attributes.position.count : 0)) / 3; } });
-      return { meshes: meshes, tris: Math.round(tris), muscles: W.muscles.length, nerves: W.nerves.length, pickables: W.pickables.length };
+  W.pick = function (cx, cy) {
+    if (!W.racy) W.racy = new T.Raycaster();
+    var r = R.canvas.getBoundingClientRect();
+    var ndc = new T.Vector2(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
+    W.racy.setFromCamera(ndc, cam);
+    var targets = [];
+    Object.keys(W.planes).forEach(function (k) { if (W.planes[k].group.visible) targets.push(W.planes[k].mesh); });
+    var hits = W.racy.intersectObjects(targets, false);
+    if (hits.length) {
+      var key = null;
+      Object.keys(W.planes).forEach(function (k) { if (W.planes[k].mesh === hits[0].object) key = k; });
+      var map = { sagittal: 'sagittalis', frontal: 'frontalis', transverse: 'transversus' };
+      if (key && map[key]) {
+        renderCard(map[key]);
+        toast(({ sagittal: '시상면', frontal: '관상면', transverse: '수평면' })[key] + ' — 좌우/앞뒤/위아래를 나누는 면');
+      }
     }
   };
-})();
 
+  W.resize = function () { W.orbit.fit(); };
+  W.ready = true;
+  return W;
+}
+
+window.__ensureScene = function (id) {
+  if (!R.renderer && !initRenderer()) return;
+  if (!R.W[id]) R.W[id] = id === 'ch1' ? buildCh1() : buildCh2();
+  R.active = id;
+  var W = R.W[id], st = (ST.layers || {})[id] || {};
+  if (W && W.setLayer) Object.keys(st).forEach(function (k) { W.setLayer(k, st[k]); });
+  refreshCameraSize();
+};
+function refreshCameraSize() {
+  if (!R.renderer) return;
+  var el = $('stage'); if (!el) return;
+  var w = el.clientWidth || 360, h = el.clientHeight || 300;
+  R.renderer.setSize(w, h, false);
+  var W = activeW();
+  if (W) { W.cam.aspect = w / h; W.cam.updateProjectionMatrix(); W.orbit.fit(); }
+}
+window.__pause3D = function () { };
+window.__focus3D = function (ch, cardId) {
+  var W = R.W[ch];
+  if (W && W.focus) W.focus(cardId);
+};
+
+(function loop(ts) {
+  requestAnimationFrame(loop);
+  if (!R.renderer) return;
+  var W = activeW();
+  if (!W || !W.ready) return;
+  if (!$('chapter') || !$('chapter').classList.contains('on')) return;
+  var t = (ts || 0) / 1000;
+  W.update(t);
+  W.orbit.step();
+  R.renderer.render(W.scene, W.cam);
+})(0);
+
+
+/* ============================================================
+   2단원 — 흉곽 · 요추 · 골반 + 코어 4대 근육 + 호흡
+   ============================================================ */
+function buildCh2() {
+  var W = { ready: false, name: 'ch2' };
+  var scene = new T.Scene(); W.scene = scene;
+  var cam = new T.PerspectiveCamera(34, 1, 0.05, 100); W.cam = cam;
+  lights(scene);
+  floorDisc(scene, 0.60, 0.75);
+
+  var bone = new T.MeshStandardMaterial({ color: 0xF3E6CB, roughness: 0.46, metalness: 0.03, emissive: 0x3A2911, emissiveIntensity: 0.3 });
+  var bone2 = new T.MeshStandardMaterial({ color: 0xE2D1AE, roughness: 0.52, metalness: 0.02, emissive: 0x2E2009, emissiveIntensity: 0.24 });
+  var skin = new T.MeshBasicMaterial({ color: 0x9DC2DC, transparent: true, opacity: 0.045, depthWrite: false, side: T.DoubleSide });
+
+  var root = new T.Group(); scene.add(root);
+  var bones = new T.Group(); root.add(bones);
+
+  /* ---------- 골반 ---------- */
+  var pelvisBone = new T.Group(); bones.add(pelvisBone);
+  var ppts2 = [[0.054, 0], [0.078, 0.012], [0.097, 0.032], [0.104, 0.055], [0.096, 0.076], [0.081, 0.084]];
+  var pbowl = new T.Mesh(new T.LatheGeometry(ppts2.map(function (p) { return new T.Vector2(p[0], p[1]); }), 34), bone);
+  pbowl.position.set(0, 0.83, -0.004); pbowl.scale.z = 0.78; pelvisBone.add(pbowl);
+  var sac = box(0.055, 0.085, 0.022, bone2, pelvisBone, 0, 0.905, -0.072); sac.rotation.x = -0.2;
+  [-1, 1].forEach(function (s) {
+    ball(0.026, bone2, pelvisBone, 0.088 * s, 0.845, 0.01, 1, 1, 1);
+  });
+
+  /* ---------- 요추 ---------- */
+  var lumbar = new T.Group(); bones.add(lumbar);
+  for (var l = 0; l < 5; l++) {
+    var ly = 1.005 + l * 0.05;
+    var vb = new T.Mesh(new T.CylinderGeometry(0.036, 0.038, 0.028, 16), bone);
+    vb.position.set(0, ly, -0.045); vb.rotation.x = 0.06; lumbar.add(vb);
+    var disc = new T.Mesh(new T.CylinderGeometry(0.040, 0.040, 0.012, 16), new T.MeshStandardMaterial({ color: 0x9FB6B0, roughness: 0.7, transparent: true, opacity: 0.85 }));
+    disc.position.set(0, ly - 0.020, -0.045); lumbar.add(disc);
+    box(0.09, 0.012, 0.016, bone2, lumbar, 0, ly, -0.016);
+    var spin = box(0.016, 0.03, 0.045, bone2, lumbar, 0, ly - 0.004, -0.085);
+    spin.rotation.x = 0.5;
+  }
+  /* ---------- 흉추 ---------- */
+  for (var tv = 0; tv < 12; tv++) {
+    var ty = 1.29 + tv * 0.0285;
+    var tb = new T.Mesh(new T.CylinderGeometry(0.023, 0.024, 0.020, 12), bone2);
+    tb.position.set(0, ty, -0.052); bones.add(tb);
+    var ts = box(0.012, 0.024, 0.032, bone2, bones, 0, ty, -0.082); ts.rotation.x = 0.65;
+  }
+
+  /* ---------- 흉곽 ---------- */
+  var ribs = new T.Group(); ribs.position.set(0, 1.40, 0); root.add(ribs);
+  W.ribs = ribs;
+  for (var i = 0; i < 10; i++) {
+    var y = 0.225 - i * 0.030;
+    var t = i / 9;
+    var w = 0.072 + 0.083 * Math.sin(Math.PI * (0.18 + 0.68 * t));
+    [-1, 1].forEach(function (s) {
+      var m = tube([[0.016 * s, y, -0.058], [w * 0.5 * s, y - 0.002, -0.072], [w * s, y - 0.012, -0.006],
+        [w * 0.74 * s, y - 0.034, 0.066], [0.032 * s, y - 0.052, 0.102]], 0.0085, bone, ribs, 7);
+      m.userData.part = 'rib';
+    });
+  }
+  var sternum = new T.Group(); ribs.add(sternum);
+  var stm = box(0.027, 0.15, 0.018, bone, sternum, 0, 0.122, 0.104);
+  stm.rotation.x = 0.05;
+  var xiph = ball(0.018, bone2, sternum, 0, 0.012, 0.117, 1.2, 1.6, 0.7);
+  W.sternum = sternum; W.sternumY = 0;
+
+  /* ---------- 코어 4대 근육 ---------- */
+  var MUS = {};
+  function coreMat(color, op) {
+    return new T.MeshStandardMaterial({
+      color: color, roughness: 0.5, metalness: 0.02, transparent: true, opacity: op,
+      side: T.DoubleSide, depthWrite: false, emissive: color, emissiveIntensity: 0.22
+    });
+  }
+
+  /* 횡격막 — 돔 */
+  var diaph = new T.Group(); diaph.position.set(0, 1.295, 0); root.add(diaph);
+  var dpts = [];
+  [[0, 0.10], [0.04, 0.094], [0.078, 0.08], [0.112, 0.057], [0.138, 0.03], [0.152, 0.007], [0.156, 0]].forEach(function (p) {
+    dpts.push(new T.Vector2(p[0], p[1]));
+  });
+  var dmat = coreMat(0xD2555A, 0.5);
+  var dmesh = new T.Mesh(new T.LatheGeometry(dpts, 36), dmat);
+  dmesh.scale.z = 0.8; diaph.add(dmesh);
+  var dfib = new T.LineSegments(new T.WireframeGeometry(new T.LatheGeometry(dpts, 18)), new T.LineBasicMaterial({ color: 0xF08C86, transparent: true, opacity: 0.16 }));
+  dfib.scale.z = 0.8; diaph.add(dfib);
+  MUS.diaph = { group: diaph, mat: dmat, meshes: [dmesh], card: 'diaphragma' };
+
+  /* 복횡근 — 허리를 감싸는 띠 */
+  var tva = new T.Group(); tva.position.set(0, 1.16, 0.004); root.add(tva);
+  var tmat = coreMat(0xD9555A, 0.24);
+  var tmesh = new T.Mesh(new T.CylinderGeometry(0.144, 0.128, 0.23, 30, 1, true), tmat);
+  tmesh.scale.z = 0.82; tva.add(tmesh);
+  var linePts = [];
+  for (var a = 0; a < 18; a++) {
+    var ang = (a / 18) * Math.PI * 2;
+    var x1 = Math.cos(ang) * 0.141, z1 = Math.sin(ang) * 0.141 * 0.82;
+    var x2 = Math.cos(ang) * 0.127, z2 = Math.sin(ang) * 0.127 * 0.82;
+    linePts.push(x1, 0.104, z1, x2, -0.104, z2);
+  }
+  var lg = new T.BufferGeometry();
+  lg.setAttribute('position', new T.Float32BufferAttribute(linePts, 3));
+  var tlines = new T.LineSegments(lg, new T.LineBasicMaterial({ color: 0xF5A0A0, transparent: true, opacity: 0.35 }));
+  tva.add(tlines);
+  MUS.tva = { group: tva, mat: tmat, meshes: [tmesh], card: 'tva' };
+
+  /* 골반기저근 — 골반 바닥의 얕은 대야 */
+  var pelv = new T.Group(); pelv.position.set(0, 0.80, 0.012); root.add(pelv);
+  var pmat = coreMat(0xC44A5A, 0.5);
+  var ppts = [new T.Vector2(0, 0), new T.Vector2(0.03, -0.008), new T.Vector2(0.07, -0.020), new T.Vector2(0.105, -0.032), new T.Vector2(0.118, -0.040)];
+  var pmesh = new T.Mesh(new T.LatheGeometry(ppts, 30), pmat);
+  pmesh.scale.z = 0.8; pelv.add(pmesh);
+  MUS.pelvic = { group: pelv, mat: pmat, meshes: [pmesh], card: 'pelvic' };
+
+  /* 다열근 — 요추 옆 국소 안정근 */
+  var multi = new T.Group(); root.add(multi);
+  var mmat = coreMat(0xBF5A62, 0.55);
+  var mMeshes = [];
+  for (var ml = 0; ml < 5; ml++) {
+    [-1, 1].forEach(function (s) {
+      var mm = new T.Mesh(new T.SphereGeometry(0.017, 12, 10), mmat);
+      mm.position.set(0.030 * s, 1.01 + ml * 0.048, -0.088);
+      mm.scale.set(0.9, 1.9, 0.9); mm.renderOrder = 2;
+      multi.add(mm); mMeshes.push(mm);
+    });
+  }
+  MUS.multi = { group: multi, mat: mmat, meshes: mMeshes, card: 'multifidus' };
+
+  /* ---------- 복직근 · 복사근 (레이어) ---------- */
+  var rectus = new T.Group(); root.add(rectus);
+  var rmat = coreMat(0xD0504F, 0.6);
+  var rMeshes = [];
+  for (var row = 0; row < 3; row++) {
+    [-1, 1].forEach(function (s) {
+      var rb = new T.Mesh(new T.SphereGeometry(0.03, 14, 12), rmat);
+      rb.position.set(0.033 * s, 1.055 + row * 0.057, 0.138 - row * 0.003);
+      rb.scale.set(0.78, 0.9, 0.3); rb.renderOrder = 3;
+      rectus.add(rb); rMeshes.push(rb);
+    });
+  }
+  var alba = box(0.007, 0.185, 0.006, new T.MeshStandardMaterial({ color: 0xE8DCC8, roughness: 0.8 }), rectus, 0, 1.115, 0.152);
+  MUS.rectus = { group: rectus, mat: rmat, meshes: rMeshes, card: 'rectus' };
+
+  var obl = new T.Group(); root.add(obl);
+  var omat = coreMat(0xC9793F, 0.5);
+  var oMeshes = [];
+  [-1, 1].forEach(function (s) {
+    for (var oi = 0; oi < 3; oi++) {
+      var ob = new T.Mesh(new T.SphereGeometry(0.03, 12, 10), omat);
+      ob.position.set(0.113 * s, 1.075 + oi * 0.05, 0.045 - oi * 0.004);
+      ob.scale.set(0.44, 1.2, 0.24); ob.renderOrder = 4;
+      ob.rotation.z = 0.85 * s;
+      obl.add(ob); oMeshes.push(ob);
+    }
+  });
+  MUS.oblique = { group: obl, mat: omat, meshes: oMeshes, card: 'obliquus' };
+  W.MUS = MUS;
+
+  /* ---------- 허파 · 배 실루엣 ---------- */
+  var lungs = new T.Group(); root.add(lungs);
+  [-1, 1].forEach(function (s) {
+    var lg2 = ball(1, new T.MeshBasicMaterial({ color: 0x7FB6DC, transparent: true, opacity: 0.10, blending: T.AdditiveBlending, depthWrite: false }), lungs, 0.072 * s, 1.475, 0.005, 0.062, 0.10, 0.052);
+  });
+  var belly = ball(1, skin, root, 0, 1.10, 0.012, 0.148, 0.118, 0.095);
+  var chestShell = ball(1, new T.MeshBasicMaterial({ color: 0x9DC2DC, transparent: true, opacity: 0.05, depthWrite: false, side: T.DoubleSide }), root, 0, 1.44, 0.0, 0.17, 0.17, 0.11);
+
+  /* ---------- 픽 대상 ---------- */
+  W.pickables = [];
+  Object.keys(MUS).forEach(function (k) {
+    MUS[k].meshes.forEach(function (m) { m.userData.card = MUS[k].card; W.pickables.push(m); });
+  });
+
+  W.orbit = new Orbit(cam, $('stage'));
+  W.orbit.set(new T.Vector3(0, 1.14, 0), 0.58, 0.34, 1.37);
+
+  W.focusKey = null;
+  W.focus = function (cardId) {
+    var key = null;
+    Object.keys(MUS).forEach(function (k) { if (MUS[k].card === cardId) key = k; });
+    W.focusKey = key;
+    Object.keys(MUS).forEach(function (k) {
+      var mm = MUS[k].mat;
+      var on = k === key;
+      mm.emissiveIntensity = on ? 0.85 : 0.22;
+      mm.opacity = Math.min(0.95, (k === 'tva' ? 0.32 : k === 'rectus' ? 0.6 : 0.5) + (on ? 0.2 : 0));
+    });
+  };
+
+  W.setLayer = function (key, on) {
+    if (key === 'core') { ['diaph', 'tva', 'pelvic', 'multi'].forEach(function (k) { MUS[k].group.visible = on; }); }
+    else if (key === 'rectus') MUS.rectus.group.visible = on;
+    else if (key === 'oblique') MUS.oblique.group.visible = on;
+    else if (key === 'bone') bones.visible = on;
+  };
+
+  W.pick = function (cx, cy) {
+    if (!W.racy) W.racy = new T.Raycaster();
+    var r = R.canvas.getBoundingClientRect();
+    var ndc = new T.Vector2(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
+    W.racy.setFromCamera(ndc, cam);
+    var list = W.pickables.filter(function (m) { return m.visible && m.parent && m.parent.visible; });
+    var hits = W.racy.intersectObjects(list, false);
+    if (hits.length) {
+      var id = hits[0].object.userData.card;
+      if (id && CARDS[id]) {
+        renderCard(id);
+        var c = CARDS[id];
+        toast(c.name + ' — ' + c.latin);
+      }
+    }
+  };
+
+  /* ---------- 호흡 애니메이션 ---------- */
+  var lastPhase = 0, prevB = -1, rising = true;
+  W.update = function (t) {
+    if (ST.bplay && cur.ch === 'ch2') {
+      ST.breath = 0.5 - 0.5 * Math.cos(t * 0.7);
+      if (t - lastPhase > 0.1) {
+        lastPhase = t;
+        var el = $('angle'); if (el) el.value = Math.round(ST.breath * 100);
+        syncReadout();
+      }
+    }
+    var b = Math.max(0, Math.min(1, ST.breath));
+    var thor = ST.brmode === 'thoracic';
+    var ribF = thor ? 1 : 0.55;
+    var bellyF = thor ? 0.25 : 1;
+
+    diaph.position.y = 1.295 - 0.075 * b * (thor ? 0.66 : 1);
+    diaph.scale.set(1 + 0.05 * b * ribF, 1 - 0.42 * b * (thor ? 0.75 : 1), 1 + 0.05 * b * ribF);
+    ribs.scale.set(1 + 0.052 * b * ribF, 1, 1 + 0.046 * b * ribF);
+    sternum.position.y = 0.012 * b * ribF;
+    lungs.scale.set(1 + 0.14 * b * ribF, 1 + 0.08 * b, 1 + 0.10 * b * ribF);
+    belly.scale.set(1 + 0.17 * b * bellyF, 1 + 0.05 * b * bellyF, 1 + 0.13 * b * bellyF);
+    chestShell.scale.set(0.16 * (1 + 0.05 * b * ribF), 0.165 * (1 + 0.03 * b), 0.105 * (1 + 0.04 * b * ribF));
+
+    var ex = 1 - b; /* 날숨 정도 */
+    tva.scale.set(1 - 0.10 * ex, 1, 1 - 0.085 * ex);
+    tmat.opacity = (W.focusKey === 'tva' ? 0.46 : 0.20) + 0.18 * ex;
+    pelv.position.y = 0.80 + 0.038 * ex;
+    pelv.scale.set(1 - 0.05 * ex, 1 + 0.28 * ex, 1 - 0.05 * ex);
+    MULTI_SCALE(1 + 0.38 * ex);
+    rectus.scale.set(1 - 0.05 * ex, 1, 1);
+    obl.scale.set(1 - 0.04 * ex, 1, 1);
+
+    if (t - lastPhase > 0.06 || prevB < 0) {
+      var ph = $('phTxt'), sub = $('phSub'), dot = $('pdot');
+      if (ph) {
+        var dd = b - prevB;
+        if (Math.abs(dd) > 0.0008) rising = dd > 0;
+        var txt, sb;
+        if (rising) {
+          txt = '들숨';
+          sb = thor ? '갈비뼈가 옆·뒤로 열리고 가슴이 넓어집니다' : '횡격막이 깊게 내려가 배가 앞으로 나옵니다';
+        } else {
+          txt = '날숨';
+          sb = thor ? '갈비뼈가 좁아지고 복횡근이 허리를 조입니다' : '배가 들어가고 골반기저근이 끌어올려집니다';
+        }
+        if (ph.textContent !== txt) ph.textContent = txt;
+        if (sub && sub.textContent !== sb) sub.textContent = sb;
+        if (dot) dot.classList.toggle('ex', !rising);
+      }
+      prevB = b;
+    }
+  };
+  function MULTI_SCALE(k) {
+    for (var i = 0; i < mMeshes.length; i++) mMeshes[i].scale.set(0.9 * k, 1.9, 0.9 * k);
+  }
+
+  W.ready = true;
+  return W;
+}
+
+
+/* ============================================================
+   이벤트 · 시작
+   ============================================================ */
+function setMotion(key) {
+  if (!MOTIONS[key]) return;
+  ST.motion = key; ST.val = 0; ST.playing = true;
+  var m = MOTIONS[key];
+  var lay = ST.layers.ch1;
+  if (!lay[m.plane]) { lay[m.plane] = true; syncLayerBtns(); var W = R.W.ch1; if (W && W.setLayer) W.setLayer(m.plane, true); }
+  syncMotionBtns();
+  syncPlay();
+  syncReadout();
+  var msg = {
+    flex: '어깨를 앞뒤로 — 시상면의 굴곡 · 신전',
+    abd: '팔을 옆으로 — 관상면의 외전 · 내전',
+    rot: '몸통을 돌리면 — 수평면의 회전',
+    elbow: '팔꿈치를 굽히면 — 시상면의 굴곡 · 폄'
+  }[key];
+  toast(msg || m.label);
+  var el = $('angle'); if (el) el.value = 0;
+  renderCard(cur.card);
+}
+function syncMotionBtns() {
+  var bs = document.querySelectorAll('.mchip');
+  for (var i = 0; i < bs.length; i++) bs[i].classList.toggle('on', bs[i].getAttribute('data-m') === ST.motion);
+}
+function syncLayerBtns() {
+  var bs = document.querySelectorAll('.lay');
+  var st = ST.layers[cur.ch] || {};
+  for (var i = 0; i < bs.length; i++) bs[i].classList.toggle('on', !!st[bs[i].getAttribute('data-key')]);
+}
+
+function toggleLayer(btn) {
+  var key = btn.getAttribute('data-key');
+  var st = ST.layers[cur.ch] = ST.layers[cur.ch] || {};
+  st[key] = !st[key];
+  btn.classList.toggle('on', st[key]);
+  var W = activeW();
+  if (W && W.setLayer) W.setLayer(key, st[key]);
+  if (cur.ch === 'ch1') { /* 면 강조는 update에서 재계산 */ }
+}
+
+function setBreathMode(v) {
+  if (v !== 'abdominal' && v !== 'thoracic') return;
+  ST.brmode = v;
+  var bs = document.querySelectorAll('.brmode button');
+  for (var i = 0; i < bs.length; i++) bs[i].classList.toggle('on', bs[i].getAttribute('data-v') === v);
+  toast(v === 'thoracic' ? '흉식호흡 — 갈비뼈가 옆으로 열리는 필라테스 호흡' : '복식호흡 — 배가 앞으로 나오는 요가 호흡');
+  hideHint();
+}
+function togglePlay() {
+  if (cur.ch === 'ch1') { ST.playing = !ST.playing; }
+  else { ST.bplay = !ST.bplay; }
+  syncPlay();
+  hideHint();
+}
+
+function bindUI() {
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest ? e.target.closest('[data-ch],[data-act]') : null;
+    if (!t) return;
+    if (t.hasAttribute('data-ch')) { openChapter(t.getAttribute('data-ch')); return; }
+    var act = t.getAttribute('data-act');
+    switch (act) {
+      case 'back': goHome(); break;
+      case 'reset': resetView(); break;
+      case 'layer': toggleLayer(t); break;
+      case 'motion': setMotion(t.getAttribute('data-m')); break;
+      case 'play': togglePlay(); break;
+      case 'brmode': setBreathMode(t.getAttribute('data-v')); break;
+      case 'term': renderCard(t.getAttribute('data-card')); break;
+      case 'prev': case 'next': {
+        var ids = chCards(cur.ch), i = ids.indexOf(cur.card);
+        var n = act === 'prev' ? (i - 1 + ids.length) % ids.length : (i + 1) % ids.length;
+        renderCard(ids[n]); break;
+      }
+      case 'speak-all': {
+        var c = CARDS[cur.card];
+        if (c) speak(c.latin + '. ' + c.en + '. ' + c.koNative, 'en-US');
+        break;
+      }
+      case 'tier-speak': {
+        var cc = CARDS[cur.card], k = t.getAttribute('data-lang');
+        if (!cc) break;
+        if (k === 'la') speak(cc.latin, 'en-US');
+        else if (k === 'en') speak(cc.en, 'en-US');
+        else if (k === 'hanja') speak(cc.hanjaRead || cc.name, 'ko-KR');
+        else speak(cc.koNative, 'ko-KR');
+        break;
+      }
+      case 'quiz-mot': openQuiz('mot'); break;
+      case 'quiz-ety': openQuiz('ety'); break;
+      case 'review': openReview(); break;
+      case 'q-tab': openQuiz(t.getAttribute('data-v')); break;
+      case 'q-opt': answerQuiz(parseInt(t.getAttribute('data-i'), 10)); break;
+      case 'q-next': nextQuestion(); break;
+      case 'q-close': closeSheet(); break;
+      case 'q-restart': restartQuiz(); break;
+      case 'q-show': {
+        var cid = t.getAttribute('data-card');
+        closeSheet();
+        if (cid) renderCard(cid);
+        break;
+      }
+    }
+  });
+
+  $('scrim').addEventListener('click', closeSheet);
+  document.addEventListener('keydown', function (e) {
+    if (!$('chapter').classList.contains('on')) return;
+    if ($('sheet').classList.contains('on')) return;
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      var ids = chCards(cur.ch), i = ids.indexOf(cur.card);
+      var n = e.key === 'ArrowLeft' ? (i - 1 + ids.length) % ids.length : (i + 1) % ids.length;
+      renderCard(ids[n]);
+    }
+  });
+  /* 사파리: 페이지 전체 핀치 확대 방지 (모델이 화면 밖으로 밀려나 보이는 문제) */
+  ['gesturestart', 'gesturechange'].forEach(function (k) {
+    document.addEventListener(k, function (e) { if ($('chapter').classList.contains('on')) e.preventDefault(); }, { passive: false });
+  });
+
+  var armed = 0, armT = null;
+  $('resetAll').addEventListener('click', function () {
+    var btn = this;
+    if (!armed) {
+      armed = 1;
+      btn.textContent = '한 번 더 누르면 기록이 지워져요';
+      clearTimeout(armT);
+      armT = setTimeout(function () { armed = 0; btn.textContent = '학습 기록 초기화'; }, 3200);
+      return;
+    }
+    armed = 0; clearTimeout(armT);
+    btn.textContent = '학습 기록 초기화';
+    try { localStorage.removeItem(LS); } catch (e) { }
+    S.seen = {}; S.ety = {}; S.mot = {}; S.wrong = {}; S.last = 'ch1';
+    saveS(); renderHome();
+    toast('학습 기록을 지웠어요');
+  });
+}
+
+/* 테스트·검증용 최소 핸들 (비밀 정보 없음) */
+window.__AW = { R: R, ST: ST, state: S, cur: cur, reset: resetView, chapter: openChapter };
+
+/* ---------- 시작 ---------- */
+function start() {
+  renderHome();
+  bindUI();
+  renderStageControls();
+  var h = (location.hash || '').replace('#', '');
+  if (h === 'ch1' || h === 'ch2') {
+    openChapter(h);
+  } else {
+    showScreen('home');
+  }
+  resize3D();
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+else start();
+
+})();
 </script>
 </body>
 </html>
