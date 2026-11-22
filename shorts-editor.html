@@ -483,7 +483,7 @@
         </div>
         <div class="card" id="outCard" hidden>
           <h4>결과</h4>
-          <video id="outVideo" controls playsinline></video>
+          <video id="outVideo" controls playsinline muted preload="auto"></video>
           <div class="row" style="margin-top:8px">
             <a class="btn primary" id="outDl" download>파일 저장</a>
             <span class="stat" id="outInfo"></span>
@@ -1330,6 +1330,10 @@
       var name = 'shorts-' + new Date().toISOString().slice(0, 10) + '.' + ext;
       var ov = $('#outVideo');
       ov.src = S.outUrl;
+      ov.load();
+      ov.addEventListener('loadeddata', function () {
+        try { ov.currentTime = 0.15; } catch (e4) {}
+      }, { once: true });
       $('#outDl').href = S.outUrl;
       $('#outDl').download = name;
       $('#outCard').hidden = false;
@@ -1340,6 +1344,9 @@
         (ext === 'webm' ? '<span>인스타 업로드는 MP4가 필요합니다</span>' : '');
       $('#expBar').style.width = '100%';
       $('#expStat').textContent = '완성 · ' + (blob.size / 1048576).toFixed(1) + 'MB';
+      $('#expNote').textContent = '결과는 아래 결과 칸에서 바로 볼 수 있습니다. ' +
+        '“파일 저장”을 누르면 내려받아집니다. 컷 지점에서 아주 짧은 끊김은 브라우저 녹화 방식의 한계입니다 ' +
+        '(정확한 MP4는 파이썬 버전 사용).';
       toast('내보내기 완료 · ' + name);
     } catch (err) {
       toast('내보내기 실패: ' + (err && err.message ? err.message : err));
