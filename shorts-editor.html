@@ -400,7 +400,17 @@
             <button class="btn" id="btnSrtPick">.srt 불러오기</button>
             <button class="btn ghost small" id="btnSrtExport">현재 자막 .srt 저장</button>
           </div>
-          <p class="note">원본 영상 기준 시간의 SRT를 넣으면 컷에 맞춰 자동으로 다시 계산됩니다. (최대 400줄)</p>
+          <div class="row" style="margin-top:8px">
+            <div class="field" style="flex:1">
+              <label>자막 시간 기준</label>
+              <select id="srtMode">
+                <option value="raw">원본 영상 기준</option>
+                <option value="final">완성 영상 기준</option>
+              </select>
+            </div>
+          </div>
+          <p class="note">원본 영상 기준 시간의 SRT를 넣으면 컷에 맞춰 자동으로 다시 계산됩니다. (최대 400줄)
+            기획 봇에서 받은 SRT·자막은 <b>완성 영상 기준</b>입니다.</p>
         </div>
         <div class="card">
           <h4>자막 모양</h4>
@@ -538,6 +548,7 @@
     cues: [],               // [{start, end, text}]  (원본 시간)
     fit: 'cover', zoom: 1, posY: 0,
     sub: { on: true, size: 64, margin: 150, box: true, bold: true },
+    srtMode: 'raw',
     res: 1080, fps: 30, br: 8,
     playing: false, playIdx: 0, raf: 0,
     sel: null, history: [], exporting: false, outUrl: ''
@@ -754,9 +765,10 @@
   }
 
   function activeCue(t) {
+    var key = S.srtMode === 'final' ? srcToOut(t) : t;
     for (var i = 0; i < S.cues.length; i++) {
       var c = S.cues[i];
-      if (t >= c.start - 0.001 && t <= c.end + 0.001) return c;
+      if (key >= c.start - 0.001 && key <= c.end + 0.001) return c;
     }
     return null;
   }
@@ -984,8 +996,8 @@
       d.className = 'cue';
       var tm = document.createElement('div');
       tm.className = 'tm';
-      tm.innerHTML = '원본 ' + fmt(c.start) + '–' + fmt(c.end) +
-        ' <span style="opacity:.7">→ 결과 ' + fmt(srcToOut(c.start)) + '</span> ';
+      tm.innerHTML = (S.srtMode === 'final' ? '완성 ' : '원본 ') + fmt(c.start) + '–' + fmt(c.end) +
+        (S.srtMode === 'final' ? '' : ' <span style="opacity:.7">→ 결과 ' + fmt(srcToOut(c.start)) + '</span> ') + ' ';
       var go = document.createElement('button'); go.textContent = '▸이동';
       go.addEventListener('click', function () { seek(c.start); });
       var del = document.createElement('button'); del.textContent = '✕';
@@ -1048,6 +1060,17 @@
   /* 결과 영상 시각 기준 SRT — 남긴 구간 안에 들어오는 자막만 옮깁니다 */
   function buildOutSrt() {
     var rows = [], n = 0;
+    if (S.srtMode === 'final') {
+      var lim = outDur();
+      S.cues.forEach(function (c) {
+        var a = Math.max(0, c.start), b = Math.min(lim, c.end);
+        if (b - a > 0.15) { n++; rows.push({ a: a, b: b, text: c.text }); }
+      });
+      rows.sort(function (x, y) { return x.a - y.a; });
+      return rows.map(function (r, i) {
+        return (i + 1) + '\n' + srtTime(r.a) + ' --> ' + srtTime(r.b) + '\n' + r.text + '\n';
+      }).join('\n');
+    }
     S.cues.forEach(function (c) {
       S.segments.forEach(function (s) {
         var a = Math.max(c.start, s.in), b = Math.min(c.end, s.out);
@@ -1372,8 +1395,8 @@
   function readPlan(obj) {
     var list = obj.segments || obj.cuts || obj.shots || obj.timeline || obj.plan || [];
     if (!Array.isArray(list) && list && Array.isArray(list.segments)) list = list.segments;
-    if (!Array.isArray(list)) return [];
-    var out = [];
+    if (!Array.isArray(list)) return { segs: [], cues: [] };
+    var out = [], cues = [];
     list.forEach(function (it) {
       if (!it || typeof it !== 'object') return;
       var src = it.source || it.src || it.trim || {};
@@ -1388,8 +1411,14 @@
       if (start == null) return;
       if (end == null) end = start + (dur || 0);
       if (end > start + 0.04) out.push({ in: start, out: end });
+      // 기획안의 자막 문구는 완성 영상 시각(start/end) 기준입니다
+      var text = it.text || it.subtitle || it.caption || it.line || '';
+      if (typeof text === 'string' && text.trim() && a != null && b != null && b > a) {
+        cues.push({ start: a, end: b, text: String(text).trim() });
+      }
     });
-    return out;
+    cues.sort(function (x, y) { return x.start - y.start; });
+    return { segs: out, cues: cues };
   }
   function first(o, keys) { for (var i = 0; i < keys.length; i++) if (o && o[keys[i]] != null) return o[keys[i]]; return null; }
   function num(v) { var x = parseFloat(v); return isFinite(x) ? x : null; }
@@ -1520,6 +1549,10 @@
   bind('#ss', 'input', function (e) { S.sub.size = +e.target.value; $('#ssV').textContent = e.target.value; drawFrame(V.currentTime); });
   bind('#sm', 'input', function (e) { S.sub.margin = +e.target.value; $('#smV').textContent = e.target.value; drawFrame(V.currentTime); });
   bind('#subOn', 'change', function (e) { S.sub.on = e.target.checked; drawFrame(V.currentTime); });
+  bind('#srtMode', 'change', function (e) {
+    S.srtMode = e.target.value;
+    renderCues(); drawFrame(V.currentTime);
+  });
   bind('#subBox', 'change', function (e) { S.sub.box = e.target.checked; drawFrame(V.currentTime); });
   bind('#subBold', 'change', function (e) { S.sub.bold = e.target.checked; drawFrame(V.currentTime); });
   bind('#btnCueAdd', 'click', function () {
@@ -1542,13 +1575,21 @@
     r.onload = function () {
       try {
         var obj = JSON.parse(r.result);
-        var segs = readPlan(obj);
+        var got = readPlan(obj);
+        var segs = got.segs;
         if (!segs.length) { toast('기획안에서 컷 구간을 찾지 못했습니다.'); return; }
         pushHistory();
         S.segments = tidy(segs);
+        if (got.cues.length) {                    /* 기획안에 들어 있는 자막 문구까지 */
+          S.cues = got.cues.slice(0, 400);
+          S.srtMode = 'final';
+          var sm = $('#srtMode'); if (sm) sm.value = 'final';
+        }
         renderAll();
-        $('#planStat').textContent = '컷 ' + S.segments.length + '개 · ' + outDur().toFixed(1) + '초';
-        toast('기획안에서 컷 ' + S.segments.length + '개를 가져왔습니다');
+        $('#planStat').textContent = '컷 ' + S.segments.length + '개 · ' + outDur().toFixed(1) + '초' +
+          (got.cues.length ? ' · 자막 ' + got.cues.length + '줄' : '');
+        toast('기획안에서 컷 ' + S.segments.length + '개' +
+              (got.cues.length ? ' · 자막 ' + got.cues.length + '줄' : '') + '을 가져왔습니다');
       } catch (err) { toast('JSON을 읽지 못했습니다: ' + err.message); }
     };
     r.readAsText(file, 'utf-8');
@@ -1560,7 +1601,10 @@
       width: outSize().w, height: outSize().h, fps: S.fps,
       duration: +outDur().toFixed(3),
       segments: S.segments.map(function (s, i) {
-        var cue = S.cues.filter(function (c) { return c.start < s.out && c.end > s.in; });
+        var oa = srcToOut(s.in), ob = srcToOut(s.out);
+        var cue = S.cues.filter(function (c) {
+          return S.srtMode === 'final' ? (c.start < ob && c.end > oa) : (c.start < s.out && c.end > s.in);
+        });
         return {
           id: i + 1,
           start: +srcToOut(s.in).toFixed(3),
