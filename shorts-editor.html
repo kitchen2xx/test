@@ -1259,10 +1259,11 @@
     $('#expNote').textContent = '실시간 녹화 중입니다. 창을 닫거나 탭을 바꾸지 마세요. ' +
       '(' + total.toFixed(1) + '초 예상)';
 
-    var stream, vTrack, aTrack = null;
+    var stream, vTrack, aTrack = null, reqFrame = null;
     try {
       stream = cv.captureStream(S.fps);
       vTrack = stream.getVideoTracks()[0];
+      if (vTrack && vTrack.requestFrame) reqFrame = function () { try { vTrack.requestFrame(); } catch (e) {} };
       try {
         var vs = V.captureStream ? V.captureStream() : (V.mozCaptureStream ? V.mozCaptureStream() : null);
         if (vs && vs.getAudioTracks().length) aTrack = vs.getAudioTracks()[0];
@@ -1288,6 +1289,10 @@
       V.currentTime = S.segments[0].in;
       await new Promise(function (r) { setTimeout(r, 260); });
       drawFrame(V.currentTime);
+      if (reqFrame) reqFrame();
+      await new Promise(function (r) { setTimeout(r, 120); });
+      drawFrame(V.currentTime);
+      if (reqFrame) reqFrame();
       rec.start(250);
 
       S.playing = true;
@@ -1309,6 +1314,7 @@
             }
           }
           drawFrame(V.currentTime);
+          if (reqFrame) reqFrame();        /* 합성 타이밍과 무관하게 프레임을 밀어 넣습니다 */
           updateHead(V.currentTime);
           var done = Math.min(total, (performance.now() - started) / 1000);
           $('#expBar').style.width = Math.min(99, done / total * 100) + '%';
