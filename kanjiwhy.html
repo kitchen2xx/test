@@ -628,7 +628,7 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
 </style>
 <style id="rpLockStyle">
   /* ============================================================
-     PASSWORD LOCK — 0909
+     PASSWORD LOCK
      The password itself is never written here: only its SHA-256 hex
      digest, checked in pure JS so it works the same on https:// and
      file:// (no crypto.subtle needed).
@@ -697,7 +697,7 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
 </head>
 <body>
 <!-- =========================================================
-     LOCK SCREEN — password 0909 (SHA-256 digest only, no plaintext)
+     LOCK SCREEN — SHA-256 digest only, no plaintext
      ========================================================= -->
 <div id="lockScreen" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
   <form class="rp-lock-card" id="lockForm" autocomplete="off" novalidate>
