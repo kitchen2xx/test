@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<script>
+  (function () {
+    try {
+      if (window.sessionStorage.getItem('rp.lock.v1') === 'unlocked') {
+        document.documentElement.className += ' rp-unlocked';
+      }
+    } catch (e) { /* storage blocked */ }
+  })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+<meta name="theme-color" content="#0b0d12" />
+<meta name="color-scheme" content="dark" />
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230b0d12'/%3E%3Cellipse cx='16' cy='18' rx='8' ry='9' fill='%23fff'/%3E%3Cpath d='M8 12h16l-2-5H10z' fill='%2315151c'/%3E%3C/svg%3E" />
+<title>프린세스 대화창 · 2D PNGTuber 테스트</title>
+<style>
+/* ============================== base ============================== */
+:root{
+  --ink:#17171f;
+  --gold:#FFD98A;
+  --panel:rgba(11,13,20,.80);
+  --line:rgba(255,255,255,.16);
+  --kr:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Noto Sans KR","Segoe UI",system-ui,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  background:#0b0d12;color:#EDEFF4;overflow:hidden;
+  font-family:var(--kr);-webkit-font-smoothing:antialiased;
+  -webkit-text-size-adjust:100%;overscroll-behavior:none;
+  -webkit-tap-highlight-color:transparent;
+}
+button,input{font:inherit;color:inherit}
+button{border:0;background:none;cursor:pointer;touch-action:manipulation}
+h1,h2,p{margin:0}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* ============================== stage ============================== */
+#stage{position:fixed;inset:0;display:flex;flex-direction:column;overflow:hidden;isolation:isolate}
+#bg{position:absolute;inset:0;z-index:0;transition:background-color .35s ease,background .35s ease}
+body[data-bg="dark"] #bg{
+  background:
+    radial-gradient(120% 88% at 50% 4%, #2f3648 0%, #1b2130 36%, #0f131c 70%, #07090e 100%);
+}
+body[data-bg="green"] #bg{background:#00b140}
+body[data-bg="white"] #bg{background:#ffffff}
+body[data-bg="checker"] #bg{
+  background-color:#f4f4f4;
+  background-image:
+    linear-gradient(45deg,#d9d9d9 25%,transparent 25%,transparent 75%,#d9d9d9 75%),
+    linear-gradient(45deg,#d9d9d9 25%,transparent 25%,transparent 75%,#d9d9d9 75%);
+  background-size:40px 40px;
+  background-position:0 0,20px 20px;
+}
+#vignette{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .35s}
+body[data-bg="dark"] #vignette{opacity:1;background:radial-gradient(125% 105% at 50% 42%,transparent 38%,rgba(0,0,0,.55) 100%)}
+#glow{
+  position:absolute;left:50%;bottom:6%;width:min(78vh,820px);aspect-ratio:1;
+  transform:translateX(-50%);pointer-events:none;z-index:0;
+  background:radial-gradient(circle at 50% 50%,rgba(255,226,168,.18),rgba(255,226,168,.06) 45%,transparent 68%);
+  filter:blur(8px);transition:opacity .35s;
+}
+body[data-bg="white"] #glow,body[data-bg="checker"] #glow,body[data-bg="green"] #glow{opacity:0}
+body[data-bg="green"] #floor{opacity:0 !important}
+
+/* ============================== character ============================== */
+#charArea{position:relative;z-index:2;flex:1 1 auto;min-height:0;padding:clamp(50px,6.5vh,78px) 0 0}
+#avatar{display:block;width:100%;height:100%;overflow:visible}
+#avatar [data-set]{opacity:0;transition:opacity .12s linear}
+#avatar[data-expr="default"]  [data-set="default"],
+#avatar[data-expr="happy"]    [data-set="happy"],
+#avatar[data-expr="surprise"] [data-set="surprise"],
+#avatar[data-expr="cynical"]  [data-set="cynical"]{opacity:1}
+#eyesClosed{opacity:0;transition:opacity .05s linear}
+#avatar[data-blink="1"] [data-set]{opacity:0}
+#avatar[data-blink="1"] #eyesClosed{opacity:1}
+#mouth .m{opacity:0;transition:opacity .07s linear}
+#mouth .m.on{opacity:1}
+#rig{transform-origin:210px 400px}
+
+/* ============================== hud ============================== */
+#hud{
+  position:absolute;top:0;left:0;right:0;z-index:30;
+  display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;justify-content:space-between;
+  padding:max(12px,env(safe-area-inset-top)) clamp(10px,2vw,20px) 0;
+  pointer-events:none;transition:opacity .25s,transform .25s;
+}
+#hud>*{pointer-events:auto}
+#hud>.hud-group:last-child{margin-left:auto}
+.hud-group{
+  display:flex;flex-wrap:wrap;gap:6px;align-items:center;
+  padding:6px;border-radius:14px;
+  background:rgba(10,12,18,.55);border:1px solid rgba(255,255,255,.10);
+  -webkit-backdrop-filter:blur(16px) saturate(130%);backdrop-filter:blur(16px) saturate(130%);
+  box-shadow:0 16px 36px -24px rgba(0,0,0,.9);
+}
+.hud-btn{
+  display:inline-flex;align-items:center;gap:6px;height:33px;padding:0 12px;border-radius:9px;
+  font-size:12.5px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;color:#E7EAF1;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+  transition:background .15s,color .15s,border-color .15s,box-shadow .15s;
+}
+.hud-btn:hover{background:rgba(255,255,255,.15)}
+.hud-btn .ic{font-size:13px;line-height:1}
+.hud-btn.on{
+  background:linear-gradient(180deg,#FFE2A0,#EDBB62);color:#241a06;border-color:#FFE0A0;
+  box-shadow:0 8px 20px -10px rgba(255,205,120,.9);
+}
+.hud-btn.off{opacity:.55}
+.hud-btn.rec.on{background:linear-gradient(180deg,#ff7272,#d63a3a);color:#fff;border-color:#ff9a9a;box-shadow:0 8px 20px -10px rgba(255,90,90,.9)}
+.hud-btn.icon{padding:0;width:35px;justify-content:center;font-size:14px}
+
+.seg{display:flex;gap:2px;padding:3px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09)}
+.seg button{
+  height:27px;padding:0 10px;border-radius:7px;font-size:12px;font-weight:700;color:#C3C9D6;
+  transition:background .15s,color .15s;
+}
+.seg button:hover{background:rgba(255,255,255,.09);color:#fff}
+.seg button.on{background:#fff;color:#111319}
+.seg.bgseg button{display:inline-flex;align-items:center;gap:5px}
+.seg.bgseg .dot{width:10px;height:10px;border-radius:3px;border:1px solid rgba(0,0,0,.35);display:block}
+
+#meter{display:flex;align-items:flex-end;gap:2px;height:18px;padding:0 4px;opacity:.35;transition:opacity .2s}
+#meter.on{opacity:1}
+#meter i{display:block;width:3px;height:4px;border-radius:2px;background:#8D96A8;transition:height .06s linear,background .12s}
+#meter.on i{background:#FFD98A}
+
+/* ============================== dock ============================== */
+#dock{
+  position:relative;z-index:20;flex:0 0 auto;
+  display:flex;flex-direction:column;align-items:center;gap:16px;
+  padding:0 clamp(9px,2vw,18px) max(12px,env(safe-area-inset-bottom));
+}
+#samples{
+  display:flex;gap:6px;width:min(980px,100%);overflow-x:auto;padding:1px 2px 3px;
+  scrollbar-width:none;transition:opacity .25s,transform .25s;
+}
+#samples::-webkit-scrollbar{display:none}
+.chip{
+  flex:0 0 auto;height:28px;padding:0 12px;border-radius:999px;font-size:11.5px;font-weight:700;
+  color:#DCE0E9;background:rgba(10,12,18,.62);border:1px solid rgba(255,255,255,.14);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);white-space:nowrap;
+  transition:color .15s,border-color .15s,background .15s;
+}
+.chip:hover{color:#FFD98A;border-color:rgba(255,217,138,.6);background:rgba(20,22,30,.8)}
+.chip.cur{color:#0e1014;background:#FFD98A;border-color:#FFD98A}
+
+#composer{
+  display:flex;gap:6px;width:min(980px,100%);padding:6px;
+  border-radius:12px;background:rgba(10,12,18,.72);border:1px solid rgba(255,255,255,.13);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  transition:opacity .25s,transform .25s;
+}
+#composer input{
+  height:34px;border-radius:8px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);padding:0 11px;font-size:13px;color:#F1F3F8;outline:none;
+  transition:border-color .15s,background .15s;
+}
+#composer input::placeholder{color:#7D8494}
+#composer input:focus{border-color:rgba(255,217,138,.6);background:rgba(255,255,255,.08)}
+#nameInput{width:92px;font-weight:700;text-align:center}
+#lineInput{flex:1 1 auto;min-width:60px}
+#composer .go{
+  height:34px;padding:0 14px;border-radius:8px;font-size:12.5px;font-weight:800;white-space:nowrap;
+  background:linear-gradient(180deg,#FFE2A0,#EDBB62);color:#241a06;
+  transition:filter .15s,transform .1s;
+}
+#composer .go:hover{filter:brightness(1.06)}
+#composer .go:active{transform:translateY(1px)}
+
+#dlg{
+  position:relative;width:min(980px,100%);margin-top:6px;
+  padding:20px clamp(16px,3vw,26px) 21px;
+  border-radius:7px;border:1.5px solid rgba(255,255,255,.26);
+  background:linear-gradient(180deg,rgba(12,14,22,.84),rgba(5,6,11,.92));
+  -webkit-backdrop-filter:blur(16px) saturate(120%);backdrop-filter:blur(16px) saturate(120%);
+  box-shadow:0 30px 60px -34px rgba(0,0,0,1),inset 0 1px 0 rgba(255,255,255,.10);
+}
+#dlg::after{content:"";position:absolute;inset:4px;border:1px solid rgba(255,255,255,.07);border-radius:4px;pointer-events:none}
+#nameTag{
+  position:absolute;top:-15px;left:clamp(12px,3vw,22px);
+  padding:3px 11px 4px;border-radius:5px;
+  background:linear-gradient(180deg,#20242f,#0c0e15);
+  border:1.5px solid rgba(255,217,138,.55);
+  color:#FFD98A;font-size:12.5px;font-weight:800;letter-spacing:.03em;line-height:1.35;
+  box-shadow:0 6px 16px -8px #000;
+  transition:border-color .15s,color .15s;
+}
+#nameTag:hover{border-color:#FFD98A;color:#FFE6B2}
+#line{
+  font-size:clamp(15px,1.5vw,19px);line-height:1.72;letter-spacing:.005em;
+  color:#F5F7FB;text-shadow:0 1px 0 rgba(0,0,0,.65);
+  min-height:calc(1.72em * 2);word-break:keep-all;overflow-wrap:anywhere;
+  padding-right:26px;
+}
+#line.typing::after{content:"▌";margin-left:1px;color:#FFD98A;animation:caret .7s steps(1) infinite}
+@keyframes caret{0%,49%{opacity:1}50%,100%{opacity:0}}
+#nextArrow{
+  position:absolute;right:14px;bottom:7px;font-size:12px;color:#FFD98A;opacity:0;
+  transition:opacity .2s;text-shadow:0 0 10px rgba(255,217,138,.5);
+}
+#nextArrow.on{opacity:1;animation:arrowBlink 1.05s steps(1,end) infinite}
+@keyframes arrowBlink{0%,55%{opacity:1}56%,100%{opacity:.06}}
+
+#hint{
+  width:min(980px,100%);text-align:center;font-size:10.5px;letter-spacing:.01em;
+  color:rgba(232,237,246,.55);transition:opacity .25s;
+}
+#hint span{
+  display:inline-block;padding:3px 10px;border-radius:999px;
+  background:rgba(9,11,16,.55);border:1px solid rgba(255,255,255,.07);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+}
+#hint b{color:rgba(255,217,138,.75);font-weight:700}
+
+/* ============================== recording ============================== */
+body.recording #hud,body.recording #composer,body.recording #samples,body.recording #hint{
+  opacity:0;pointer-events:none;transform:translateY(-8px);
+}
+body.recording #hud{transform:translateY(-14px)}
+body.recording #dlg{box-shadow:0 30px 70px -40px rgba(0,0,0,1),inset 0 1px 0 rgba(255,255,255,.10)}
+
+/* ============================== toast ============================== */
+#toast{
+  position:fixed;left:50%;top:13%;transform:translate(-50%,-10px);z-index:60;
+  padding:9px 16px;border-radius:10px;pointer-events:none;
+  background:rgba(8,10,15,.88);border:1px solid rgba(255,255,255,.18);
+  color:#EDF0F7;font-size:12.5px;font-weight:700;letter-spacing:-.01em;
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  opacity:0;transition:opacity .22s,transform .22s;
+  box-shadow:0 18px 40px -22px #000;
+}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:760px){
+  #composer input{font-size:16px}
+  .hud-btn{padding:0 9px;font-size:11.5px;height:31px}
+  .seg button{padding:0 8px;font-size:11.5px;height:25px}
+  #meter{display:none}
+  #hint{font-size:9.5px}
+}
+@media (max-height:620px){
+  #charArea{padding-top:58px}
+  #line{min-height:calc(1.72em * 1.6)}
+}
+</style>
+<style id="rpLockStyle">
+  #lockScreen{display:none}
+  html:not(.rp-unlocked) #lockScreen{
+    display:flex;position:fixed;inset:0;z-index:2147483000;align-items:center;justify-content:center;
+    overflow:auto;padding:calc(24px + env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom));
+    background:radial-gradient(900px 560px at 50% -8%,#2c3240 0%,#141821 55%,#07090d 100%);
+    font-family:var(--kr);-webkit-text-size-adjust:100%;
+  }
+  html:not(.rp-unlocked) body>*:not(#lockScreen){display:none !important}
+  html:not(.rp-unlocked){overflow:hidden !important}
+  .rp-lock-card{
+    width:100%;max-width:384px;margin:auto;color:#EAEDF4;text-align:center;
+    background:linear-gradient(180deg,rgba(24,27,36,.96),rgba(12,14,20,.98));
+    border:1px solid rgba(255,255,255,.12);border-radius:20px;
+    box-shadow:0 40px 90px -40px #000,inset 0 1px 0 rgba(255,255,255,.07);
+    padding:30px 24px 22px;
+  }
+  .rp-lock-card.shake{animation:rpLockShake .36s ease-in-out}
+  .rp-lock-icon{
+    width:56px;height:56px;margin:0 auto 16px;border-radius:18px;
+    background:linear-gradient(145deg,#FFE2A0,#D9A052);
+    box-shadow:0 14px 30px -12px rgba(255,200,110,.6);
+    display:flex;align-items:center;justify-content:center;font-size:25px;
+  }
+  .rp-lock-title{font-size:16.5px;font-weight:800;margin:0;letter-spacing:-.02em;color:#F2F5FB}
+  .rp-lock-sub{font-size:12.5px;color:#98A0B2;margin:6px 0 20px;line-height:1.55}
+  .rp-lock-field{position:relative}
+  .rp-lock-field input{
+    width:100%;font-family:inherit;font-size:17px;font-weight:700;letter-spacing:.42em;text-align:center;
+    color:#F4F7FD;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);
+    border-radius:12px;padding:12px 52px;outline:none;-webkit-appearance:none;
+    transition:border-color .15s,box-shadow .15s;
+  }
+  .rp-lock-field input:focus{border-color:rgba(255,217,138,.75);box-shadow:0 0 0 3px rgba(255,205,120,.16)}
+  .rp-lock-field input.err{border-color:#E8615D;box-shadow:0 0 0 3px rgba(232,97,93,.18)}
+  .rp-lock-field input::placeholder{letter-spacing:.3em;font-weight:400;color:#6B7284}
+  .rp-lock-eye{
+    position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:transparent;
+    cursor:pointer;font-family:inherit;font-size:11.5px;font-weight:800;color:#98A0B2;
+    padding:7px 9px;border-radius:8px;white-space:nowrap;
+  }
+  .rp-lock-eye:hover{background:rgba(255,255,255,.08);color:#F0F3F9}
+  .rp-lock-error{margin:10px 0 0;font-size:12.5px;font-weight:700;color:#FF8A86;line-height:1.5}
+  .rp-lock-error[hidden]{display:none}
+  .rp-lock-submit{
+    margin-top:14px;width:100%;border:0;border-radius:12px;cursor:pointer;
+    background:linear-gradient(180deg,#FFE2A0,#E7B45E);color:#241a06;font-family:inherit;
+    font-size:14px;font-weight:800;padding:12px 14px;
+  }
+  .rp-lock-submit:hover{filter:brightness(1.05)}
+  .rp-lock-submit:disabled{opacity:.55}
+  .rp-lock-foot{font-size:11.5px;color:#6E7688;margin:14px 0 0;line-height:1.55}
+  @keyframes rpLockShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+</style>
+</head>
+<body data-bg="dark">
+<div id="lockScreen" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
+  <form class="rp-lock-card" id="lockForm" autocomplete="off" novalidate>
+    <div class="rp-lock-icon" aria-hidden="true">🔒</div>
+    <h1 class="rp-lock-title" id="lockTitle">프린세스 대화창 · PNGTuber</h1>
+    <p class="rp-lock-sub">비밀번호를 입력해 주세요.</p>
+    <div class="rp-lock-field">
+      <input type="password" id="lockInput" inputmode="numeric" autocomplete="off"
+             autocapitalize="off" spellcheck="false" aria-label="비밀번호" placeholder="····">
+      <button type="button" class="rp-lock-eye" id="lockEye" aria-label="비밀번호 보기">보기</button>
+    </div>
+    <p class="rp-lock-error" id="lockError" role="alert" hidden></p>
+    <button type="submit" class="rp-lock-submit" id="lockSubmit">잠금 해제</button>
+    <noscript><p class="rp-lock-error">자바스크립트가 꺼져 있어 잠금을 해제할 수 없습니다.</p></noscript>
+    <p class="rp-lock-foot">잠금은 이 탭에서만 유지됩니다. 탭을 닫으면 다시 잠깁니다.</p>
+  </form>
+</div>
+
+<div id="stage">
+  <div id="bg"></div>
+  <div id="glow"></div>
+  <div id="vignette"></div>
+
+  <div id="charArea">
+    <svg id="avatar" viewBox="0 30 420 392" preserveAspectRatio="xMidYMax meet" data-expr="default"
+         role="img" aria-label="코 없는 하트형 앞머리 캐릭터">
+      <defs>
+        <radialGradient id="gBody" cx="36%" cy="22%" r="90%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="52%" stop-color="#ffffff"/>
+          <stop offset="82%" stop-color="#f6f2ea"/>
+          <stop offset="100%" stop-color="#e3dbcb"/>
+        </radialGradient>
+        <linearGradient id="gHair" x1="18%" y1="0%" x2="64%" y2="100%">
+          <stop offset="0%" stop-color="#31313c"/>
+          <stop offset="34%" stop-color="#22222b"/>
+          <stop offset="78%" stop-color="#17171d"/>
+          <stop offset="100%" stop-color="#0f0f14"/>
+        </linearGradient>
+        <radialGradient id="gEye" cx="38%" cy="24%" r="86%">
+          <stop offset="0%" stop-color="#2a2a35"/>
+          <stop offset="55%" stop-color="#141419"/>
+          <stop offset="100%" stop-color="#0a0a0e"/>
+        </radialGradient>
+        <filter id="fSoft" x="-45%" y="-70%" width="190%" height="240%">
+          <feGaussianBlur stdDeviation="9"/>
+        </filter>
+        <clipPath id="clipBig"><ellipse cx="210" cy="248" rx="13.8" ry="16"/></clipPath>
+      </defs>
+
+      <ellipse id="floor" cx="210" cy="403" rx="88" ry="11" fill="#000" opacity=".30" filter="url(#fSoft)"/>
+
+      <g id="rig">
+        <!-- legs -->
+        <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M192 344 L190 388 L180 398" stroke="#1e1e27" stroke-width="20"/>
+          <path d="M228 344 L230 388 L240 398" stroke="#1e1e27" stroke-width="20"/>
+          <path d="M192 344 L190 388 L180 398" stroke="#ffffff" stroke-width="15"/>
+          <path d="M228 344 L230 388 L240 398" stroke="#ffffff" stroke-width="15"/>
+        </g>
+
+        <!-- body -->
+        <path id="bodyShape"
+              d="M210 96 C262 96 296 130 302 176 C307 226 302 292 288 320 C274 344 246 352 210 352
+                 C174 352 146 344 132 320 C118 292 113 226 118 176 C124 130 158 96 210 96 Z"
+              fill="url(#gBody)" stroke="#20202a" stroke-width="3" stroke-linejoin="round"/>
+
+        <!-- arms -->
+        <g fill="none" stroke-linecap="round">
+          <path d="M129 238 C125 252 124 266 126 278" stroke="#20202a" stroke-width="21"/>
+          <path d="M291 238 C295 252 296 266 294 278" stroke="#20202a" stroke-width="21"/>
+          <path d="M129 238 C125 252 124 266 126 278" stroke="#ffffff" stroke-width="15"/>
+          <path d="M291 238 C295 252 296 266 294 278" stroke="#ffffff" stroke-width="15"/>
+        </g>
+
+        <!-- mouth -->
+        <g id="mouth">
+          <g class="m" id="mSmile"><path d="M199 245 Q210 254 221 245" fill="none" stroke="#17171f" stroke-width="3.6" stroke-linecap="round"/></g>
+          <g class="m" id="mWide"><path d="M195 241 C202 237 218 237 225 241 C222 258 198 258 195 241 Z" fill="#17171f"/></g>
+          <g class="m" id="mSmirk"><path d="M197 248 C206 255 219 253 225 242" fill="none" stroke="#17171f" stroke-width="3.6" stroke-linecap="round"/></g>
+          <g class="m" id="mO"><ellipse cx="210" cy="248" rx="8" ry="10.5" fill="#17171f"/></g>
+          <g class="m" id="mSmall"><ellipse cx="210" cy="247" rx="9" ry="7.6" fill="#17171f"/></g>
+          <g class="m" id="mBig"><g clip-path="url(#clipBig)">
+            <ellipse cx="210" cy="248" rx="13.8" ry="16" fill="#17171f"/>
+            <ellipse cx="210" cy="259" rx="8" ry="5.2" fill="#d98a9b"/>
+          </g></g>
+          <g class="m" id="mTalkO"><ellipse cx="210" cy="249" rx="8.6" ry="12.5" fill="#17171f"/></g>
+        </g>
+
+        <!-- eyes -->
+        <g id="eyes">
+          <g data-set="default">
+            <g transform="rotate(4 165 184)">
+              <ellipse cx="165" cy="184" rx="19.8" ry="32.4" fill="url(#gEye)"/>
+              <circle cx="157.4" cy="168" r="6" fill="#fff"/>
+              <circle cx="173" cy="202" r="2.8" fill="#fff" opacity=".92"/>
+              <path d="M155 159 C149 155 143 152 137 151 C141 156 147 161 152 168 Z" fill="#14141b"/>
+            </g>
+            <g transform="rotate(-4 255 184)">
+              <ellipse cx="255" cy="184" rx="19.8" ry="32.4" fill="url(#gEye)"/>
+              <circle cx="247.4" cy="168" r="6" fill="#fff"/>
+              <circle cx="263" cy="202" r="2.8" fill="#fff" opacity=".92"/>
+              <path d="M265 159 C271 155 277 152 283 151 C279 156 273 161 268 168 Z" fill="#14141b"/>
+            </g>
+          </g>
+          <g data-set="surprise">
+            <g transform="rotate(4 165 182)">
+              <ellipse cx="165" cy="182" rx="20.6" ry="35.2" fill="url(#gEye)"/>
+              <circle cx="157" cy="165" r="5.4" fill="#fff"/>
+              <circle cx="173" cy="202" r="2.6" fill="#fff" opacity=".92"/>
+              <path d="M154 156 C147 151 140 148 133 148 C138 153 145 159 151 166 Z" fill="#14141b"/>
+            </g>
+            <g transform="rotate(-4 255 182)">
+              <ellipse cx="255" cy="182" rx="20.6" ry="35.2" fill="url(#gEye)"/>
+              <circle cx="247" cy="165" r="5.4" fill="#fff"/>
+              <circle cx="263" cy="202" r="2.6" fill="#fff" opacity=".92"/>
+              <path d="M266 156 C273 151 280 148 287 148 C282 153 275 159 269 166 Z" fill="#14141b"/>
+            </g>
+          </g>
+          <g data-set="happy">
+            <path d="M147 201 C153 181 177 181 183 201" fill="none" stroke="#14141b" stroke-width="7.4" stroke-linecap="round"/>
+            <path d="M237 201 C243 181 267 181 273 201" fill="none" stroke="#14141b" stroke-width="7.4" stroke-linecap="round"/>
+            <path d="M147 201 C142 193 138 186 134 181" fill="none" stroke="#14141b" stroke-width="6" stroke-linecap="round"/>
+            <path d="M273 201 C278 193 282 186 286 181" fill="none" stroke="#14141b" stroke-width="6" stroke-linecap="round"/>
+          </g>
+          <g data-set="cynical">
+            <g transform="rotate(4 165 184)">
+              <path d="M146.4 184 C146.4 217 183.6 217 183.6 184 Z" fill="url(#gEye)"/>
+              <path d="M142.6 184 L187.4 184" stroke="#14141b" stroke-width="4.6" stroke-linecap="round"/>
+              <circle cx="158" cy="201" r="4.2" fill="#fff"/>
+            </g>
+            <g transform="rotate(-4 255 184)">
+              <ellipse cx="255" cy="188" rx="18.4" ry="21.6" fill="url(#gEye)"/>
+              <circle cx="247" cy="179" r="4.6" fill="#fff"/>
+              <path d="M236.6 186.6 L273.4 186.6" stroke="#14141b" stroke-width="4" stroke-linecap="round"/>
+              <path d="M268 166 C273 162 279 160 284 160 C280 165 275 170 270 175 Z" fill="#14141b"/>
+            </g>
+          </g>
+          <g id="eyesClosed">
+            <path d="M147 184 Q165 197 183 184" fill="none" stroke="#14141b" stroke-width="6" stroke-linecap="round"/>
+            <path d="M237 184 Q255 197 273 184" fill="none" stroke="#14141b" stroke-width="6" stroke-linecap="round"/>
+          </g>
+        </g>
+
+        <!-- hair -->
+        <path id="hair"
+              d="M 210 103 C 205 98 199 96 192 97 C 176 99 162 108 151 120 C 141 132 134 146 130 160
+                 C 126 178 122 196 118 214 C 115 230 112 242 108 250 C 106 254 101 254 99 249
+                 C 88 230 74 216 62 204 C 53 195 48 194 48 188 C 60 168 76 150 95 134
+                 C 108 118 118 94 135 72 C 155 50 180 40 210 38 C 240 40 265 50 285 72
+                 C 302 94 312 118 325 134 C 344 150 360 168 372 188 C 372 196 367 198 358 208
+                 C 346 220 332 236 321 249 C 319 254 314 254 312 250 C 308 242 305 230 302 214
+                 C 298 196 294 178 290 160 C 286 146 279 132 269 120 C 258 108 244 99 228 97
+                 C 221 96 215 98 210 103 Z"
+              fill="url(#gHair)" stroke="#15151c" stroke-width="3" stroke-linejoin="round"/>
+        <g fill="none" stroke="rgba(255,255,255,.12)" stroke-linecap="round">
+          <path d="M126 110 C140 86 162 66 190 56" stroke-width="7"/>
+          <path d="M104 140 C110 122 118 108 128 96" stroke-width="4"/>
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <div id="hud">
+    <div class="hud-group">
+      <button class="hud-btn" id="micBtn" title="마이크로 말하면 입이 움직입니다 (M)"><span class="ic">🎤</span><span id="micLabel">마이크 켜기</span></button>
+      <span id="meter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+      <button class="hud-btn" id="demoBtn" title="마이크 없이 자동 데모 (D)"><span class="ic">▶</span> 데모 재생</button>
+      <button class="hud-btn icon" id="soundBtn" title="타자 효과음 켜기/끄기" aria-pressed="true">🔊</button>
+    </div>
+    <div class="hud-group">
+      <div class="seg" id="exprSeg" role="group" aria-label="표정">
+        <button data-expr="default" class="on">기본</button>
+        <button data-expr="happy">웃음</button>
+        <button data-expr="surprise">놀람</button>
+        <button data-expr="cynical">시니컬</button>
+      </div>
+      <div class="seg bgseg" id="bgSeg" role="group" aria-label="배경">
+        <button data-bg="dark" class="on"><i class="dot" style="background:#232a3a"></i>다크</button>
+        <button data-bg="green"><i class="dot" style="background:#00b140"></i>그린</button>
+        <button data-bg="checker"><i class="dot" style="background:linear-gradient(45deg,#fff 25%,#ccc 25% 75%,#fff 75%)"></i>체크</button>
+        <button data-bg="white"><i class="dot" style="background:#fff"></i>화이트</button>
+      </div>
+      <button class="hud-btn rec" id="recBtn" title="컨트롤을 숨깁니다 (R)"><span class="ic">◉</span> 녹화 모드</button>
+    </div>
+  </div>
+
+  <div id="dock">
+    <div id="samples" aria-label="샘플 대사"></div>
+    <div id="composer">
+      <input id="nameInput" value="프린세스" aria-label="화자 이름" maxlength="12" />
+      <input id="lineInput" placeholder="대사를 입력하고 Enter — 스페이스로 샘플 대사 넘기기" aria-label="대사 입력" />
+      <button class="go" id="sayBtn">대사 띄우기</button>
+    </div>
+    <div id="dlg" role="log" aria-live="polite">
+      <div id="nameTag"><span id="speaker">프린세스</span></div>
+      <p id="line"></p>
+      <span id="nextArrow" aria-hidden="true">▶</span>
+    </div>
+    <div id="hint"><span><b>Space</b> 다음 대사 · <b>1–4</b> 표정 · <b>M</b> 마이크 · <b>D</b> 데모 · <b>B</b> 배경 · <b>R</b> 녹화 — 화면을 눌러도 진행</span></div>
+  </div>
+</div>
+
+<div id="toast" role="status"></div>
+
+<script id="rpLockScript">
+(function () {
+  'use strict';
+
+  var PASSWORD_HASH = '9552e277ebcc7fa191292c6e900d94dfe6e837d8abf76a2da927d4530d2c8f69';
+  var STORE_KEY = 'rp.lock.v1';
+  var STORE_VAL = 'unlocked';
+
+  /* ---------- pure-JS SHA-256 (works on https:// and file://) ---------- */
+  var K = [
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+  ];
+
+  function utf8Bytes(str) {
+    var out = [], i, c, d, cp;
+    for (i = 0; i < str.length; i++) {
+      c = str.charCodeAt(i);
+      if (c < 0x80) {
+        out.push(c);
+      } else if (c < 0x800) {
+        out.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f));
+      } else if (c >= 0xd800 && c <= 0xdbff && i + 1 < str.length &&
+                 (d = str.charCodeAt(i + 1)) >= 0xdc00 && d <= 0xdfff) {
+        cp = 0x10000 + ((c - 0xd800) << 10) + (d - 0xdc00);
+        out.push(0xf0 | (cp >> 18), 0x80 | ((cp >> 12) & 0x3f),
+                 0x80 | ((cp >> 6) & 0x3f), 0x80 | (cp & 0x3f));
+        i++;
+      } else {
+        out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
+      }
+    }
+    return out;
+  }
+
+  function sha256Hex(str) {
+    var bytes = utf8Bytes(String(str == null ? '' : str));
+    var len = bytes.length;
+    var total = (((len + 9) + 63) >> 6) << 6;
+    var msg = new Array(total);
+    var i;
+
+    for (i = 0; i < len; i++) msg[i] = bytes[i] & 0xff;
+    msg[len] = 0x80;
+    for (i = len + 1; i < total; i++) msg[i] = 0;
+
+    var hi = Math.floor(len / 536870912);
+    var lo = (len * 8) >>> 0;
+    msg[total - 8] = (hi >>> 24) & 0xff;
+    msg[total - 7] = (hi >>> 16) & 0xff;
+    msg[total - 6] = (hi >>> 8) & 0xff;
+    msg[total - 5] = hi & 0xff;
+    msg[total - 4] = (lo >>> 24) & 0xff;
+    msg[total - 3] = (lo >>> 16) & 0xff;
+    msg[total - 2] = (lo >>> 8) & 0xff;
+    msg[total - 1] = lo & 0xff;
+
+    var H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+             0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+    var w = new Array(64);
+    var off, a, b, c, d, e, f, g, h, t1, t2, s0, s1, ch, maj, j, tmp;
+
+    for (off = 0; off < total; off += 64) {
+      for (j = 0; j < 16; j++) {
+        w[j] = ((msg[off + j * 4] << 24) | (msg[off + j * 4 + 1] << 16) |
+                (msg[off + j * 4 + 2] << 8) | msg[off + j * 4 + 3]) >>> 0;
+      }
+      for (j = 16; j < 64; j++) {
+        tmp = w[j - 15];
+        s0 = ((tmp >>> 7) | (tmp << 25)) ^ ((tmp >>> 18) | (tmp << 14)) ^ (tmp >>> 3);
+        tmp = w[j - 2];
+        s1 = ((tmp >>> 17) | (tmp << 15)) ^ ((tmp >>> 19) | (tmp << 13)) ^ (tmp >>> 10);
+        w[j] = (w[j - 16] + s0 + w[j - 7] + s1) >>> 0;
+      }
+      a = H[0]; b = H[1]; c = H[2]; d = H[3];
+      e = H[4]; f = H[5]; g = H[6]; h = H[7];
+      for (j = 0; j < 64; j++) {
+        s1 = ((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7));
+        ch = (e & f) ^ (~e & g);
+        t1 = (h + s1 + ch + K[j] + w[j]) >>> 0;
+        s0 = ((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10));
+        maj = (a & b) ^ (a & c) ^ (b & c);
+        t2 = (s0 + maj) >>> 0;
+        h = g; g = f; f = e; e = (d + t1) >>> 0;
+        d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+      }
+      H[0] = (H[0] + a) >>> 0; H[1] = (H[1] + b) >>> 0;
+      H[2] = (H[2] + c) >>> 0; H[3] = (H[3] + d) >>> 0;
+      H[4] = (H[4] + e) >>> 0; H[5] = (H[5] + f) >>> 0;
+      H[6] = (H[6] + g) >>> 0; H[7] = (H[7] + h) >>> 0;
+    }
+    var hex = '';
+    for (i = 0; i < 8; i++) hex += ('00000000' + H[i].toString(16)).slice(-8);
+    return hex;
+  }
+
+  function sameHex(a, b) {
+    if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
+    var diff = 0, i;
+    for (i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    return diff === 0;
+  }
+
+  function normalize(value) {
+    return String(value == null ? '' : value).replace(/^\s+|\s+$/g, '');
+  }
+
+  function verify(value) {
+    return sameHex(sha256Hex(normalize(value)), PASSWORD_HASH);
+  }
+
+  /* ---------- session unlock state ---------- */
+  var memoryUnlocked = false;
+
+  function isUnlocked() {
+    try { return window.sessionStorage.getItem(STORE_KEY) === STORE_VAL; }
+    catch (e) { return memoryUnlocked; }
+  }
+
+  function saveUnlocked(on) {
+    memoryUnlocked = !!on;
+    try {
+      if (on) window.sessionStorage.setItem(STORE_KEY, STORE_VAL);
+      else window.sessionStorage.removeItem(STORE_KEY);
+    } catch (e) { /* storage blocked: keep the state in memory for this page only */ }
+  }
+
+  /* ---------- screen ---------- */
+  var root = document.documentElement;
+  var form = document.getElementById('lockForm');
+  var input = document.getElementById('lockInput');
+  var errorEl = document.getElementById('lockError');
+  var eyeBtn = document.getElementById('lockEye');
+  var submitBtn = document.getElementById('lockSubmit');
+  var wrongCount = 0;
+  var cooling = false;
+
+  function focusInput() {
+    if (!input || isUnlocked()) return;
+    try { input.focus({ preventScroll: true }); }
+    catch (e) { try { input.focus(); } catch (e2) {} }
+    try { input.setSelectionRange(input.value.length, input.value.length); } catch (e3) {}
+  }
+
+  function clearError() {
+    if (errorEl) { errorEl.textContent = ''; errorEl.hidden = true; }
+    if (input) input.classList.remove('err');
+  }
+
+  function resetEye() {
+    if (!input) return;
+    input.type = 'password';
+    if (eyeBtn) {
+      eyeBtn.textContent = '보기';
+      eyeBtn.setAttribute('aria-label', '비밀번호 보기');
+    }
+  }
+
+  function applyState() {
+    var unlocked = isUnlocked();
+    if (unlocked) root.classList.add('rp-unlocked');
+    else root.classList.remove('rp-unlocked');
+
+    resetEye();
+    if (input) input.value = '';
+    clearError();
+
+    if (unlocked) wrongCount = 0;
+    else setTimeout(focusInput, 40);
+  }
+
+  function showError(msg) {
+    if (errorEl) { errorEl.textContent = msg; errorEl.hidden = false; }
+    if (input) { input.value = ''; input.classList.add('err'); }
+    if (form) {
+      form.classList.remove('shake');
+      void form.offsetWidth;
+      form.classList.add('shake');
+      setTimeout(function () { if (form) form.classList.remove('shake'); }, 420);
+    }
+    focusInput();
+  }
+
+  function unlockNow() {
+    saveUnlocked(true);
+    applyState();
+    window.scrollTo(0, 0);
+  }
+
+  function lockNow() {
+    saveUnlocked(false);
+    applyState();
+    window.scrollTo(0, 0);
+  }
+
+  if (form) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (cooling) return;
+
+      var value = input ? input.value : '';
+      if (!normalize(value)) {
+        showError('비밀번호를 입력해 주세요.');
+        return;
+      }
+      if (verify(value)) {
+        unlockNow();
+        return;
+      }
+
+      wrongCount += 1;
+      showError('비밀번호가 맞지 않습니다. 다시 확인해 주세요.');
+
+      if (wrongCount >= 3) {
+        cooling = true;
+        var wait = Math.min(3000, (wrongCount - 2) * 800);
+        if (submitBtn) submitBtn.disabled = true;
+        if (errorEl) {
+          errorEl.textContent = '비밀번호를 ' + wrongCount + '번 틀렸습니다. ' +
+            (wait / 1000).toFixed(1) + '초 후 다시 시도해 주세요.';
+          errorEl.hidden = false;
+        }
+        setTimeout(function () {
+          cooling = false;
+          if (submitBtn) submitBtn.disabled = false;
+          focusInput();
+        }, wait);
+      }
+    });
+  }
+
+  if (eyeBtn) {
+    eyeBtn.addEventListener('click', function () {
+      if (!input) return;
+      var reveal = input.type === 'password';
+      input.type = reveal ? 'text' : 'password';
+      eyeBtn.textContent = reveal ? '숨기기' : '보기';
+      eyeBtn.setAttribute('aria-label', reveal ? '비밀번호 숨기기' : '비밀번호 보기');
+      focusInput();
+    });
+  }
+
+  applyState();
+
+  /* hook so the lock can be checked from automation */
+  window.RP_LOCK = {
+    hash: sha256Hex,
+    verify: verify,
+    isUnlocked: isUnlocked,
+    unlock: function () { unlockNow(); },
+    lock: function () { lockNow(); }
+  };
+})();
+</script>
+
+<script>
+(function () {
+  'use strict';
+
+  var $ = function (sel, root) { return (root || document).querySelector(sel); };
+  var avatar = $('#avatar');
+  var rig = $('#rig');
+  var lineEl = $('#line');
+  var nextArrow = $('#nextArrow');
+  var speakerEl = $('#speaker');
+  var nameInput = $('#nameInput');
+  var lineInput = $('#lineInput');
+  var samplesEl = $('#samples');
+  var stage = $('#stage');
+  var toastEl = $('#toast');
+  var meterEl = $('#meter');
+  var meterBars = meterEl ? Array.prototype.slice.call(meterEl.children) : [];
+
+  var state = {
+    expr: 'default',
+    mouthStage: -2,        /* -1 idle, 0..3 speech */
+    blink: false,
+    mic: false,
+    demo: false,
+    muted: false,
+    recording: false,
+    talking: false,
+    noBlink: false,
+    amp: 0
+  };
+
+  /* ============================ 대사 데이터 ============================ */
+  var LINES = [
+    { label: '01 인사', expr: 'default', text: '안녕하세요! 오늘도 방송에 놀러 와 주셔서 정말 고마워요.' },
+    { label: '02 손님', expr: 'default', text: '어? 채팅에 손님이 왔네요. 처음 뵙겠습니다, 반가워요!' },
+    { label: '03 프린세스', expr: 'cynical', text: '이 몸은 아주 대단한 프린세스랍니다. 함부로 대하면 안 돼요?' },
+    { label: '04 놀람', expr: 'surprise', text: '헉! 벌써 시청자가 백 명이나 왔어요?!' },
+    { label: '05 시작', expr: 'happy', text: '자, 지금부터 신나는 이야기를 시작할게요. 귀 기울여 들어 주세요!' },
+    { label: '06 마무리', expr: 'happy', text: '오늘은 여기까지! 다음 방송에서 또 만나요. 안녕!' }
+  ];
+  var lineIndex = -1;
+
+  /* ============================ 사운드 ============================ */
+  var actx = null, master = null;
+
+  function audio() {
+    if (!actx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      actx = new AC();
+      master = actx.createGain();
+      master.gain.value = 0.9;
+      master.connect(actx.destination);
+    }
+    if (actx.state === 'suspended') { try { actx.resume(); } catch (e) {} }
+    return actx;
+  }
+
+  function tone(freq, dur, type, vol, delay) {
+    if (state.muted) return;
+    var ctx = audio();
+    if (!ctx) return;
+    var t0 = ctx.currentTime + (delay || 0);
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = type || 'square';
+    osc.frequency.setValueAtTime(freq, t0);
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(vol, t0 + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(gain);
+    gain.connect(master);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.02);
+  }
+
+  function blip() {
+    tone(1000 + Math.random() * 460, 0.028, 'square', 0.028, 0);
+  }
+  function chime() {
+    tone(660, 0.10, 'triangle', 0.06, 0);
+    tone(990, 0.14, 'triangle', 0.05, 0.08);
+  }
+
+  /* ============================ 표정 / 입 ============================ */
+  var IDLE_MOUTH = { default: 'mSmile', happy: 'mWide', surprise: 'mO', cynical: 'mSmirk' };
+
+  function mouthShow(id) {
+    var nodes = document.querySelectorAll('#mouth .m');
+    for (var i = 0; i < nodes.length; i++) {
+      if (nodes[i].id === id) nodes[i].classList.add('on');
+      else nodes[i].classList.remove('on');
+    }
+  }
+
+  function setExpr(name) {
+    if (!IDLE_MOUTH[name]) name = 'default';
+    state.expr = name;
+    avatar.setAttribute('data-expr', name);
+    var btns = document.querySelectorAll('#exprSeg button');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.toggle('on', btns[i].getAttribute('data-expr') === name);
+    }
+    if (state.mouthStage === -1) mouthShow(IDLE_MOUTH[name]);
+    if (name === 'happy' && state.blink) setBlink(false);
+  }
+
+  function setBlink(on) {
+    state.blink = !!on;
+    avatar.setAttribute('data-blink', on ? '1' : '0');
+  }
+
+  var blinkTimer = null, blinkStop = null;
+
+  function scheduleBlink() {
+    clearTimeout(blinkTimer);
+    var wait = 2300 + Math.random() * 3800;
+    blinkTimer = setTimeout(function () {
+      if (!state.noBlink && state.expr !== 'happy') {
+        setBlink(true);
+        blinkStop = setTimeout(function () { setBlink(false); }, 115);
+        if (Math.random() < 0.25) {
+          setTimeout(function () {
+            if (state.expr === 'happy') return;
+            setBlink(true);
+            setTimeout(function () { setBlink(false); }, 105);
+          }, 210);
+        }
+      }
+      scheduleBlink();
+    }, wait);
+  }
+
+  /* ============================ 바운스 / 렌더 ============================ */
+  function setRig(t, amp) {
+    var breathe = Math.sin(t / 1500) * 1.4;
+    var sway = Math.sin(t / 2600) * 0.55;
+    var bob = breathe + amp * 7.5;
+    var sy = 1 + amp * 0.018 - Math.sin(t / 1500) * 0.004;
+    var sx = 1 / sy;
+    rig.setAttribute('transform',
+      'translate(0 ' + (-bob).toFixed(2) + ') ' +
+      'translate(210 400) rotate(' + sway.toFixed(3) + ') scale(' + sx.toFixed(4) + ' ' + sy.toFixed(4) + ') translate(-210 -400)');
+    var floor = $('#floor');
+    if (floor) {
+      var k = 1 - amp * 0.10;
+      floor.setAttribute('rx', (92 * k).toFixed(1));
+      floor.setAttribute('opacity', (0.30 - amp * 0.07).toFixed(3));
+    }
+  }
+
+  var lastFrame = 0;
+  function loop(ts) {
+    if (ts - lastFrame > 16) {
+      lastFrame = ts;
+      var t = ts || performance.now();
+      var target = 0;
+      if (state.mic) target = micLevel();
+      if (state.talking) target = Math.max(target, talkEnv(t));
+      target = Math.min(1, Math.max(0, target));
+      var k = target > state.amp ? 0.55 : 0.22;
+      state.amp += (target - state.amp) * k;
+      if (state.amp < 0.004) state.amp = 0;
+
+      var stageNow = -1;
+      if (state.amp > 0.085) {
+        stageNow = state.amp < 0.36 ? 1 : (state.amp < 0.70 ? 2 : 3);
+      }
+      if (stageNow !== state.mouthStage) {
+        state.mouthStage = stageNow;
+        if (stageNow === -1) mouthShow(IDLE_MOUTH[state.expr]);
+        else mouthShow(stageNow === 1 ? 'mSmall' : (stageNow === 2 ? 'mBig' : 'mTalkO'));
+      }
+
+      setRig(t, state.amp);
+
+      if (meterBars.length) {
+        for (var i = 0; i < meterBars.length; i++) {
+          var need = (i + 1) / meterBars.length;
+          var h = state.amp >= need ? 6 + (state.amp - need + 0.2) * 18 : 4;
+          meterBars[i].style.height = Math.min(18, Math.max(4, h)).toFixed(1) + 'px';
+        }
+      }
+    }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  function talkEnv(t) {
+    var a = Math.abs(Math.sin(t / 92) * Math.sin(t / 37));
+    var b = 0.55 + 0.45 * Math.sin(t / 210);
+    return Math.min(1, 0.18 + 0.92 * a * b);
+  }
+
+  /* ============================ 마이크 ============================ */
+  var audioCtx = null, analyser = null, micStream = null, micBuf = null;
+
+  function micLevel() {
+    if (!analyser || !micBuf) return 0;
+    analyser.getByteTimeDomainData(micBuf);
+    var sum = 0;
+    for (var i = 0; i < micBuf.length; i++) {
+      var v = (micBuf[i] - 128) / 128;
+      sum += v * v;
+    }
+    var rms = Math.sqrt(sum / micBuf.length);
+    return Math.min(1, Math.max(0, (rms - 0.012) / 0.18));
+  }
+
+  function setMicUI(on, label) {
+    var btn = $('#micBtn');
+    $('#micLabel').textContent = label || (on ? '마이크 끄기' : '마이크 켜기');
+    btn.classList.toggle('on', !!on);
+    meterEl.classList.toggle('on', !!on);
+  }
+
+  function stopMic() {
+    state.mic = false;
+    if (micStream) {
+      micStream.getTracks().forEach(function (tr) { try { tr.stop(); } catch (e) {} });
+      micStream = null;
+    }
+    analyser = null;
+    micBuf = null;
+    setMicUI(false);
+    showToast('마이크를 껐어요');
+  }
+
+  function startMic() {
+    if (state.mic) { stopMic(); return; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      showToast('이 브라우저에서는 마이크를 쓸 수 없어요 — 데모 재생을 눌러 주세요');
+      return;
+    }
+    setMicUI(false, '권한 요청 중…');
+    navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+    }).then(function (stream) {
+      micStream = stream;
+      audioCtx = audio() || audioCtx;
+      if (!audioCtx) throw new Error('no audio context');
+      var src = audioCtx.createMediaStreamSource(stream);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 1024;
+      analyser.smoothingTimeConstant = 0.55;
+      src.connect(analyser);
+      micBuf = new Uint8Array(analyser.fftSize);
+      state.mic = true;
+      setMicUI(true);
+      chime();
+      showToast('마이크 켜짐 — 말해 보세요');
+    }).catch(function (err) {
+      setMicUI(false);
+      var msg = '마이크를 켤 수 없어요';
+      if (err && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) {
+        msg = '마이크 권한이 막혀 있어요 — 브라우저 설정에서 허용해 주세요';
+      } else if (err && err.name === 'NotFoundError') {
+        msg = '마이크를 찾지 못했어요 — 데모 재생으로 테스트할 수 있어요';
+      }
+      showToast(msg);
+    });
+  }
+
+  /* ============================ 타자기 ============================ */
+  var typing = null;
+  var demoTimer = null;
+
+  function stopTyping() {
+    if (typing && typing.timer) clearTimeout(typing.timer);
+    typing = null;
+    state.talking = false;
+    lineEl.classList.remove('typing');
+  }
+
+  function say(text, expr) {
+    var t = String(text || '').replace(/\s+/g, ' ').trim();
+    if (!t) return;
+    if (expr) setExpr(expr);
+    stopTyping();
+    clearTimeout(demoTimer);
+
+    lineEl.textContent = '';
+    nextArrow.classList.remove('on');
+    lineEl.classList.add('typing');
+    state.talking = true;
+
+    var i = 0, blinked = false;
+    var total = t.length;
+
+    function step() {
+      if (!typing) return;
+      i += 1;
+      var ch = t.charAt(i - 1);
+      lineEl.textContent = t.slice(0, i);
+
+      if (ch !== ' ' && ch !== '\n' && i % 2 === 0) blip();
+      if (!blinked && i > total * 0.32) { blinked = true; if (state.expr !== 'happy') { setBlink(true); setTimeout(function () { setBlink(false); }, 110); } }
+
+      if (i >= total) { finishTyping(); return; }
+
+      var d = 26 + Math.random() * 20;
+      if ('.!?'.indexOf(ch) > -1) d += 105;
+      else if (',—'.indexOf(ch) > -1) d += 55;
+      typing.timer = setTimeout(step, d);
+    }
+
+    typing = { text: t, timer: setTimeout(step, 90) };
+  }
+
+  function finishTyping() {
+    if (!typing) return;
+    if (typing.timer) clearTimeout(typing.timer);
+    lineEl.textContent = typing.text;
+    typing = null;
+    state.talking = false;
+    lineEl.classList.remove('typing');
+    nextArrow.classList.add('on');
+    if (state.demo) {
+      clearTimeout(demoTimer);
+      demoTimer = setTimeout(function () { if (state.demo) advance(true); }, 1900);
+    }
+  }
+
+  function advance(auto) {
+    if (typing) { finishTyping(); return; }
+    if (state.demo && !auto) { stopDemo(); return; }
+    lineIndex = (lineIndex + 1) % LINES.length;
+    var l = LINES[lineIndex];
+    markChip();
+    say(l.text, l.expr);
+  }
+
+  /* ============================ 데모 ============================ */
+  function startDemo() {
+    state.demo = true;
+    var btn = $('#demoBtn');
+    btn.classList.add('on');
+    btn.innerHTML = '<span class="ic">■</span> 데모 중지';
+    if (typing) finishTyping();
+    else advance(true);
+  }
+
+  function stopDemo() {
+    state.demo = false;
+    clearTimeout(demoTimer);
+    var btn = $('#demoBtn');
+    btn.classList.remove('on');
+    btn.innerHTML = '<span class="ic">▶</span> 데모 재생';
+  }
+
+  /* ============================ 샘플 칩 ============================ */
+  function buildChips() {
+    LINES.forEach(function (l, idx) {
+      var b = document.createElement('button');
+      b.className = 'chip';
+      b.type = 'button';
+      b.textContent = l.label;
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        lineIndex = idx;
+        markChip();
+        say(l.text, l.expr);
+      });
+      samplesEl.appendChild(b);
+    });
+  }
+  function markChip() {
+    var chips = samplesEl.children;
+    for (var i = 0; i < chips.length; i++) chips[i].classList.toggle('cur', i === lineIndex);
+  }
+
+  /* ============================ 토스트 ============================ */
+  var toastTimer = null;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('on'); }, 2200);
+  }
+
+  /* ============================ 녹화 모드 ============================ */
+  function setRecording(on) {
+    state.recording = !!on;
+    document.body.classList.toggle('recording', state.recording);
+    $('#recBtn').classList.toggle('on', state.recording);
+    if (state.recording) {
+      showToast('녹화 모드 — 화면을 탭하면 컨트롤이 돌아옵니다');
+      if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    } else {
+      showToast('컨트롤 복귀');
+    }
+  }
+
+  /* ============================ 이벤트 ============================ */
+  function tapAdvance(e) {
+    if (e && e.target && e.target.closest && e.target.closest('button,input,a,label')) return;
+    if (state.recording) { setRecording(false); return; }
+    if (typing) { finishTyping(); return; }
+    advance(false);
+  }
+
+  stage.addEventListener('click', function (e) {
+    if (e.target.closest('#hud') || e.target.closest('#composer') || e.target.closest('#samples')) return;
+    tapAdvance(e);
+  });
+
+  $('#micBtn').addEventListener('click', function (e) { e.stopPropagation(); startMic(); });
+  $('#demoBtn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (state.demo) stopDemo(); else startDemo();
+  });
+  $('#soundBtn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    state.muted = !state.muted;
+    this.textContent = state.muted ? '🔇' : '🔊';
+    this.setAttribute('aria-pressed', state.muted ? 'false' : 'true');
+    this.classList.toggle('off', state.muted);
+    if (!state.muted) { audio(); tone(880, 0.06, 'triangle', 0.05, 0); }
+  });
+  $('#recBtn').addEventListener('click', function (e) { e.stopPropagation(); setRecording(!state.recording); });
+
+  $('#exprSeg').addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    e.stopPropagation();
+    setExpr(b.getAttribute('data-expr'));
+  });
+
+  $('#bgSeg').addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    e.stopPropagation();
+    var bg = b.getAttribute('data-bg');
+    document.body.setAttribute('data-bg', bg);
+    var all = $('#bgSeg').querySelectorAll('button');
+    for (var i = 0; i < all.length; i++) all[i].classList.toggle('on', all[i] === b);
+  });
+
+  $('#sayBtn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    var txt = lineInput.value.trim();
+    if (!txt) { showToast('대사를 입력해 주세요'); lineInput.focus(); return; }
+    stopDemoIfNeeded();
+    lineIndex = -1; markChip();
+    say(txt);
+    lineInput.value = '';
+  });
+
+  function stopDemoIfNeeded() { if (state.demo) stopDemo(); }
+
+  lineInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      $('#sayBtn').click();
+    }
+    e.stopPropagation();
+  });
+  lineInput.addEventListener('click', function (e) { e.stopPropagation(); });
+
+  nameInput.addEventListener('input', function () {
+    var v = this.value.trim() || '프린세스';
+    speakerEl.textContent = v;
+  });
+  nameInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); this.blur(); }
+    e.stopPropagation();
+  });
+  nameInput.addEventListener('click', function (e) { e.stopPropagation(); });
+
+  document.addEventListener('keydown', function (e) {
+    var tag = (e.target && e.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    var k = e.key;
+    if (k === ' ' || k === 'Spacebar') { e.preventDefault(); if (typing) finishTyping(); else advance(false); return; }
+    if (k === 'Enter') { e.preventDefault(); if (typing) finishTyping(); else advance(false); return; }
+    if (k === 'm' || k === 'M') { startMic(); return; }
+    if (k === 'd' || k === 'D') { if (state.demo) stopDemo(); else startDemo(); return; }
+    if (k === 'r' || k === 'R') { setRecording(!state.recording); return; }
+    if (k === 'b' || k === 'B') {
+      var order = ['dark', 'green', 'checker', 'white'];
+      var cur = document.body.getAttribute('data-bg') || 'dark';
+      var next = order[(order.indexOf(cur) + 1) % order.length];
+      var btn = $('#bgSeg button[data-bg="' + next + '"]');
+      if (btn) btn.click();
+      return;
+    }
+    if (k >= '1' && k <= '4') {
+      var names = ['default', 'happy', 'surprise', 'cynical'];
+      setExpr(names[parseInt(k, 10) - 1]);
+    }
+  });
+
+  /* ============================ 초기화 ============================ */
+  buildChips();
+  setExpr('default');
+  mouthShow('mSmile');
+  scheduleBlink();
+
+  /* 첫 화면 인사 */
+  setTimeout(function () {
+    if (!document.documentElement.classList.contains('rp-unlocked')) return;
+    if (lineEl.textContent) return;
+    lineIndex = 0; markChip();
+    say(LINES[0].text, LINES[0].expr);
+  }, 420);
+
+  /* 잠금 해제 직후에도 인사가 보이도록 */
+  var mo = new MutationObserver(function () {
+    if (document.documentElement.classList.contains('rp-unlocked') && !lineEl.textContent && !typing) {
+      lineIndex = 0; markChip();
+      say(LINES[0].text, LINES[0].expr);
+    }
+  });
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+  /* 자동화 훅 */
+  window.AVATAR_DEMO = {
+    say: say,
+    setBlinkEnabled: function (on) { state.noBlink = !on; if (!on) setBlink(false); },
+    setExpr: setExpr,
+    advance: advance,
+    setRecording: setRecording,
+    setBg: function (bg) { var b = $('#bgSeg button[data-bg="' + bg + '"]'); if (b) b.click(); },
+    state: state,
+    isTyping: function () { return !!typing; }
+  };
+})();
+</script>
+</body>
+</html>
