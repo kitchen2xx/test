@@ -192,33 +192,33 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
 
 /* etymology bar inside the card */
 .formula{
-  flex:none;border-top:1px solid var(--line-2);padding:7px 10px 8px;
+  flex:none;border-top:1px solid var(--line-2);padding:9px 11px 10px;
   background:linear-gradient(180deg,#FFFDFA,#FBF8F2);
 }
-.fhead{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.fhead{display:flex;align-items:center;gap:6px;margin-bottom:6px}
 .flabel{
-  font-size:9.2px;font-weight:800;color:var(--blue);background:var(--blue-wash);
-  border:1px solid var(--blue-line);padding:2px 6px;border-radius:5px;letter-spacing:-.02em;white-space:nowrap;
+  font-size:10.6px;font-weight:800;color:var(--blue);background:var(--blue-wash);
+  border:1px solid var(--blue-line);padding:3px 7px;border-radius:6px;letter-spacing:-.02em;white-space:nowrap;
 }
 .flink{
-  margin-left:auto;border:none;background:none;font-size:9.2px;font-weight:800;color:var(--ink-3);
-  padding:2px 0 2px 6px;cursor:pointer;white-space:nowrap;letter-spacing:-.02em;
+  margin-left:auto;border:none;background:none;font-size:10.6px;font-weight:800;color:var(--ink-3);
+  padding:3px 0 3px 6px;cursor:pointer;white-space:nowrap;letter-spacing:-.02em;
 }
 .flink:active{color:var(--blue)}
-.fpills{display:flex;flex-wrap:wrap;align-items:center;gap:3px 4px}
+.fpills{display:flex;flex-wrap:wrap;align-items:center;gap:4px 5px}
 .pill{
-  display:inline-flex;align-items:center;gap:3px;max-width:100%;
-  background:#F7F3EC;border:1px solid #EDE5D8;border-radius:8px;padding:2.5px 6px 2.5px 4px;
+  display:inline-flex;align-items:center;gap:4px;max-width:100%;
+  background:#F7F3EC;border:1px solid #EDE5D8;border-radius:8px;padding:3.5px 7px 3.5px 5px;
   cursor:pointer;transition:.15s;line-height:1.15;
 }
 .pill:active{transform:scale(.97);background:#F2ECE1}
-.pill i{font-style:normal;font-size:9.5px;line-height:1}
-.pill b{font-size:10.2px;font-weight:800;color:var(--blue);letter-spacing:-.01em;white-space:nowrap}
-.pill small{font-size:8.4px;font-weight:700;color:var(--ink-3);white-space:nowrap;letter-spacing:-.02em}
-.fop{color:#C9BEAE;font-weight:800;font-size:9.5px}
-.farrow{color:var(--seal);font-weight:800;font-size:10px;padding:0 1px}
-.fresult{font-size:10.2px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
-.fnote{margin-top:4px;font-size:8.8px;color:var(--ink-3);font-weight:600;line-height:1.35;letter-spacing:-.02em}
+.pill i{font-style:normal;font-size:11px;line-height:1}
+.pill b{font-size:11.8px;font-weight:800;color:var(--blue);letter-spacing:-.01em;white-space:nowrap}
+.pill small{font-size:9.8px;font-weight:700;color:var(--ink-3);white-space:nowrap;letter-spacing:-.02em}
+.fop{color:#C9BEAE;font-weight:800;font-size:11px}
+.farrow{color:var(--seal);font-weight:800;font-size:11.5px;padding:0 1px}
+.fresult{font-size:12px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.fnote{margin-top:5px;font-size:10.2px;color:var(--ink-3);font-weight:600;line-height:1.45;letter-spacing:-.02em}
 .mask-hint{
   position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);display:none;z-index:4;
   font-size:9.2px;font-weight:800;color:var(--blue);background:rgba(255,255,255,.95);
@@ -315,7 +315,7 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
 .sheet.on{transform:translateY(0)}
 .sheet-head{flex:none;position:relative;padding:8px 14px 6px;display:flex;align-items:center;border-bottom:1px solid var(--line-2)}
 .sheet-head .handle{position:absolute;top:6px;left:50%;transform:translateX(-50%);width:32px;height:3.5px;border-radius:99px;background:#DDD4C6}
-.sheet-head h3{margin:7px 0 0;font-size:12px;font-weight:800;letter-spacing:-.03em;display:flex;align-items:center;gap:5px}
+.sheet-head h3{margin:7px 0 0;font-size:13px;font-weight:800;letter-spacing:-.03em;display:flex;align-items:center;gap:5px}
 .sheet-head .x{
   margin-left:auto;margin-top:7px;width:25px;height:25px;border-radius:50%;border:none;background:var(--paper-2);
   color:var(--ink-2);font-size:10.5px;cursor:pointer;display:grid;place-items:center;
@@ -330,21 +330,26 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
 /* story sheet */
 .sh-head{display:flex;align-items:center;gap:10px;margin-bottom:9px}
 .sh-ico{
-  flex:none;width:46px;height:46px;border-radius:12px;background:#fff;border:1px solid var(--line);
-  display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--blue);text-align:center;
+  flex:none;width:50px;height:50px;border-radius:12px;background:#fff;border:1px solid var(--line);
+  display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--blue);text-align:center;
   line-height:1.15;letter-spacing:-.03em;box-shadow:var(--shadow-sm);padding:0 2px;
 }
-.sh-meta{min-width:0;display:flex;flex-direction:column;gap:1px}
-.sh-meta b{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
-.sh-meta span{font-size:9.5px;color:var(--ink-3);font-weight:700}
-.tag{display:inline-block;font-size:8.5px;font-weight:800;color:var(--blue-2);background:var(--blue-wash);border-radius:4px;padding:1.5px 5px;margin-top:3px;align-self:flex-start}
-.story-p{font-size:11.5px;line-height:1.68;color:var(--ink-2);margin:0 0 9px!important}
-.famrow{display:flex;flex-wrap:wrap;gap:4px}
+.sh-ico .rootk{display:block;font-size:8.8px;color:var(--ink-3);letter-spacing:.02em;font-weight:800}
+.sh-meta{min-width:0;display:flex;flex-direction:column;gap:2px}
+.sh-meta b{font-size:15.2px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.sh-meta span{font-size:10.6px;color:var(--ink-3);font-weight:700}
+.tag{display:inline-block;font-size:9.4px;font-weight:800;color:var(--blue-2);background:var(--blue-wash);border-radius:4px;padding:2px 6px;margin-top:3px;align-self:flex-start}
+/* 유래 시트 본문은 다른 시트보다 한 단계 크게 (읽기 편하게) */
+#storyBody{font-size:12.8px;line-height:1.66}
+#storyBody h4{font-size:11.8px;margin:15px 0 6px}
+.story-p{font-size:12.8px;line-height:1.7;color:var(--ink-2);margin:0 0 10px!important}
+.famrow{display:flex;flex-wrap:wrap;gap:5px}
 .famchip{
-  display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid var(--line);border-radius:8px;
-  padding:4px 7px;font-size:9.5px;font-weight:700;color:var(--ink-2);cursor:pointer;letter-spacing:-.02em;
+  display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--line);border-radius:8px;
+  padding:5px 9px;font-size:10.8px;font-weight:700;color:var(--ink-2);cursor:pointer;letter-spacing:-.02em;
 }
-.famchip b{font-size:11px;color:var(--blue);font-weight:800}
+.famchip b{font-size:12.4px;color:var(--blue);font-weight:800}
+.famchip .kk{font-size:9.4px;color:#9aa5b0;letter-spacing:-.01em}
 .famchip.locked{background:#F6F2EB;color:#A99C8B;border-style:dashed}
 .famchip.locked b{color:#A99C8B}
 .sheet-actions{display:flex;gap:5px;margin-top:11px}
@@ -2610,7 +2615,7 @@ const WORDS = [
     const w = cur();
     const fam = familyOf(w);
     let h = "";
-    h += '<div class="sh-head"><div class="sh-ico"><span style="display:block;font-size:8px;color:var(--ink-3);letter-spacing:.02em">ROOT</span>' + esc(w.root) + "</div>";
+    h += '<div class="sh-head"><div class="sh-ico"><span class="rootk">ROOT</span>' + esc(w.root) + "</div>";
     h += '<div class="sh-meta"><b>' + esc(w.w) + " · " + esc(w.core) + "</b>";
     h += "<span>" + (w.art ? esc(w.art) + " · " : "") + esc(w.pos) + " · " + esc(lvDef(w.level).label) + " · [" + esc(w.ipa) + "]</span>";
     h += '<span class="tag">' + esc((ROOTS[w.root] || {}).family || w.root) + " = " + esc((ROOTS[w.root] || {}).m || "") + "</span></div></div>";
@@ -2619,7 +2624,7 @@ const WORDS = [
 
     h += "<h4>조각으로 보기</h4><div class=\"famrow\">";
     w.parts.forEach(function (p) {
-      h += '<span class="famchip"><b>' + esc(p.a) + "</b>" + p.i + " " + esc(p.m) + ' <span style="font-size:8px;color:#9aa5b0">' + esc(p.k) + "</span></span>";
+      h += '<span class="famchip"><b>' + esc(p.a) + "</b>" + p.i + " " + esc(p.m) + ' <span class="kk">' + esc(p.k) + "</span></span>";
     });
     h += "</div>";
 
@@ -2628,7 +2633,7 @@ const WORDS = [
       const open = isOpen(x.level);
       h += '<button class="famchip' + (open ? "" : " locked") + '" data-fam="' + esc(x.w) + '" data-open="' + (open ? "1" : "0") + '">' +
         (open ? "" : "🔒") + "<b>" + esc(x.w) + "</b>" + esc(x.core.split(" · ")[0]) +
-        '<span style="font-size:8px;color:#9aa5b0">' + esc(lvDef(x.level).label) + "</span></button>";
+        '<span class="kk">' + esc(lvDef(x.level).label) + "</span></button>";
     });
     h += "</div>";
 
