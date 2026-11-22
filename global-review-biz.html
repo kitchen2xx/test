@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>글로벌 체험단 BIZ — 사장님(매장·브랜드) 대시보드 (MVP 시안)</title>
+<meta name="description" content="외국인 크리에이터 숏폼 체험단을 운영하는 사장님용 페이지. 사업자 인증, 캠페인 등록, 지원자 선정, 결과 리포트와 정산까지 한 화면에서." />
+<style>
+  :root{
+    --ink:#0f172a;
+    --ink-2:#334155;
+    --muted:#64748b;
+    --line:#e5e9f0;
+    --line-soft:#f1f4f9;
+    --bg:#f6f8fc;
+    --card:#ffffff;
+    --brand:#2f5df5;
+    --brand-dark:#1d43cc;
+    --brand-soft:#eef2ff;
+    --mint:#0e9f6e;
+    --mint-soft:#e6f7f0;
+    --amber:#b54708;
+    --amber-soft:#fff4e5;
+    --violet:#6941c6;
+    --violet-soft:#f4f0ff;
+    --pink:#c11574;
+    --pink-soft:#fdf2fa;
+    --radius:16px;
+    --shadow-sm:0 1px 2px rgba(15,23,42,.05);
+    --shadow:0 14px 38px -18px rgba(15,23,42,.25);
+    --max:1180px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.55;font-size:15px;
+    -webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word;
+  }
+  button{font-family:inherit;font-size:inherit;cursor:pointer}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3,h4,p,ul,ol{margin:0}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 22px}
+  .hint{font-size:11.8px;color:var(--muted);line-height:1.5}
+  .muted{color:var(--muted)}
+
+  /* ---------- buttons ---------- */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:10px;border:1px solid transparent;
+    padding:10px 16px;font-weight:700;font-size:14px;white-space:nowrap;
+    transition:background .15s,border-color .15s,transform .06s,box-shadow .15s}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--brand);color:#fff;box-shadow:0 8px 18px -10px rgba(47,93,245,.9)}
+  .btn-primary:hover{background:var(--brand-dark)}
+  .btn-ghost{background:#fff;border-color:var(--line);color:var(--ink-2)}
+  .btn-ghost:hover{border-color:#c6cfdd;background:#fcfdff}
+  .btn-soft{background:var(--brand-soft);color:var(--brand-dark)}
+  .btn-soft:hover{background:#e3e9ff}
+  .btn-dark{background:var(--ink);color:#fff}
+  .btn-dark:hover{background:#1e293b}
+  .btn-sm{padding:7px 12px;font-size:13px;border-radius:9px}
+  .btn-lg{padding:14px 22px;font-size:15px;border-radius:12px}
+  .btn-block{width:100%}
+  .btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+
+  /* ---------- header ---------- */
+  header.site{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.94);
+    -webkit-backdrop-filter:saturate(180%) blur(10px);backdrop-filter:saturate(180%) blur(10px);border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;gap:22px;height:66px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;letter-spacing:-.03em;flex:none}
+  .logo .mark{width:31px;height:31px;border-radius:10px;flex:none;
+    background:linear-gradient(135deg,#2f5df5,#7c5cff 55%,#12b76a);color:#fff;display:grid;place-items:center;font-size:15px;font-weight:800}
+  .logo small{display:block;font-weight:700;font-size:10px;color:var(--muted);letter-spacing:.12em;line-height:1.2;text-transform:uppercase}
+  .tabs{display:flex;gap:18px;margin-left:8px}
+  .tabs a{font-size:14px;font-weight:700;color:var(--ink-2);padding:4px 0;border-bottom:2px solid transparent}
+  .tabs a:hover{color:var(--brand)}
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:9px}
+  .status-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;padding:6px 11px;border-radius:999px;
+    background:#fef3f2;color:#b42318;border:1px solid #fecdca;white-space:nowrap}
+  .status-pill .dot{width:6px;height:6px;border-radius:50%;background:#f04438;flex:none}
+  .status-pill.ok{background:var(--mint-soft);color:#05603a;border-color:#cdeade}
+  .status-pill.ok .dot{background:#12b76a}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);
+    background:radial-gradient(900px 420px at 92% -10%,#dbe4ff 0%,rgba(219,228,255,0) 62%),
+               radial-gradient(700px 380px at -8% 4%,#e6faf2 0%,rgba(230,250,242,0) 58%),#fff}
+  .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:44px;padding:56px 22px 50px;align-items:center}
+  .hero-grid > *{min-width:0}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--amber-soft);color:var(--amber);
+    border:1px solid #ffdfb8;border-radius:999px;padding:6px 13px;font-size:12.5px;font-weight:800}
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:#f79009;box-shadow:0 0 0 3px #ffdfb8;flex:none}
+  .hero h1{font-size:40px;line-height:1.25;letter-spacing:-.04em;font-weight:800;margin:17px 0 13px}
+  .hero h1 em{font-style:normal;color:var(--brand);position:relative;white-space:nowrap}
+  .hero h1 em::after{content:"";position:absolute;left:0;right:0;bottom:3px;height:10px;background:rgba(47,93,245,.13);border-radius:4px;z-index:-1}
+  .hero p.lead{font-size:15.5px;color:var(--ink-2);max-width:520px}
+  .hero p.lead b{color:var(--ink)}
+  .hero-actions{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap}
+  .lockline{margin-top:20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;
+    background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:10px;padding:10px 13px;max-width:520px}
+  .lockline.ok{background:var(--mint-soft);border-color:#cdeade;color:#05603a}
+  .lockline a{font-weight:800;text-decoration:underline;text-underline-offset:2px}
+
+  .offer{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:26px;position:relative}
+  .offer-ribbon{position:absolute;top:-13px;left:24px;background:var(--ink);color:#fff;font-size:11px;font-weight:800;
+    padding:5px 12px;border-radius:999px;letter-spacing:.04em}
+  .offer h3{font-size:17px;font-weight:800;letter-spacing:-.02em;margin-top:4px}
+  .offer .big{font-size:33px;font-weight:800;letter-spacing:-.04em;color:var(--brand);margin:5px 0 1px;line-height:1.2}
+  .offer .big span{font-size:14px;color:var(--ink-2);font-weight:700;margin-left:5px;letter-spacing:-.02em}
+  .offer .sub{font-size:12.8px;color:var(--amber);font-weight:800}
+  .offer ul{list-style:none;padding:0;margin:14px 0 15px;display:grid;gap:8px}
+  .offer li{display:flex;gap:9px;font-size:13.2px;color:var(--ink-2)}
+  .offer li i{flex:none;width:19px;height:19px;border-radius:50%;background:var(--mint-soft);color:var(--mint);
+    display:grid;place-items:center;font-style:normal;font-size:11px;font-weight:800;margin-top:2px}
+  .quota{border-top:1px dashed var(--line);padding-top:13px}
+  .quota-top{display:flex;justify-content:space-between;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:7px}
+  .quota-top b{color:var(--amber)}
+  .bar{height:8px;border-radius:999px;background:var(--line-soft);overflow:hidden}
+  .bar > i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#f79009,#fdb022)}
+  .bar.brand > i{background:linear-gradient(90deg,#2f5df5,#7c5cff)}
+
+  /* ---------- stats ---------- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);
+    border-radius:14px;overflow:hidden;margin-top:-26px;position:relative;box-shadow:var(--shadow-sm)}
+  .stat{background:#fff;padding:16px 20px}
+  .stat b{display:block;font-size:20px;letter-spacing:-.02em}
+  .stat span{font-size:12.3px;color:var(--muted)}
+  .spacer{height:42px}
+
+  /* ---------- sections ---------- */
+  section.block{padding:46px 0 8px}
+  .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:20px;flex-wrap:wrap}
+  .sec-title{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .secnum{font-size:12px;font-weight:800;color:var(--brand);background:var(--brand-soft);border-radius:8px;padding:4px 9px;letter-spacing:.06em}
+  .sec-head h2{font-size:25px;font-weight:800;letter-spacing:-.035em;line-height:1.3}
+  .sec-head p{color:var(--muted);font-size:13.5px;margin-top:6px;max-width:660px}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:20px;padding:26px;box-shadow:var(--shadow-sm)}
+  .panel + .panel{margin-top:16px}
+
+  /* ---------- pricing ---------- */
+  .pricing{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .price-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;flex-direction:column;position:relative}
+  .price-card.featured{border:2px solid var(--brand);box-shadow:0 18px 44px -26px rgba(47,93,245,.55)}
+  .price-card .badge-top{position:absolute;top:-12px;right:20px;background:var(--brand);color:#fff;font-size:11.5px;font-weight:800;padding:5px 12px;border-radius:999px}
+  .kind{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+  .price-card h3{font-size:18px;font-weight:800;margin:6px 0 4px;letter-spacing:-.025em}
+  .price-card .desc{font-size:13px;color:var(--muted);min-height:38px}
+  .price{display:flex;align-items:baseline;gap:6px;margin:12px 0 2px}
+  .price b{font-size:27px;letter-spacing:-.035em;font-weight:800}
+  .price span{font-size:13px;color:var(--muted);font-weight:700}
+  .price-note{font-size:11.6px;color:var(--muted);margin-bottom:14px}
+  .price-card ul{list-style:none;padding:0;margin:0 0 18px;display:grid;gap:8px}
+  .price-card li{display:flex;gap:9px;font-size:13.2px;color:var(--ink-2)}
+  .price-card li .ok{color:var(--mint);font-weight:800;flex:none}
+  .price-card li .no{color:#b9c2d0;font-weight:800;flex:none}
+  .price-card li.dim{color:var(--muted)}
+  .price-card .btn{margin-top:auto}
+
+  /* ---------- verify ---------- */
+  .verify-grid{display:grid;grid-template-columns:1.35fr .65fr;gap:16px;align-items:start}
+  .panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+  .panel-head h3{font-size:18px;font-weight:800;letter-spacing:-.025em}
+  .panel-head p{font-size:12.8px;color:var(--muted);margin-top:4px}
+  .tag-req{font-size:11px;font-weight:800;color:#b42318;background:#fef3f2;border:1px solid #fecdca;padding:4px 9px;border-radius:999px;white-space:nowrap}
+  .field{display:flex;flex-direction:column;gap:6px;min-width:0}
+  .field label{font-size:12.6px;font-weight:800;color:var(--ink-2)}
+  .field .req{color:var(--brand)}
+  .field input,.field select,.field textarea{font-family:inherit;font-size:14px;color:var(--ink);background:#fff;
+    border:1px solid var(--line);border-radius:10px;padding:11px 13px;width:100%;
+    transition:border-color .12s,box-shadow .12s}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(47,93,245,.12)}
+  .field input::placeholder,.field textarea::placeholder{color:#98a2b3}
+  .field textarea{resize:vertical;min-height:70px}
+  .f-row{display:flex;gap:9px}
+  .f-row input{flex:1;min-width:0}
+  .f-row .btn{flex:none}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .form-grid .full{grid-column:1/-1}
+  .form-grid .third{grid-column:span 1}
+  .res-box{display:none;margin-top:10px;border-radius:11px;padding:11px 13px;font-size:12.8px;line-height:1.5}
+  .res-box.show{display:block}
+  .res-box.ok{background:var(--mint-soft);border:1px solid #cdeade;color:#05603a}
+  .res-box.err{background:#fef3f2;border:1px solid #fecdca;color:#b42318}
+  .res-box.load{background:var(--brand-soft);border:1px solid #dbe4ff;color:#1d3fbd}
+  .res-box b{font-weight:800}
+
+  .dropzone{display:flex;align-items:center;gap:12px;border:1.5px dashed #cfd8e6;border-radius:12px;padding:14px 15px;
+    background:#fbfcfe;cursor:pointer;transition:border-color .12s,background .12s}
+  .dropzone:hover{border-color:var(--brand);background:#f7f9ff}
+  .dropzone.has{border-style:solid;border-color:#cdeade;background:var(--mint-soft)}
+  .dz-ic{width:38px;height:38px;border-radius:10px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;font-size:16px;flex:none}
+  .dz-txt{min-width:0}
+  .dz-txt b{display:block;font-size:13.2px;font-weight:800}
+  .dz-txt span{display:block;font-size:11.5px;color:var(--muted)}
+  .dz-state{margin-left:auto;font-size:11.5px;font-weight:800;color:var(--mint);flex:none}
+  .dropzone input[type=file]{display:none}
+
+  .switch-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);
+    border-radius:12px;padding:12px 14px;background:#fbfcfe}
+  .switch-row .sw-txt b{display:block;font-size:13px;font-weight:800}
+  .switch-row .sw-txt span{display:block;font-size:11.5px;color:var(--muted)}
+  .switch{position:relative;display:inline-flex;flex:none;width:44px;height:26px}
+  .switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+  .switch i{position:absolute;inset:0;background:#cbd5e1;border-radius:999px;transition:background .15s}
+  .switch i::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;
+    transition:transform .15s;box-shadow:0 1px 3px rgba(15,23,42,.3)}
+  .switch input:checked + i{background:var(--brand)}
+  .switch input:checked + i::after{transform:translateX(18px)}
+  .switch input:focus-visible + i{outline:3px solid rgba(47,93,245,.35);outline-offset:2px}
+
+  .side-list{list-style:none;padding:0;margin:0;display:grid;gap:11px}
+  .side-list li{display:flex;gap:10px;font-size:13px;color:var(--ink-2);align-items:flex-start}
+  .side-list li .sic{flex:none;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-size:11px;font-weight:800;
+    background:var(--brand-soft);color:var(--brand-dark);margin-top:1px}
+  .side-list li.locked{color:var(--muted)}
+  .side-list li.locked .sic{background:#f1f4f9;color:#94a3b8}
+  .side-note{margin-top:16px;font-size:12px;color:var(--muted);background:#fbfcfe;border:1px solid var(--line-soft);border-radius:10px;padding:11px 12px}
+
+  /* ---------- chips ---------- */
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  .chip{border:1px solid var(--line);background:#fff;color:var(--ink-2);padding:7px 13px;border-radius:999px;
+    font-size:13px;font-weight:700;transition:all .12s}
+  .chip:hover{border-color:#b9c2d0}
+  .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+  .chip[aria-pressed="true"] .cnt{color:#c3cddd}
+  .chip .cnt{font-weight:700;color:var(--muted);margin-left:4px;font-size:11.5px}
+
+  /* ---------- lock ---------- */
+  .lockwrap{position:relative}
+  .lock-overlay{position:absolute;inset:0;background:rgba(246,248,252,.8);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);border-radius:16px;
+    display:flex;align-items:center;justify-content:center;padding:20px;z-index:5;text-align:center}
+  .lock-overlay.hide{display:none}
+  .lock-card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:22px 24px;max-width:360px}
+  .lock-card .lic{width:44px;height:44px;border-radius:12px;background:var(--amber-soft);color:var(--amber);display:grid;place-items:center;
+    font-size:20px;margin:0 auto 11px}
+  .lock-card b{display:block;font-size:15px;font-weight:800;margin-bottom:5px}
+  .lock-card p{font-size:12.6px;color:var(--muted);margin-bottom:14px}
+
+  /* ---------- campaign list ---------- */
+  .camp-list{display:grid;gap:10px;margin-top:16px}
+  .camp-row{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;border:1px solid var(--line);
+    border-radius:14px;padding:15px 17px;background:#fff;transition:border-color .12s,box-shadow .12s}
+  .camp-row:hover{border-color:#d3dbe8;box-shadow:var(--shadow-sm)}
+  .camp-row.new{outline:3px solid rgba(47,93,245,.35);outline-offset:2px}
+  .camp-main{min-width:0}
+  .camp-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .camp-title b{font-size:14.5px;font-weight:800;letter-spacing:-.02em}
+  .camp-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+  .tag{font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;background:var(--line-soft);color:var(--ink-2);white-space:nowrap}
+  .tag.lang{background:#f4f7ff;color:#2f5df5;border:1px solid #dbe4ff;font-weight:800}
+  .tag.track-m{background:var(--mint-soft);color:#05603a}
+  .tag.track-i{background:var(--amber-soft);color:#93370d}
+  .camp-side{display:flex;align-items:center;gap:16px}
+  .camp-num{text-align:right}
+  .camp-num b{display:block;font-size:15px;font-weight:800;letter-spacing:-.02em}
+  .camp-num span{font-size:11.4px;color:var(--muted)}
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:11.2px;font-weight:800;padding:4px 9px;border-radius:999px;white-space:nowrap}
+  .badge.live{background:var(--brand-soft);color:var(--brand-dark)}
+  .badge.mint{background:var(--mint-soft);color:#05603a}
+  .badge.amber{background:var(--amber-soft);color:#93370d}
+  .badge.gray{background:#eef2f7;color:var(--ink-2)}
+
+  /* ---------- applicants ---------- */
+  .app-toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .app-toolbar .chips{margin:0}
+  .select-mini{font-family:inherit;font-size:13px;font-weight:700;color:var(--ink-2);border:1px solid var(--line);
+    border-radius:9px;padding:8px 11px;background:#fff}
+  .app-list{display:grid;gap:9px}
+  .app-row{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) auto;gap:14px;align-items:center;
+    border:1px solid var(--line);border-radius:14px;padding:13px 15px;background:#fff}
+  .app-row.picked{border-color:#cfd9ff;background:#fbfcff}
+  .app-row.held{background:#fbfcfe;border-style:dashed}
+  .who{display:flex;align-items:center;gap:10px;min-width:0}
+  .avatar{width:36px;height:36px;border-radius:11px;flex:none;display:grid;place-items:center;font-weight:800;font-size:13px;
+    background:var(--brand-soft);color:var(--brand-dark)}
+  .avatar.mint{background:var(--mint-soft);color:#067647}
+  .avatar.violet{background:var(--violet-soft);color:var(--violet)}
+  .avatar.amber{background:var(--amber-soft);color:var(--amber)}
+  .avatar.pink{background:var(--pink-soft);color:var(--pink)}
+  .who b{display:block;font-size:13.6px;font-weight:800;letter-spacing:-.015em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .who span{display:block;font-size:11.4px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .who .meta-line{display:flex;gap:6px;align-items:center;margin-top:4px;flex-wrap:wrap}
+  .visa{font-size:10.6px;font-weight:800;padding:3px 7px;border-radius:5px;white-space:nowrap}
+  .visa.h1{background:var(--mint-soft);color:#05603a}
+  .visa.d2{background:var(--brand-soft);color:var(--brand-dark)}
+  .visa.tmp{background:var(--amber-soft);color:#93370d}
+  .chan{min-width:0}
+  .chan b{display:block;font-size:12.6px;font-weight:800}
+  .chan span{display:block;font-size:11.4px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .seg{display:inline-flex;background:#f1f4f9;border-radius:9px;padding:3px;gap:2px;flex:none}
+  .seg button{border:0;background:transparent;font-size:12.2px;font-weight:800;color:var(--muted);padding:7px 12px;border-radius:7px}
+  .seg button[aria-pressed="true"].pick{background:var(--brand);color:#fff;box-shadow:0 4px 10px -6px rgba(47,93,245,.9)}
+  .seg button[aria-pressed="true"].hold{background:#fff;color:var(--ink-2);box-shadow:var(--shadow-sm)}
+  .visit{margin-top:8px;display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+  .visit select{font-family:inherit;font-size:12px;font-weight:700;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:#fff;color:var(--ink-2)}
+  .visit .confirmed{font-size:11.6px;font-weight:800;color:#05603a;background:var(--mint-soft);border:1px solid #cdeade;padding:4px 9px;border-radius:7px}
+  .app-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+
+  /* ---------- report ---------- */
+  .shorts{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .short{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+  .thumb{height:118px;position:relative;display:flex;align-items:flex-end;padding:10px 12px;color:#fff}
+  .thumb::after{content:"▶";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.24);display:grid;place-items:center;font-size:12px;
+    border:1px solid rgba(255,255,255,.55)}
+  .thumb .plat{font-size:10.6px;font-weight:800;background:rgba(15,23,42,.45);padding:3px 8px;border-radius:999px;position:relative;z-index:1}
+  .thumb.t1{background:linear-gradient(135deg,#f59e0b,#ef4444 60%,#7c3aed)}
+  .thumb.t2{background:linear-gradient(135deg,#06b6d4,#3b82f6 55%,#8b5cf6)}
+  .thumb.t3{background:linear-gradient(135deg,#10b981,#0ea5e9 60%,#6366f1)}
+  .short-body{padding:13px 14px 15px;display:flex;flex-direction:column;gap:9px;flex:1}
+  .short-body h4{font-size:13.6px;font-weight:800;letter-spacing:-.02em;line-height:1.4}
+  .short-body .by{font-size:11.4px;color:var(--muted)}
+  .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line-soft);border-radius:9px;overflow:hidden}
+  .metrics div{background:#fbfcfe;padding:8px 6px;text-align:center}
+  .metrics b{display:block;font-size:13.4px;font-weight:800;letter-spacing:-.02em}
+  .metrics span{font-size:10.4px;color:var(--muted)}
+  .consent-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;
+    border-top:1px dashed var(--line);padding-top:10px}
+  .consent-row .lbl{font-size:11.3px;color:var(--muted);font-weight:700}
+  .consent{font-size:11px;font-weight:800;padding:4px 9px;border-radius:999px;white-space:nowrap;border:1px solid transparent}
+  .consent.on{background:var(--mint-soft);color:#05603a;border-color:#cdeade}
+  .consent.off{background:#f1f4f9;color:var(--muted);border-color:var(--line)}
+  .consent.ask{background:#fff;color:var(--brand-dark);border-color:#c9d6ff}
+
+  .settle{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+  .settle-card{border:1px solid var(--line);border-radius:13px;padding:15px 16px;background:#fbfcfe}
+  .settle-card span{font-size:11.6px;color:var(--muted);font-weight:700}
+  .settle-card b{display:block;font-size:19px;font-weight:800;letter-spacing:-.025em;margin-top:3px}
+  .tbl{width:100%;border-collapse:collapse;margin-top:14px;font-size:12.6px}
+  .tbl th{text-align:left;font-size:11.2px;color:var(--muted);font-weight:800;letter-spacing:.02em;
+    border-bottom:1px solid var(--line);padding:8px 10px;white-space:nowrap}
+  .tbl td{border-bottom:1px solid var(--line-soft);padding:11px 10px;vertical-align:top}
+  .tbl td.num,.tbl th.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .tbl tr:last-child td{border-bottom:0}
+  .tbl .strong{font-weight:800}
+  .tbl-wrap{overflow-x:auto}
+
+  /* ---------- toast ---------- */
+  .toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);background:var(--ink);color:#fff;
+    padding:13px 18px;border-radius:12px;font-size:13.2px;font-weight:700;box-shadow:0 18px 40px -14px rgba(15,23,42,.6);
+    opacity:0;pointer-events:none;transition:all .22s;z-index:90;max-width:calc(100% - 32px)}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+
+  /* ---------- footer ---------- */
+  footer{background:#0b1220;color:#94a3b8;padding:40px 0 34px;margin-top:46px}
+  .foot-grid{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}
+  footer .logo{color:#fff}
+  footer .logo small{color:#64748b}
+  footer p{font-size:12.3px;line-height:1.7;margin-top:11px;max-width:460px}
+  footer .cols{display:flex;gap:42px;flex-wrap:wrap}
+  footer h4{color:#fff;font-size:12px;font-weight:800;margin-bottom:9px}
+  footer .cols a{display:block;font-size:12.2px;margin-bottom:6px;color:#94a3b8}
+  .copyright{border-top:1px solid #1e293b;margin-top:24px;padding-top:16px;font-size:11.4px;color:#64748b;
+    display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .foot-tiny{font-size:11px;color:#64748b;margin-top:9px}
+  .foot-tiny a{color:#7d8ba0;text-decoration:underline;text-underline-offset:3px}
+  .foot-tiny a:hover{color:#c7d2e0}
+
+  /* ---------- responsive ---------- */
+  @media(max-width:1040px){
+    .hero-grid{grid-template-columns:1fr;gap:28px;padding:40px 22px 40px}
+    .hero h1{font-size:33px}
+    .verify-grid{grid-template-columns:1fr}
+    .shorts{grid-template-columns:1fr 1fr}
+    .app-row{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto}
+  }
+  @media(max-width:900px){
+    .tabs{display:none}
+  }
+  @media(max-width:760px){
+    .wrap{padding:0 16px}
+    .nav{height:58px;gap:10px}
+    .logo{font-size:16px}
+    .logo small{display:none}
+    .nav-right .btn-ghost{display:none}
+    .status-pill{font-size:11px;padding:5px 9px}
+    .hero h1{font-size:27px;line-height:1.3}
+    .hero p.lead{font-size:14.2px}
+    .hero-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .hero-actions .btn{padding:12px 8px;font-size:13.2px}
+    .offer{padding:20px;border-radius:18px}
+    .offer .big{font-size:27px}
+    .stats{grid-template-columns:1fr 1fr;margin-top:0}
+    .stat{padding:13px 15px}
+    .stat b{font-size:18px}
+    .spacer{height:24px}
+    section.block{padding:34px 0 4px}
+    .sec-head h2{font-size:21px}
+    .panel{padding:18px;border-radius:16px}
+    .pricing{grid-template-columns:1fr}
+    .form-grid{grid-template-columns:1fr}
+    .shorts{grid-template-columns:1fr}
+    .settle{grid-template-columns:1fr}
+    .camp-row{grid-template-columns:1fr;gap:10px}
+    .camp-side{justify-content:space-between;border-top:1px dashed var(--line);padding-top:10px}
+    .camp-num{text-align:left}
+    .app-row{grid-template-columns:1fr;gap:10px}
+    .app-right{flex-direction:row;align-items:center;justify-content:space-between;width:100%}
+    .thumb{height:104px}
+    .tbl{min-width:0;display:block}
+    .tbl thead{display:none}
+    .tbl tbody{display:block}
+    .tbl tr{display:block;border:1px solid var(--line);border-radius:12px;padding:4px 12px;margin-bottom:9px;background:#fff}
+    .tbl tr:last-child{margin-bottom:0}
+    .tbl td{display:flex;justify-content:space-between;align-items:baseline;gap:14px;border-bottom:1px dashed var(--line-soft);
+      padding:8px 0;text-align:right}
+    .tbl td:last-child{border-bottom:0}
+    .tbl td::before{content:attr(data-label);color:var(--muted);font-weight:700;font-size:11.4px;text-align:left;flex:none}
+    .tbl td:first-child{font-weight:800}
+    .lock-card{padding:18px}
+  }
+</style>
+<script>
+  /* Apply the saved unlock state before first paint, so an unlocked tab
+     never flashes the lock screen. */
+  (function () {
+    try {
+      if (window.sessionStorage.getItem('rp.lock.v1') === 'unlocked') {
+        document.documentElement.className += ' rp-unlocked';
+      }
+    } catch (e) { /* storage blocked: stay locked until the password is entered */ }
+  })();
+</script>
+<style id="rpLockStyle">
+  /* ============================================================
+     PASSWORD LOCK — 4-digit code (SHA-256 digest only, no plaintext)
+     The password itself is never written here: only its SHA-256 hex
+     digest, checked in pure JS so it works the same on https:// and
+     file:// (no crypto.subtle needed).
+     ============================================================ */
+  #lockScreen { display: none; }
+  html:not(.rp-unlocked) #lockScreen {
+    display: flex; position: fixed; inset: 0; z-index: 2147483000;
+    align-items: center; justify-content: center; overflow: auto;
+    padding: calc(24px + env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom));
+    background: radial-gradient(900px 520px at 50% -12%, #2b2f38 0%, #171a20 55%, #0b0d11 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", "Noto Sans KR", "Noto Sans CJK KR", system-ui, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  html:not(.rp-unlocked) body > *:not(#lockScreen) { display: none !important; }
+  html:not(.rp-unlocked) { overflow: hidden !important; }
+  .rp-lock-card {
+    width: 100%; max-width: 392px; margin: auto; color: #1C1A17;
+    background: #fff; border-radius: 18px; box-shadow: 0 26px 70px rgba(0,0,0,.5);
+    padding: 28px 24px 22px; text-align: center;
+  }
+  .rp-lock-card.shake { animation: rpLockShake .36s ease-in-out; }
+  .rp-lock-icon {
+    width: 52px; height: 52px; margin: 0 auto 14px; border-radius: 16px;
+    background: linear-gradient(135deg, #f0bd76, #c8802a);
+    box-shadow: 0 10px 24px rgba(200,128,42,.30);
+    display: flex; align-items: center; justify-content: center; font-size: 24px;
+  }
+  .rp-lock-title { font-size: 17px; font-weight: 800; margin: 0; letter-spacing: -.3px; color: #1C1A17; }
+  .rp-lock-sub { font-size: 12.5px; color: #7A736A; margin: 5px 0 18px; line-height: 1.5; }
+  .rp-lock-field { position: relative; }
+  .rp-lock-field input {
+    width: 100%; font-family: inherit; font-size: 16px; font-weight: 700;
+    letter-spacing: .35em; text-align: center; color: #1C1A17;
+    background: #fff; border: 1px solid #D9D2C6; border-radius: 12px;
+    padding: 12px 52px; outline: none; -webkit-appearance: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .rp-lock-field input:focus { border-color: #C8802A; box-shadow: 0 0 0 3px rgba(200,128,42,.16); }
+  .rp-lock-field input.is-bad { border-color: #D92D20; box-shadow: 0 0 0 3px rgba(217,45,32,.14); }
+  .rp-lock-field input::placeholder { letter-spacing: .3em; font-weight: 400; color: #B5ADA2; }
+  .rp-lock-eye {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    border: 0; background: transparent; cursor: pointer; font-family: inherit;
+    font-size: 11.5px; font-weight: 800; color: #7A736A;
+    padding: 7px 9px; border-radius: 8px; white-space: nowrap;
+  }
+  .rp-lock-eye:hover { background: #F4F0E9; color: #1C1A17; }
+  .rp-lock-error { margin: 10px 0 0; font-size: 12.5px; font-weight: 700; color: #D92D20; line-height: 1.5; }
+  .rp-lock-error[hidden] { display: none; }
+  .rp-lock-submit {
+    margin-top: 14px; width: 100%; border: 0; border-radius: 12px; cursor: pointer;
+    background: #1C1A17; color: #fff; font-family: inherit; font-size: 14px; font-weight: 800;
+    padding: 12px 14px;
+  }
+  .rp-lock-submit:hover { background: #000; }
+  .rp-lock-submit:disabled { opacity: .55; }
+  .rp-lock-foot { font-size: 11.5px; color: #9A938A; margin: 14px 0 0; line-height: 1.55; }
+  @keyframes rpLockShake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+</style>
+</head>
+<body>
+<div id="lockScreen" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
+  <form class="rp-lock-card" id="lockForm" autocomplete="off" novalidate>
+    <div class="rp-lock-icon" aria-hidden="true">🔒</div>
+    <h1 class="rp-lock-title" id="lockTitle">글로벌 체험단 BIZ</h1>
+    <p class="rp-lock-sub">비밀번호를 입력해 주세요.</p>
+    <div class="rp-lock-field">
+      <input type="password" id="lockInput" inputmode="numeric" autocomplete="off"
+             autocapitalize="off" spellcheck="false" aria-label="비밀번호" placeholder="••••">
+      <button type="button" class="rp-lock-eye" id="lockEye" aria-label="비밀번호 보기">보기</button>
+    </div>
+    <p class="rp-lock-error" id="lockError" role="alert" hidden></p>
+    <button type="submit" class="rp-lock-submit" id="lockSubmit">잠금 해제</button>
+    <noscript><p class="rp-lock-error">자바스크립트가 꺼져 있어 잠금을 해제할 수 없습니다. 브라우저에서 자바스크립트를 허용한 뒤 새로고침해 주세요.</p></noscript>
+    <p class="rp-lock-foot">잠금은 이 탭에서만 유지됩니다. 탭을 닫으면 다시 잠깁니다.</p>
+  </form>
+</div>
+<script id="rpLockScript">
+(function () {
+  'use strict';
+
+  var PASSWORD_HASH = '9552e277ebcc7fa191292c6e900d94dfe6e837d8abf76a2da927d4530d2c8f69';
+  var STORE_KEY = 'rp.lock.v1';
+  var STORE_VAL = 'unlocked';
+
+  /* ---------- pure-JS SHA-256 (works on https:// and file://) ---------- */
+  var K = [
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+  ];
+
+  function utf8Bytes(str) {
+    var out = [], i, c, d, cp;
+    for (i = 0; i < str.length; i++) {
+      c = str.charCodeAt(i);
+      if (c < 0x80) {
+        out.push(c);
+      } else if (c < 0x800) {
+        out.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f));
+      } else if (c >= 0xd800 && c <= 0xdbff && i + 1 < str.length &&
+                 (d = str.charCodeAt(i + 1)) >= 0xdc00 && d <= 0xdfff) {
+        cp = 0x10000 + ((c - 0xd800) << 10) + (d - 0xdc00);
+        out.push(0xf0 | (cp >> 18), 0x80 | ((cp >> 12) & 0x3f),
+                 0x80 | ((cp >> 6) & 0x3f), 0x80 | (cp & 0x3f));
+        i++;
+      } else {
+        out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
+      }
+    }
+    return out;
+  }
+
+  function sha256Hex(str) {
+    var bytes = utf8Bytes(String(str == null ? '' : str));
+    var len = bytes.length;
+    var total = (((len + 9) + 63) >> 6) << 6;
+    var msg = new Array(total);
+    var i;
+
+    for (i = 0; i < len; i++) msg[i] = bytes[i] & 0xff;
+    msg[len] = 0x80;
+    for (i = len + 1; i < total; i++) msg[i] = 0;
+
+    var hi = Math.floor(len / 536870912);
+    var lo = (len * 8) >>> 0;
+    msg[total - 8] = (hi >>> 24) & 0xff;
+    msg[total - 7] = (hi >>> 16) & 0xff;
+    msg[total - 6] = (hi >>> 8) & 0xff;
+    msg[total - 5] = hi & 0xff;
+    msg[total - 4] = (lo >>> 24) & 0xff;
+    msg[total - 3] = (lo >>> 16) & 0xff;
+    msg[total - 2] = (lo >>> 8) & 0xff;
+    msg[total - 1] = lo & 0xff;
+
+    var H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+             0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+    var w = new Array(64);
+    var off, a, b, c, d, e, f, g, h, t1, t2, s0, s1, ch, maj, j, tmp;
+
+    for (off = 0; off < total; off += 64) {
+      for (j = 0; j < 16; j++) {
+        w[j] = ((msg[off + j * 4] << 24) | (msg[off + j * 4 + 1] << 16) |
+                (msg[off + j * 4 + 2] << 8) | msg[off + j * 4 + 3]) >>> 0;
+      }
+      for (j = 16; j < 64; j++) {
+        tmp = w[j - 15];
+        s0 = ((tmp >>> 7) | (tmp << 25)) ^ ((tmp >>> 18) | (tmp << 14)) ^ (tmp >>> 3);
+        tmp = w[j - 2];
+        s1 = ((tmp >>> 17) | (tmp << 15)) ^ ((tmp >>> 19) | (tmp << 13)) ^ (tmp >>> 10);
+        w[j] = (w[j - 16] + s0 + w[j - 7] + s1) >>> 0;
+      }
+      a = H[0]; b = H[1]; c = H[2]; d = H[3];
+      e = H[4]; f = H[5]; g = H[6]; h = H[7];
+      for (j = 0; j < 64; j++) {
+        s1 = ((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7));
+        ch = (e & f) ^ (~e & g);
+        t1 = (h + s1 + ch + K[j] + w[j]) >>> 0;
+        s0 = ((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10));
+        maj = (a & b) ^ (a & c) ^ (b & c);
+        t2 = (s0 + maj) >>> 0;
+        h = g; g = f; f = e; e = (d + t1) >>> 0;
+        d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+      }
+      H[0] = (H[0] + a) >>> 0; H[1] = (H[1] + b) >>> 0;
+      H[2] = (H[2] + c) >>> 0; H[3] = (H[3] + d) >>> 0;
+      H[4] = (H[4] + e) >>> 0; H[5] = (H[5] + f) >>> 0;
+      H[6] = (H[6] + g) >>> 0; H[7] = (H[7] + h) >>> 0;
+    }
+    var hex = '';
+    for (i = 0; i < 8; i++) hex += ('00000000' + H[i].toString(16)).slice(-8);
+    return hex;
+  }
+
+  function sameHex(a, b) {
+    if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
+    var diff = 0, i;
+    for (i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    return diff === 0;
+  }
+
+  function normalize(value) {
+    return String(value == null ? '' : value).replace(/^\s+|\s+$/g, '');
+  }
+
+  function verify(value) {
+    return sameHex(sha256Hex(normalize(value)), PASSWORD_HASH);
+  }
+
+  /* ---------- session unlock state ---------- */
+  var memoryUnlocked = false;
+
+  function isUnlocked() {
+    try { return window.sessionStorage.getItem(STORE_KEY) === STORE_VAL; }
+    catch (e) { return memoryUnlocked; }
+  }
+
+  function saveUnlocked(on) {
+    memoryUnlocked = !!on;
+    try {
+      if (on) window.sessionStorage.setItem(STORE_KEY, STORE_VAL);
+      else window.sessionStorage.removeItem(STORE_KEY);
+    } catch (e) { /* storage blocked: keep the state in memory for this page only */ }
+  }
+
+  /* ---------- screen ---------- */
+  var root = document.documentElement;
+  var form = document.getElementById('lockForm');
+  var input = document.getElementById('lockInput');
+  var errorEl = document.getElementById('lockError');
+  var eyeBtn = document.getElementById('lockEye');
+  var submitBtn = document.getElementById('lockSubmit');
+  var wrongCount = 0;
+  var cooling = false;
+
+  function focusInput() {
+    if (!input || isUnlocked()) return;
+    try { input.focus({ preventScroll: true }); }
+    catch (e) { try { input.focus(); } catch (e2) {} }
+    try { input.setSelectionRange(input.value.length, input.value.length); } catch (e3) {}
+  }
+
+  function clearError() {
+    if (errorEl) { errorEl.textContent = ''; errorEl.hidden = true; }
+    if (input) input.classList.remove('is-bad');
+  }
+
+  function resetEye() {
+    if (!input) return;
+    input.type = 'password';
+    if (eyeBtn) {
+      eyeBtn.textContent = '보기';
+      eyeBtn.setAttribute('aria-label', '비밀번호 보기');
+    }
+  }
+
+  function applyState() {
+    var unlocked = isUnlocked();
+    if (unlocked) root.classList.add('rp-unlocked');
+    else root.classList.remove('rp-unlocked');
+
+    resetEye();
+    if (input) input.value = '';
+    clearError();
+
+    if (unlocked) wrongCount = 0;
+    else setTimeout(focusInput, 40);
+  }
+
+  function showError(msg) {
+    if (errorEl) { errorEl.textContent = msg; errorEl.hidden = false; }
+    if (input) { input.value = ''; input.classList.add('is-bad'); }
+    if (form) {
+      form.classList.remove('shake');
+      void form.offsetWidth;
+      form.classList.add('shake');
+      setTimeout(function () { if (form) form.classList.remove('shake'); }, 420);
+    }
+    focusInput();
+  }
+
+  function unlockNow() {
+    saveUnlocked(true);
+    applyState();
+    window.scrollTo(0, 0);
+  }
+
+  function lockNow() {
+    saveUnlocked(false);
+    applyState();
+    window.scrollTo(0, 0);
+  }
+
+  if (form) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (cooling) return;
+
+      var value = input ? input.value : '';
+      if (!normalize(value)) {
+        showError('비밀번호를 입력해 주세요.');
+        return;
+      }
+      if (verify(value)) {
+        unlockNow();
+        return;
+      }
+
+      wrongCount += 1;
+      showError('비밀번호가 맞지 않습니다. 다시 확인해 주세요.');
+
+      if (wrongCount >= 3) {
+        cooling = true;
+        var wait = Math.min(3000, (wrongCount - 2) * 800);
+        if (submitBtn) submitBtn.disabled = true;
+        if (errorEl) {
+          errorEl.textContent = '비밀번호를 ' + wrongCount + '번 틀렸습니다. ' +
+            (wait / 1000).toFixed(1) + '초 후 다시 시도해 주세요.';
+          errorEl.hidden = false;
+        }
+        setTimeout(function () {
+          cooling = false;
+          if (submitBtn) submitBtn.disabled = false;
+          focusInput();
+        }, wait);
+      }
+    });
+  }
+
+  if (eyeBtn) {
+    eyeBtn.addEventListener('click', function () {
+      if (!input) return;
+      var reveal = input.type === 'password';
+      input.type = reveal ? 'text' : 'password';
+      eyeBtn.textContent = reveal ? '숨기기' : '보기';
+      eyeBtn.setAttribute('aria-label', reveal ? '비밀번호 숨기기' : '비밀번호 보기');
+      focusInput();
+    });
+  }
+
+  applyState();
+
+  /* hook so the lock can be checked from automation */
+  window.RP_LOCK = {
+    hash: sha256Hex,
+    verify: verify,
+    isUnlocked: isUnlocked,
+    unlock: function () { unlockNow(); },
+    lock: function () { lockNow(); }
+  };
+})();
+</script>
+
+<header class="site">
+  <div class="wrap nav">
+    <a class="logo" href="#top" aria-label="글로벌 체험단 BIZ 홈">
+      <span class="mark">G</span>
+      <span>글로벌 체험단 <small>BIZ · 사장님</small></span>
+    </a>
+    <nav class="tabs" aria-label="사장님 메뉴">
+      <a href="#verify">사업자 인증</a>
+      <a href="#pricing">요금제</a>
+      <a href="#campaigns">캠페인 등록</a>
+      <a href="#applicants">지원자·선정</a>
+      <a href="#report">리포트·정산</a>
+    </nav>
+    <div class="nav-right">
+      <span class="status-pill" id="verifyPill"><span class="dot"></span>사업자 미인증</span>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO / OFFER -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow"><span class="dot"></span>FOR BUSINESS · 초기 파트너 모집</span>
+        <h1>외국인 크리에이터의<br><em>모국어 숏폼</em>으로<br>매장을 알리세요</h1>
+        <p class="lead">성수·명동·강남·홍대에서 활동하는 <b>EN · JP · CN 교환·유학생 크리에이터</b>가 매장을 직접 방문해 <b>Instagram Reels · TikTok · YouTube Shorts</b>로 소개합니다. 외국어 마케팅 없이 <b>한국어 공고만</b> 올리면 선정·방문 확정·결과 리포트·정산까지 이 화면에서 끝납니다.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" href="#verify" id="heroCta">사업자 인증하고 시작하기</a>
+          <a class="btn btn-ghost btn-lg" href="#pricing">요금제 비교</a>
+        </div>
+        <div class="lockline" id="heroLock">
+          <span>🔒</span>
+          <span>사업자 인증 전에는 <b>캠페인 등록이 잠깁니다</b>.</span>
+          <a href="#verify">지금 인증하기 →</a>
+        </div>
+      </div>
+
+      <aside class="offer" aria-label="초기 파트너 오퍼">
+        <span class="offer-ribbon">EARLY PARTNER · 30일 무료</span>
+        <h3>초기 파트너 선착순 20곳 한정</h3>
+        <div class="big">30일 무료<span>/ 입점</span></div>
+        <div class="sub">6일 주기 최대 4회 모집</div>
+        <ul>
+          <li><i>✓</i>6일 주기 모집 기준 <b>최대 4회</b> 테스트</li>
+          <li><i>✓</i>모집 인원·채널 제한 없이 공고 등록</li>
+          <li><i>✓</i>1차 필터 통과 크리에이터만 전달</li>
+          <li><i>✓</i>30일 후 자동 결제 없음 — 원할 때만 유료 전환</li>
+        </ul>
+        <div class="quota">
+          <div class="quota-top"><span>남은 초기 파트너 자리</span><b>13 / 20곳</b></div>
+          <div class="bar"><i style="width:35%"></i></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <div class="spacer" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="stats" aria-label="대시보드 요약">
+      <div class="stat"><b id="statCampaigns">2</b><span>등록 캠페인</span></div>
+      <div class="stat"><b id="statApplicants">37</b><span>받은 지원</span></div>
+      <div class="stat"><b id="statPassed">28</b><span>1차 필터 통과</span></div>
+      <div class="stat"><b id="statUploads">6</b><span>업로드 완료</span></div>
+    </div>
+  </div>
+
+  <!-- 01 VERIFY -->
+  <section class="block" id="verify">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="sec-title"><span class="secnum">01</span><h2>사업자 인증 · 매장 프로필</h2></div>
+          <p>실제 매장·브랜드만 공고를 올릴 수 있도록 사업자등록번호와 등록증을 확인합니다. 인증 전에는 캠페인 등록이 잠깁니다.</p>
+        </div>
+        <span class="badge gray" id="verifyBadge">인증 전</span>
+      </div>
+
+      <div class="verify-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h3>사업자 인증 <span class="tag-req">필수</span></h3>
+              <p>사업자등록번호 10자리를 입력하고 조회한 뒤, 등록증을 첨부해 주세요.</p>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="bizNo">사업자등록번호 <span class="req">*</span></label>
+            <div class="f-row">
+              <input id="bizNo" type="text" inputmode="numeric" maxlength="12" placeholder="000-00-00000" autocomplete="off" />
+              <button type="button" class="btn btn-dark" id="btnBizCheck">사업자 확인</button>
+            </div>
+            <span class="hint">시안 체험용 번호: <b>123-45-67891</b> (그 외 번호는 체크섬 검증에서 걸러집니다)</span>
+            <div class="res-box" id="bizResult" role="status" aria-live="polite"></div>
+          </div>
+
+          <div class="field" style="margin-top:14px">
+            <label>사업자등록증 첨부 <span class="req">*</span></label>
+            <label class="dropzone" id="dz">
+              <span class="dz-ic">📄</span>
+              <span class="dz-txt">
+                <b>사업자등록증 파일 선택</b>
+                <span id="dzName">PDF · JPG · PNG (10MB 이하) — 시안은 실제 업로드되지 않습니다</span>
+              </span>
+              <span class="dz-state" id="dzState">필수</span>
+              <input type="file" id="bizFile" accept=".pdf,.jpg,.jpeg,.png" />
+            </label>
+          </div>
+
+          <div class="form-grid" style="margin-top:16px">
+            <div class="field">
+              <label for="bizName">상호명 <span class="req">*</span></label>
+              <input id="bizName" type="text" placeholder="예: 성수 브런치랩" />
+            </div>
+            <div class="field">
+              <label for="bizType">업종 <span class="req">*</span></label>
+              <input id="bizType" type="text" placeholder="예: 음식점업 · 카페" />
+            </div>
+            <div class="field full">
+              <label for="bizNaver">네이버지도 주소 <span class="req">*</span></label>
+              <input id="bizNaver" type="text" placeholder="예: 서울 성동구 연무장길 00 1층" />
+            </div>
+            <div class="field full">
+              <label for="bizGoogle">구글지도 주소 (외국인 검색용)</label>
+              <input id="bizGoogle" type="text" placeholder="예: 00 Yeonmujang-gil, Seongdong-gu, Seoul" />
+            </div>
+            <div class="field">
+              <label for="bizPhone">담당자 연락처 <span class="req">*</span></label>
+              <input id="bizPhone" type="tel" placeholder="010-0000-0000" />
+            </div>
+            <div class="field">
+              <label for="bizEmail">담당자 이메일</label>
+              <input id="bizEmail" type="email" placeholder="owner@example.com" />
+            </div>
+          </div>
+
+          <div class="form-grid" style="margin-top:16px">
+            <div class="switch-row">
+              <span class="sw-txt"><b>외국어 응대 가능</b><span>영어 · 일본어 · 중국어 중 1개 이상</span></span>
+              <label class="switch"><input type="checkbox" id="swLang" /><i></i></label>
+            </div>
+            <div class="switch-row">
+              <span class="sw-txt"><b>영문 메뉴판 보유</b><span>외국인 크리에이터 촬영 시 노출</span></span>
+              <label class="switch"><input type="checkbox" id="swMenu" /><i></i></label>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;align-items:center;margin-top:18px;flex-wrap:wrap">
+            <button type="button" class="btn btn-primary btn-lg" id="btnVerify">인증 요청하기</button>
+            <span class="hint" id="verifyHint">사업자 확인 → 등록증 첨부 → 필수 정보 입력 후 요청할 수 있습니다.</span>
+          </div>
+        </div>
+
+        <div class="panel" aria-label="인증 후 사용 가능한 기능">
+          <div class="panel-head"><div><h3>인증하면 열리는 기능</h3><p>인증 완료 즉시 아래 기능이 활성화됩니다.</p></div></div>
+          <ul class="side-list" id="verifyFeatures">
+            <li class="locked"><span class="sic">🔒</span><span><b>캠페인 등록</b> — 혜택 · 인원 · 언어 · 채널 · 해시태그</span></li>
+            <li class="locked"><span class="sic">🔒</span><span><b>지원자 확인 · 선정</b> — 비자 인증 뱃지 포함 프로필</span></li>
+            <li class="locked"><span class="sic">🔒</span><span><b>방문 일정 확정</b> — 크리에이터에게 자동 안내</span></li>
+            <li class="locked"><span class="sic">🔒</span><span><b>결과 리포트</b> — 조회수 · 좋아요 · 저장 수</span></li>
+            <li class="locked"><span class="sic">🔒</span><span><b>세금계산서 발행 · 정산</b></span></li>
+          </ul>
+          <div class="side-note">
+            <b>왜 사업자 인증이 필요한가요?</b><br>
+            실제 매장 확인 없이 공고가 올라가면 크리에이터가 헛걸음하고, 노쇼·먹튀 신고가 플랫폼 신뢰를 무너뜨립니다. 인증은 1회만 하면 이후 모든 캠페인에 적용됩니다.
+          </div>
+          <div class="side-note" style="margin-top:10px">
+            <b>개인정보 처리</b><br>
+            등록증은 인증 심사 목적으로만 사용하고 <b>심사 완료 후 즉시 파기</b>합니다. (시안: 실제 전송·저장 없음)
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 PRICING -->
+  <section class="block" id="pricing">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="sec-title"><span class="secnum">02</span><h2>요금제 — 무료로 시작하고, 필요할 때만 대행으로</h2></div>
+          <p>30일 무료 셀프형으로 반응을 보고, 손이 부족할 때 전담 대행(30~60만 원)으로 전환합니다.</p>
+        </div>
+      </div>
+
+      <div class="pricing">
+        <div class="price-card featured">
+          <span class="badge-top">지금 무료</span>
+          <div class="kind">SELF · 셀프형</div>
+          <h3>초기 30일 무료</h3>
+          <p class="desc">공고만 올리고 신청자 목록에서 직접 고르세요. 6일 주기로 최대 4회 모집.</p>
+          <div class="price"><b>0원</b><span>/ 30일</span></div>
+          <div class="price-note">선착순 20곳 · 카드 등록 없음 · 자동 결제 없음</div>
+          <ul>
+            <li><span class="ok">✓</span>공고 등록 무제한 (30일간 · 6일 주기 최대 4회)</li>
+            <li><span class="ok">✓</span>1차 자동 필터링 (활동 · 숏폼 퀄리티 · 노쇼)</li>
+            <li><span class="ok">✓</span>신청자 프로필 열람 (국적 · 언어 · 평균 조회수)</li>
+            <li><span class="ok">✓</span>브랜드가 직접 최종 선정</li>
+            <li><span class="ok">✓</span>결과 리포트 · 정산 대시보드</li>
+            <li class="dim"><span class="no">−</span>안내 · 독촉 · 결과 보고서는 직접</li>
+          </ul>
+          <a class="btn btn-primary btn-block" href="#campaigns" data-need-verify="1">무료로 공고 올리기</a>
+        </div>
+
+        <div class="price-card">
+          <div class="kind">FULL SERVICE · 대행형</div>
+          <h3>전담 매칭 · 대행</h3>
+          <p class="desc">선정부터 콘텐츠 마감 독촉, 결과 링크 보고서까지 플랫폼이 전부 처리합니다.</p>
+          <div class="price"><b>30~60만 원</b><span>/ 캠페인</span></div>
+          <div class="price-note">모집 규모 · 채널 수에 따라 견적 · 성과 확인 후 전환</div>
+          <ul>
+            <li><span class="ok">✓</span>크리에이터 최종 선정 (기준 합의)</li>
+            <li><span class="ok">✓</span>선정 안내 · 방문 일정 조율</li>
+            <li><span class="ok">✓</span>콘텐츠 마감 독촉 · 미제출자 관리</li>
+            <li><span class="ok">✓</span>업로드 링크 · 조회수 엑셀 보고서</li>
+            <li><span class="ok">✓</span>외국어 콘텐츠 검수 (표현 · 브랜드 톤)</li>
+            <li><span class="ok">✓</span>세금계산서 발행 · 정산</li>
+          </ul>
+          <button type="button" class="btn btn-ghost btn-block" id="btnConsult">대행 상담 신청하기</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 CAMPAIGNS -->
+  <section class="block" id="campaigns">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="sec-title"><span class="secnum">03</span><h2>캠페인 등록</h2></div>
+          <p>등록하면 바로 아래 목록에 추가되고, 외국인 크리에이터에게 공개됩니다.</p>
+        </div>
+        <span class="badge amber" id="campLockBadge">사업자 인증 필요</span>
+      </div>
+
+      <div class="panel lockwrap" id="campPanel">
+        <div class="lock-overlay" id="campLock">
+          <div class="lock-card">
+            <div class="lic">🔒</div>
+            <b>사업자 인증이 필요합니다</b>
+            <p>인증을 마치면 캠페인 등록이 바로 열립니다. 1회 인증으로 모든 캠페인에 적용됩니다.</p>
+            <a class="btn btn-primary" href="#verify" id="lockGo">사업자 인증하러 가기</a>
+          </div>
+        </div>
+
+        <form id="campForm" novalidate>
+          <fieldset id="campFieldset" disabled style="border:0;margin:0;padding:0;min-width:0">
+            <div class="form-grid">
+              <div class="field full">
+                <label for="cTitle">캠페인명 <span class="req">*</span></label>
+                <input id="cTitle" type="text" placeholder="예: 성수 감성 브런치 2인 체험단" />
+              </div>
+              <div class="field full">
+                <label for="cBenefit">제공 혜택 <span class="req">*</span></label>
+                <input id="cBenefit" type="text" placeholder="예: 2인 브런치 세트 + 음료 (45,000원 상당) · 현물 제공" />
+              </div>
+              <div class="field">
+                <label for="cCapacity">모집 인원 <span class="req">*</span></label>
+                <input id="cCapacity" type="number" min="1" max="100" placeholder="예: 10" />
+              </div>
+              <div class="field">
+                <label for="cCategory">카테고리 <span class="req">*</span></label>
+                <select id="cCategory">
+                  <option value="">선택</option>
+                  <option>맛집</option><option>K뷰티</option><option>피부과</option><option>팝업</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="cArea">상권 · 지역 <span class="req">*</span></label>
+                <select id="cArea">
+                  <option value="">선택</option>
+                  <option>성수</option><option>명동</option><option>강남</option><option>홍대</option><option>기타</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="cDeadline">모집 마감</label>
+                <select id="cDeadline">
+                  <option value="3">3일 후</option>
+                  <option value="6" selected>6일 후 (기본 주기)</option>
+                  <option value="10">10일 후</option>
+                </select>
+              </div>
+
+              <div class="field full">
+                <label>희망 콘텐츠 언어 <span class="req">*</span></label>
+                <div class="chips" id="cLangs">
+                  <button type="button" class="chip" data-lang="EN" aria-pressed="true">EN 영어</button>
+                  <button type="button" class="chip" data-lang="JP" aria-pressed="false">JP 일본어</button>
+                  <button type="button" class="chip" data-lang="CN" aria-pressed="false">CN 중화권</button>
+                </div>
+                <span class="hint">EN · JP · CN 3개 언어권만 운영합니다. (동남아는 EN으로 커버)</span>
+              </div>
+
+              <div class="field full">
+                <label>모집 채널 <span class="req">*</span></label>
+                <div class="chips" id="cChannels">
+                  <button type="button" class="chip" data-ch="Instagram" aria-pressed="true">Instagram Reels</button>
+                  <button type="button" class="chip" data-ch="TikTok" aria-pressed="false">TikTok</button>
+                  <button type="button" class="chip" data-ch="YouTube Shorts" aria-pressed="false">YouTube Shorts</button>
+                </div>
+                <span class="hint">블로그 · 기자단은 진행하지 않습니다.</span>
+              </div>
+
+              <div class="field">
+                <label for="cHashtag">필수 해시태그 <span class="req">*</span></label>
+                <input id="cHashtag" type="text" placeholder="#성수브런치 #SeongsuEats #gifted" />
+                <span class="hint">공백으로 구분 · 협찬 표기 <b>#gifted</b> 자동 포함 권장</span>
+              </div>
+              <div class="field">
+                <label for="cPlace">위치 태그 <span class="req">*</span></label>
+                <input id="cPlace" type="text" placeholder="예: 성수 브런치랩 (성동구 연무장길)" />
+                <span class="hint">크리에이터가 태그할 매장 위치</span>
+              </div>
+
+              <div class="field full">
+                <label>비자 트랙 <span class="req">*</span></label>
+                <div class="chips" id="cTrack">
+                  <button type="button" class="chip" data-track="mission" aria-pressed="true">의무 업로드형 (합법 비자만)</button>
+                  <button type="button" class="chip" data-track="invite" aria-pressed="false">단기 관광객 초대형 (자발적 후기)</button>
+                </div>
+                <div class="res-box show load" id="trackNote" style="margin-top:8px"></div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:12px;align-items:center;margin-top:18px;flex-wrap:wrap">
+              <button type="submit" class="btn btn-primary btn-lg" id="btnRegister">캠페인 등록하기</button>
+              <span class="hint" id="campHint">등록 후 외국인 크리에이터에게 바로 공개됩니다. (시안: 실제 저장 없음)</span>
+            </div>
+            <div class="res-box err" id="campErr" style="margin-top:12px"></div>
+          </fieldset>
+        </form>
+      </div>
+
+      <div class="panel" style="margin-top:16px">
+        <div class="panel-head">
+          <div><h3>내 캠페인</h3><p>등록한 캠페인과 모집 현황입니다.</p></div>
+          <span class="badge live" id="campCountBadge">2건 진행 중</span>
+        </div>
+        <div class="camp-list" id="campList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 APPLICANTS -->
+  <section class="block" id="applicants">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="sec-title"><span class="secnum">04</span><h2>지원자 확인 · 선정</h2></div>
+          <p>1차 필터를 통과한 지원자 중 최근 6명을 표시합니다. 선정하면 방문 일정을 확정하고 크리에이터에게 안내가 발송됩니다.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="badge live" id="appCountBadge">대기 5명</span>
+          <span class="badge mint" id="pickCountBadge">선정 0명</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="app-toolbar">
+          <div class="chips" id="appStatusFilter">
+            <button class="chip" data-st="all" aria-pressed="true">전체</button>
+            <button class="chip" data-st="wait" aria-pressed="false">대기</button>
+            <button class="chip" data-st="pick" aria-pressed="false">선정</button>
+            <button class="chip" data-st="hold" aria-pressed="false">보류</button>
+          </div>
+          <select class="select-mini" id="appCampFilter" aria-label="캠페인 필터">
+            <option value="all">전체 캠페인</option>
+          </select>
+        </div>
+        <div class="app-list" id="appList"></div>
+        <p class="hint" style="margin-top:12px">비자 뱃지: <b>H-1 인증</b> · <b>D-2 허가</b>는 의무 업로드형, <b>단기 초대</b>는 업로드 의무 없는 초대형 캠페인에만 매칭됩니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 REPORT -->
+  <section class="block" id="report">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="sec-title"><span class="secnum">05</span><h2>결과 리포트 · 2차 활용 · 정산</h2></div>
+          <p>업로드된 숏폼의 성과를 확인하고, 가게 SNS·광고 2차 활용 동의 여부와 세금계산서·정산 내역을 관리합니다.</p>
+        </div>
+        <span class="badge mint" id="reportBadge">업로드 3건 · 동의 2건</span>
+      </div>
+
+      <div class="shorts" id="shortList"></div>
+
+      <div class="panel" style="margin-top:16px">
+        <div class="panel-head">
+          <div><h3>세금계산서 · 정산 내역</h3><p>대행형 캠페인과 2차 활용 라이선스 정산 내역입니다. (시안 예시 데이터)</p></div>
+          <button type="button" class="btn btn-ghost btn-sm" id="btnTax">세금계산서 발행 요청</button>
+        </div>
+        <div class="settle">
+          <div class="settle-card"><span>이번 달 청구 예정</span><b>0원</b></div>
+          <div class="settle-card"><span>정산 완료</span><b>605,000원</b></div>
+          <div class="settle-card"><span>세금계산서 발행</span><b>2건</b></div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>발행일</th><th>항목</th><th class="num">공급가액</th><th class="num">부가세</th><th class="num">합계</th><th>세금계산서</th><th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td data-label="발행일">2026-11-18</td><td class="strong" data-label="항목">전담 매칭·대행 (성수 브런치 2인 체험단)</td>
+                <td class="num" data-label="공급가액">450,000</td><td class="num" data-label="부가세">45,000</td><td class="num strong" data-label="합계">495,000</td>
+                <td data-label="세금계산서">발행 완료</td><td data-label="상태"><span class="badge mint">정산 완료</span></td>
+              </tr>
+              <tr>
+                <td data-label="발행일">2026-11-20</td><td class="strong" data-label="항목">콘텐츠 2차 활용 라이선스 (숏폼 2건)</td>
+                <td class="num" data-label="공급가액">100,000</td><td class="num" data-label="부가세">10,000</td><td class="num strong" data-label="합계">110,000</td>
+                <td data-label="세금계산서">발행 완료</td><td data-label="상태"><span class="badge mint">정산 완료</span></td>
+              </tr>
+              <tr>
+                <td data-label="발행일">2026-11-25</td><td data-label="항목">12월 셀프형 이용료 (예정)</td>
+                <td class="num" data-label="공급가액">0</td><td class="num" data-label="부가세">0</td><td class="num strong" data-label="합계">0</td>
+                <td data-label="세금계산서">—</td><td data-label="상태"><span class="badge gray">무료 기간</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="hint" style="margin-top:12px">30일 무료 기간에는 청구가 발생하지 않습니다. 유료 전환 · 대행 계약 시에만 세금계산서가 발행됩니다.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="logo"><span class="mark">G</span><span>글로벌 체험단 <small>Global Review Crew · BIZ</small></span></div>
+        <p>외국어 마케팅 없이 한국어 공고만 올려도, 검증된 외국인 크리에이터가 매장을 방문해 모국어 숏폼으로 해외·인바운드 고객을 만들어 주는 B2B 체험단 마케팅 솔루션입니다. 공고 등록 · 지원자 선정 · 방문 확정 · 결과 리포트 · 세금계산서까지 한 화면에서 처리합니다.</p>
+      </div>
+      <div class="cols">
+        <div>
+          <h4>사장님</h4>
+          <a href="#verify">사업자 인증</a>
+          <a href="#pricing">요금제 비교</a>
+          <a href="#campaigns">캠페인 등록</a>
+        </div>
+        <div>
+          <h4>운영</h4>
+          <a href="#applicants">지원자 · 선정</a>
+          <a href="#report">리포트 · 정산</a>
+        </div>
+        <div>
+          <h4>문의</h4>
+          <a href="#pricing">대행 상담</a>
+          <a href="#report">세금계산서 발행</a>
+        </div>
+      </div>
+    </div>
+    <div class="copyright">
+      <span>© 2026 글로벌 체험단. MVP 시안 — 실제 서비스 전 화면 검토용.</span>
+      <span>사장님판 v1.5 · 2026-11-21</span>
+    </div>
+    <p class="foot-tiny"><a href="global-review-creator.html">크리에이터용 페이지</a></p>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var $ = function (sel, root) { return (root || document).querySelector(sel); };
+  var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function money(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+
+  var toastEl = $("#toast"), toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 3000);
+  }
+
+  /* =========================================================
+     state
+     ========================================================= */
+  var verified = false;
+  var bizNumberOk = false;
+  var fileAttached = false;
+
+  var campaigns = [
+    { id: "c1", title: "성수 감성 브런치 2인 체험단", benefit: "2인 브런치 세트 + 음료 (45,000원 상당)",
+      capacity: 10, applicants: 18, category: "맛집", area: "성수", langs: ["EN", "JP"],
+      channels: ["Instagram", "TikTok"], track: "mission", dueIn: 6, status: "모집 중",
+      hashtag: "#성수브런치 #SeongsuEats #gifted", place: "성수 브런치랩" },
+    { id: "c2", title: "K뷰티 스킨케어 3종 2주 체험", benefit: "스킨케어 정품 3종 (62,000원 상당)",
+      capacity: 15, applicants: 19, category: "K뷰티", area: "명동", langs: ["EN", "CN"],
+      channels: ["Instagram", "YouTube Shorts"], track: "invite", dueIn: 8, status: "모집 중",
+      hashtag: "#명동글로우랩 #KBeauty #gifted", place: "명동 글로우랩" }
+  ];
+
+  var applicants = [
+    { id: "a1", name: "Emma Laurent", handle: "@emma.seoul", nation: "프랑스", lang: "EN", camp: "c1",
+      channels: "Instagram · TikTok", views: 18400, followers: 6200, visa: "H-1 인증", visit: "", status: "wait" },
+    { id: "a2", name: "Yui Tanaka", handle: "@yui_tokyo2seoul", nation: "일본", lang: "JP", camp: "c1",
+      channels: "Instagram", views: 9600, followers: 3100, visa: "D-2 허가", visit: "", status: "wait" },
+    { id: "a3", name: "Chen Wei", handle: "@chen_eats_seoul", nation: "중국", lang: "CN", camp: "c2",
+      channels: "TikTok · YouTube Shorts", views: 24100, followers: 8800, visa: "단기 초대", visit: "", status: "wait" },
+    { id: "a4", name: "Mia Rossi", handle: "@mia.rossi", nation: "이탈리아", lang: "EN", camp: "c1",
+      channels: "Instagram", views: 7300, followers: 2400, visa: "D-2 허가", visit: "", status: "wait" },
+    { id: "a5", name: "Hana Sato", handle: "@hana_seoul_life", nation: "일본", lang: "JP", camp: "c2",
+      channels: "YouTube Shorts", views: 42500, followers: 15600, visa: "단기 초대", visit: "", status: "wait" },
+    { id: "a6", name: "Lucas Meyer", handle: "@lucas.meets.seoul", nation: "독일", lang: "EN", camp: "c2",
+      channels: "Instagram · YouTube Shorts", views: 12800, followers: 4400, visa: "H-1 인증", visit: "", status: "wait" }
+  ];
+
+  var shorts = [
+    { id: "s1", title: "성수 브런치 카페 솔직 리뷰", creator: "Emma · EN", camp: "성수 감성 브런치 2인 체험단",
+      platform: "Instagram Reels", tones: "t1", views: "24.1만", likes: "1.8만", saves: "4,200", date: "11/18", consent: true },
+    { id: "s2", title: "K뷰티 3종 2주 사용기", creator: "Yui · JP", camp: "K뷰티 스킨케어 3종 2주 체험",
+      platform: "Instagram Reels", tones: "t2", views: "9.8만", likes: "7,300", saves: "1,900", date: "11/19", consent: true },
+    { id: "s3", title: "명동 팝업 오픈데이 브이로그", creator: "Chen · CN", camp: "K뷰티 스킨케어 3종 2주 체험",
+      platform: "TikTok", tones: "t3", views: "6.2만", likes: "4,100", saves: "980", date: "11/20", consent: false }
+  ];
+
+  var VISIT_SLOTS = ["11/24(월) 14:00", "11/25(화) 11:00", "11/26(수) 16:00", "11/28(금) 12:00"];
+
+  /* =========================================================
+     01 사업자 인증
+     ========================================================= */
+  function fmtBizNo(v) {
+    var d = String(v).replace(/[^0-9]/g, "").slice(0, 10);
+    if (d.length <= 3) return d;
+    if (d.length <= 5) return d.slice(0, 3) + "-" + d.slice(3);
+    return d.slice(0, 3) + "-" + d.slice(3, 5) + "-" + d.slice(5);
+  }
+  function bizChecksum(digits) {
+    if (digits.length !== 10) return false;
+    var w = [1, 3, 7, 1, 3, 7, 1, 3, 5];
+    var sum = 0;
+    for (var i = 0; i < 9; i++) sum += Number(digits.charAt(i)) * w[i];
+    sum += Math.floor(Number(digits.charAt(8)) * 5 / 10);
+    return (10 - (sum % 10)) % 10 === Number(digits.charAt(9));
+  }
+
+  var bizNoEl = $("#bizNo");
+  bizNoEl.addEventListener("input", function () {
+    var pos = this.selectionStart;
+    var before = this.value.length;
+    this.value = fmtBizNo(this.value);
+    // keep caret roughly stable when auto-inserting hyphens
+    this.setSelectionRange(Math.min(this.value.length, pos + (this.value.length - before)), Math.min(this.value.length, pos + (this.value.length - before)));
+  });
+
+  var TAX_MOCK = {
+    "1234567891": { name: "(주)성수브런치랩", type: "음식점업 · 커피전문점" }
+  };
+
+  var bizResult = $("#bizResult");
+  function showResult(kind, html) {
+    bizResult.className = "res-box show " + kind;
+    bizResult.innerHTML = html;
+  }
+
+  $("#btnBizCheck").addEventListener("click", function () {
+    var digits = bizNoEl.value.replace(/[^0-9]/g, "");
+    if (digits.length !== 10) {
+      showResult("err", "사업자등록번호 10자리를 입력해 주세요. (예: 123-45-67891)");
+      bizNumberOk = false; refreshVerifyBtn(); return;
+    }
+    if (!bizChecksum(digits)) {
+      showResult("err", "<b>조회 실패</b> — 사업자등록번호 체크섬이 올바르지 않습니다. 번호를 다시 확인해 주세요.");
+      bizNumberOk = false; refreshVerifyBtn(); return;
+    }
+    var btn = this;
+    btn.disabled = true;
+    showResult("load", "국세청 사업자등록 정보를 조회하는 중입니다…");
+    setTimeout(function () {
+      btn.disabled = false;
+      bizNumberOk = true;
+      var hit = TAX_MOCK[digits];
+      var name = hit ? hit.name : "사업자 정보 확인 완료";
+      var type = hit ? hit.type : "";
+      showResult("ok", "<b>진위확인 완료</b> — " + esc(name) + (type ? " · " + esc(type) : "") + "<br>사업자 상태: 계속사업자 · 과세유형: 일반과세자 <span class='muted'>(시안)</span>");
+      if (hit) {
+        if (!$("#bizName").value.trim()) $("#bizName").value = hit.name;
+        if (!$("#bizType").value.trim()) $("#bizType").value = hit.type;
+      }
+      refreshVerifyBtn();
+    }, 700);
+  });
+
+  $("#bizFile").addEventListener("change", function () {
+    var f = this.files && this.files[0];
+    if (!f) return;
+    fileAttached = true;
+    $("#dz").classList.add("has");
+    $("#dzName").textContent = f.name + " · " + (f.size > 1024 * 1024 ? (f.size / 1024 / 1024).toFixed(1) + "MB" : Math.max(1, Math.round(f.size / 1024)) + "KB");
+    $("#dzState").textContent = "✓ 첨부됨";
+    refreshVerifyBtn();
+  });
+
+  function refreshVerifyBtn() {
+    var btn = $("#btnVerify");
+    if (verified) { btn.disabled = true; btn.textContent = "인증 완료"; return; }
+    btn.disabled = false;
+    btn.textContent = "인증 요청하기";
+  }
+
+  function setVerified() {
+    verified = true;
+    var pill = $("#verifyPill");
+    pill.className = "status-pill ok";
+    pill.innerHTML = '<span class="dot"></span>사업자 인증 완료';
+    $("#verifyBadge").className = "badge mint";
+    $("#verifyBadge").textContent = "인증 완료";
+    $("#heroLock").className = "lockline ok";
+    $("#heroLock").innerHTML = '<span>✓</span><span><b>사업자 인증 완료</b> — 캠페인을 등록하고 지원자를 선정할 수 있습니다.</span><a href="#campaigns">캠페인 등록 →</a>';
+    $("#campLock").classList.add("hide");
+    $("#campFieldset").disabled = false;
+    $("#campLockBadge").className = "badge mint";
+    $("#campLockBadge").textContent = "인증 완료 · 등록 가능";
+    $$("#verifyFeatures li").forEach(function (li) {
+      li.classList.remove("locked");
+      li.querySelector(".sic").textContent = "✓";
+    });
+    $("#verifyHint").textContent = "인증이 완료되었습니다. 사업자 인증은 1회만 하면 모든 캠페인에 적용됩니다.";
+    var cta = $("#heroCta");
+    if (cta) { cta.textContent = "캠페인 등록하기"; cta.setAttribute("href", "#campaigns"); }
+    refreshVerifyBtn();
+  }
+
+  $("#btnVerify").addEventListener("click", function () {
+    if (verified) return;
+    if (!bizNumberOk) {
+      showResult("err", "먼저 <b>사업자 확인</b>으로 사업자등록번호를 조회해 주세요.");
+      $("#bizNo").focus();
+      toast("사업자등록번호 조회가 필요합니다");
+      return;
+    }
+    var name = $("#bizName").value.trim();
+    var type = $("#bizType").value.trim();
+    var addr = $("#bizNaver").value.trim();
+    var phone = $("#bizPhone").value.trim();
+    if (!name || !type || !addr || !phone) {
+      showResult("err", "상호명 · 업종 · 네이버지도 주소 · 담당자 연락처를 모두 입력해 주세요.");
+      toast("매장 정보를 모두 입력해 주세요");
+      return;
+    }
+    if (!fileAttached) {
+      showResult("err", "사업자등록증 파일을 첨부해 주세요.");
+      $("#dz").scrollIntoView({ behavior: "smooth", block: "center" });
+      toast("사업자등록증을 첨부해 주세요");
+      return;
+    }
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = "심사 중…";
+    showResult("load", "사업자등록증을 확인하고 있습니다… (시안 · 약 1초)");
+    setTimeout(function () {
+      setVerified();
+      showResult("ok", "<b>인증 완료</b> — " + esc(name) + " · 사업자등록증 확인됨. 이제 캠페인을 등록할 수 있습니다.");
+      toast("사업자 인증이 완료되었습니다 · 캠페인 등록 가능");
+    }, 1200);
+  });
+
+  $$("[data-need-verify]").forEach(function (a) {
+    a.addEventListener("click", function (e) {
+      if (!verified) {
+        e.preventDefault();
+        toast("사업자 인증 후 공고를 등록할 수 있습니다");
+        document.getElementById("verify").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  });
+  $("#lockGo").addEventListener("click", function () {
+    document.getElementById("verify").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  $("#btnConsult").addEventListener("click", function () {
+    toast("대행 상담 요청이 접수되었습니다 · 1영업일 내 연락드립니다 (시안)");
+  });
+  $("#btnTax").addEventListener("click", function () {
+    toast("세금계산서 발행 요청이 접수되었습니다 (시안)");
+  });
+
+  /* =========================================================
+     03 캠페인 등록
+     ========================================================= */
+  var pickedLangs = ["EN"];
+  var pickedChannels = ["Instagram"];
+  var pickedTrack = "mission";
+
+  function multiChip(container, attr, list, onChange) {
+    $(container).addEventListener("click", function (e) {
+      var b = e.target.closest(".chip");
+      if (!b) return;
+      var v = b.getAttribute(attr);
+      var i = list.indexOf(v);
+      if (i === -1) list.push(v);
+      else if (list.length > 1) list.splice(i, 1);
+      $$(".chip", this).forEach(function (x) {
+        x.setAttribute("aria-pressed", String(list.indexOf(x.getAttribute(attr)) !== -1));
+      });
+      if (onChange) onChange();
+    });
+  }
+  multiChip("#cLangs", "data-lang", pickedLangs);
+  multiChip("#cChannels", "data-ch", pickedChannels);
+
+  function renderTrackNote() {
+    var note = $("#trackNote");
+    if (pickedTrack === "mission") {
+      note.className = "res-box show load";
+      note.innerHTML = "<b>의무 업로드형</b> — H-1 워킹홀리데이, F-2·F-4·F-5, 시간제취업 허가를 받은 D-2 크리에이터만 신청할 수 있습니다. 방문·촬영·업로드 기한을 캠페인 조건으로 안내합니다.";
+    } else {
+      note.className = "res-box show";
+      note.style.background = "#fff8ef";
+      note.style.border = "1px solid #ffe1bd";
+      note.style.color = "#93370d";
+      note.innerHTML = "<b>단기 관광객 초대형</b> — 업로드 의무·계약 조건 없이 무료 초대만 제공합니다. 크리에이터는 자발적 후기로 참여하고 <b>#gifted</b> 협찬 표기를 권장합니다. (법적 안전장치 문구가 캠페인에 자동 포함됩니다)";
+    }
+  }
+  $("#cTrack").addEventListener("click", function (e) {
+    var b = e.target.closest(".chip");
+    if (!b) return;
+    pickedTrack = b.getAttribute("data-track");
+    $$(".chip", this).forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+    renderTrackNote();
+  });
+  renderTrackNote();
+
+  function trackBadge(t) {
+    return t === "mission"
+      ? '<span class="tag track-m">의무 업로드형 · 합법 비자</span>'
+      : '<span class="tag track-i">단기 초대형 · 자발적 후기</span>';
+  }
+
+  function renderCampaigns() {
+    var box = $("#campList");
+    box.innerHTML = campaigns.map(function (c) {
+      return '<div class="camp-row" data-id="' + c.id + '">' +
+        '<div class="camp-main">' +
+          '<div class="camp-title"><b>' + esc(c.title) + '</b>' +
+            '<span class="badge ' + (c.status === "모집 중" ? "live" : "gray") + '">' + esc(c.status) + '</span>' +
+          '</div>' +
+          '<div class="camp-meta">' +
+            '<span class="tag">' + esc(c.category) + '</span>' +
+            '<span class="tag">' + esc(c.area) + '</span>' +
+            c.langs.map(function (l) { return '<span class="tag lang">' + esc(l) + '</span>'; }).join("") +
+            c.channels.map(function (ch) { return '<span class="tag">' + esc(ch) + '</span>'; }).join("") +
+            trackBadge(c.track) +
+          '</div>' +
+        '</div>' +
+        '<div class="camp-side">' +
+          '<div class="camp-num"><b>' + c.applicants + ' / ' + c.capacity + '</b><span>지원 / 모집</span></div>' +
+          '<span class="badge amber">D-' + c.dueIn + '</span>' +
+        '</div>' +
+      '</div>';
+    }).join("");
+    $("#campCountBadge").textContent = campaigns.filter(function (c) { return c.status === "모집 중"; }).length + "건 진행 중";
+    $("#statCampaigns").textContent = campaigns.length;
+    refreshCampFilter();
+  }
+
+  $("#campForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!verified) { toast("사업자 인증 후 캠페인을 등록할 수 있습니다"); return; }
+    var title = $("#cTitle").value.trim();
+    var benefit = $("#cBenefit").value.trim();
+    var cap = parseInt($("#cCapacity").value, 10);
+    var category = $("#cCategory").value;
+    var area = $("#cArea").value;
+    var hashtag = $("#cHashtag").value.trim();
+    var place = $("#cPlace").value.trim();
+    var dueIn = parseInt($("#cDeadline").value, 10);
+    var errBox = $("#campErr");
+
+    if (!title || !benefit || !cap || cap < 1 || !category || !area || !hashtag || !place) {
+      errBox.classList.add("show");
+      errBox.innerHTML = "필수 항목을 확인해 주세요. (캠페인명 · 제공 혜택 · 모집 인원 · 카테고리 · 상권 · 해시태그 · 위치 태그)";
+      errBox.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    errBox.classList.remove("show");
+
+    var c = {
+      id: "c" + (campaigns.length + 1) + "-" + Date.now(),
+      title: title, benefit: benefit, capacity: cap, applicants: 0,
+      category: category, area: area, langs: pickedLangs.slice(),
+      channels: pickedChannels.slice(), track: pickedTrack, dueIn: dueIn,
+      status: "모집 중", hashtag: hashtag, place: place
+    };
+    campaigns.unshift(c);
+    renderCampaigns();
+
+    this.reset();
+    pickedLangs = ["EN"]; pickedChannels = ["Instagram"]; pickedTrack = "mission";
+    $$("#cLangs .chip").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-lang") === "EN")); });
+    $$("#cChannels .chip").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-ch") === "Instagram")); });
+    $$("#cTrack .chip").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-track") === "mission")); });
+    renderTrackNote();
+
+    var row = document.querySelector('.camp-row[data-id="' + c.id + '"]');
+    if (row) {
+      row.classList.add("new");
+      row.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(function () { row.classList.remove("new"); }, 2400);
+    }
+    toast("캠페인이 등록되었습니다 · 외국인 크리에이터에게 공개됩니다");
+  });
+
+  /* =========================================================
+     04 지원자
+     ========================================================= */
+  var appFilter = "all";
+  var campFilter = "all";
+
+  function campTitle(id) {
+    var c = campaigns.filter(function (x) { return x.id === id; })[0];
+    return c ? c.title : "";
+  }
+  function refreshCampFilter() {
+    var sel = $("#appCampFilter");
+    var cur = sel.value;
+    sel.innerHTML = '<option value="all">전체 캠페인</option>' + campaigns.map(function (c) {
+      return '<option value="' + c.id + '">' + esc(c.title) + '</option>';
+    }).join("");
+    sel.value = campaigns.some(function (c) { return c.id === cur; }) ? cur : "all";
+    campFilter = sel.value;
+  }
+
+  function visaClass(v) {
+    if (v.indexOf("H-1") === 0) return "h1";
+    if (v.indexOf("D-2") === 0) return "d2";
+    return "tmp";
+  }
+  var avatarTone = ["", "mint", "violet", "amber", "pink"];
+
+  function renderApplicants() {
+    var list = applicants.filter(function (a) {
+      var okSt = appFilter === "all" || a.status === appFilter;
+      var okCamp = campFilter === "all" || a.camp === campFilter;
+      return okSt && okCamp;
+    });
+    var box = $("#appList");
+    if (!list.length) {
+      box.innerHTML = '<div class="hint" style="padding:26px;text-align:center;border:1px dashed #cfd8e6;border-radius:12px">조건에 맞는 지원자가 없습니다.</div>';
+    } else {
+      box.innerHTML = list.map(function (a, i) {
+        var picked = a.status === "pick";
+        var held = a.status === "hold";
+        var visitHtml = "";
+        if (picked) {
+          visitHtml = a.visit
+            ? '<div class="visit"><span class="confirmed">✓ 방문 확정 · ' + esc(a.visit) + '</span>' +
+              '<button type="button" class="btn btn-ghost btn-sm" data-act="changevisit" data-id="' + a.id + '">변경</button></div>'
+            : '<div class="visit"><select data-visit="' + a.id + '">' +
+              VISIT_SLOTS.map(function (s) { return '<option value="' + esc(s) + '">' + esc(s) + '</option>'; }).join("") +
+              '</select><button type="button" class="btn btn-soft btn-sm" data-act="visit" data-id="' + a.id + '">방문 확정</button></div>';
+        }
+        return '<div class="app-row ' + (picked ? "picked" : held ? "held" : "") + '" data-id="' + a.id + '">' +
+          '<div class="who">' +
+            '<div class="avatar ' + avatarTone[i % avatarTone.length] + '">' + esc(a.name.charAt(0)) + '</div>' +
+            '<div style="min-width:0">' +
+              '<b>' + esc(a.name) + ' <span class="muted" style="font-weight:600;font-size:11.4px">' + esc(a.handle) + '</span></b>' +
+              '<span>' + esc(a.nation) + ' · ' + esc(campTitle(a.camp)) + '</span>' +
+              '<div class="meta-line"><span class="visa ' + visaClass(a.visa) + '">' + esc(a.visa) + '</span>' +
+                '<span class="tag lang">' + esc(a.lang) + '</span>' +
+                '<span class="tag">팔로워 ' + money(a.followers) + '</span></div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="chan">' +
+            '<b>' + esc(a.channels) + '</b>' +
+            '<span>평균 조회수 ' + money(a.views) + ' · ' + esc(a.handle) + '</span>' +
+            visitHtml +
+          '</div>' +
+          '<div class="app-right">' +
+            '<div class="seg" role="group" aria-label="선정 상태">' +
+              '<button type="button" class="pick" data-act="pick" data-id="' + a.id + '" aria-pressed="' + picked + '">선정</button>' +
+              '<button type="button" class="hold" data-act="hold" data-id="' + a.id + '" aria-pressed="' + held + '">보류</button>' +
+            '</div>' +
+            '<span class="badge ' + (picked ? "mint" : held ? "gray" : "amber") + '">' +
+              (picked ? "선정 · 방문 조율" : held ? "보류" : "검토 대기") + '</span>' +
+          '</div>' +
+        '</div>';
+      }).join("");
+    }
+    $("#appCountBadge").textContent = "대기 " + applicants.filter(function (a) { return a.status === "wait"; }).length + "명";
+    $("#pickCountBadge").textContent = "선정 " + applicants.filter(function (a) { return a.status === "pick"; }).length + "명";
+    $("#statApplicants").textContent = applicants.length + 31;
+  }
+
+  $("#appStatusFilter").addEventListener("click", function (e) {
+    var b = e.target.closest(".chip");
+    if (!b) return;
+    appFilter = b.getAttribute("data-st");
+    $$(".chip", this).forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+    renderApplicants();
+  });
+  $("#appCampFilter").addEventListener("change", function () {
+    campFilter = this.value;
+    renderApplicants();
+  });
+
+  $("#appList").addEventListener("click", function (e) {
+    var btn = e.target.closest("button[data-act]");
+    if (!btn) return;
+    var a = applicants.filter(function (x) { return x.id === btn.getAttribute("data-id"); })[0];
+    if (!a) return;
+    var act = btn.getAttribute("data-act");
+    if (act === "pick") {
+      a.status = "pick";
+      if (a.visit) a.visit = "";
+      renderApplicants();
+      toast(a.name + " 님을 선정했습니다 · 방문 일정을 확정해 주세요");
+    } else if (act === "hold") {
+      a.status = "hold";
+      renderApplicants();
+      toast(a.name + " 님을 보류로 옮겼습니다");
+    } else if (act === "visit") {
+      var sel = document.querySelector('select[data-visit="' + a.id + '"]');
+      if (!sel) return;
+      a.visit = sel.value;
+      renderApplicants();
+      toast("방문 확정 · " + a.visit + " · 크리에이터에게 안내가 발송됩니다 (시안)");
+    } else if (act === "changevisit") {
+      a.visit = "";
+      renderApplicants();
+    }
+  });
+
+  /* =========================================================
+     05 리포트
+     ========================================================= */
+  function renderShorts() {
+    $("#shortList").innerHTML = shorts.map(function (s) {
+      var consentHtml = s.consent
+        ? '<span class="consent on">✓ 2차 활용 동의</span>'
+        : '<button type="button" class="consent ask" data-consent="' + s.id + '">동의 요청</button>';
+      return '<article class="short" data-id="' + s.id + '">' +
+        '<div class="thumb ' + s.tones + '"><span class="plat">' + esc(s.platform) + '</span></div>' +
+        '<div class="short-body">' +
+          '<div>' +
+            '<h4>' + esc(s.title) + '</h4>' +
+            '<div class="by">' + esc(s.creator) + ' · ' + esc(s.date) + ' 업로드</div>' +
+          '</div>' +
+          '<div class="metrics">' +
+            '<div><b>' + esc(s.views) + '</b><span>조회수</span></div>' +
+            '<div><b>' + esc(s.likes) + '</b><span>좋아요</span></div>' +
+            '<div><b>' + esc(s.saves) + '</b><span>저장</span></div>' +
+          '</div>' +
+          '<div class="consent-row"><span class="lbl">가게 SNS·광고 활용</span>' + consentHtml + '</div>' +
+        '</div>' +
+      '</article>';
+    }).join("");
+    $("#reportBadge").textContent = "업로드 " + shorts.length + "건 · 동의 " + shorts.filter(function (s) { return s.consent; }).length + "건";
+  }
+  $("#shortList").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-consent]");
+    if (!b) return;
+    var s = shorts.filter(function (x) { return x.id === b.getAttribute("data-consent"); })[0];
+    if (!s) return;
+    s.consent = true;
+    renderShorts();
+    toast("2차 활용 동의를 받았습니다 · 가게 SNS·광고에 사용할 수 있습니다");
+  });
+
+  /* =========================================================
+     init
+     ========================================================= */
+  renderCampaigns();
+  renderApplicants();
+  renderShorts();
+})();
+</script>
+</body>
+</html>
