@@ -17,7 +17,7 @@
 <meta name="theme-color" content="#FAF8F5">
 <title>DutchWhy · 더치와이 — 네덜란드어 단어는 조각으로 읽는다</title>
 <meta name="robots" content="noindex, nofollow">
-<meta name="description" content="DutchWhy 프로토타입 — 네덜란드어 B1·B2 필수 어휘를 접두사·어근 하나로 꿰는 어원 학습 앱">
+<meta name="description" content="DutchWhy 프로토타입 — 네덜란드어 A1–B2 레벨별 어휘를 접두사·어근 하나로 꿰는 어원 학습 앱">
 <style>
 /* ============================================================
    DutchWhy (더치와이) — single-card · 360×780 zero-scroll
@@ -100,22 +100,31 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
 .levels{flex:none;display:flex;gap:4px;padding:0 12px 5px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .levels::-webkit-scrollbar{display:none}
 .chip{
-  flex:none;display:inline-flex;align-items:center;gap:2px;font-size:9.6px;font-weight:800;letter-spacing:-.02em;
-  padding:4px 8px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink-2);
+  flex:none;display:inline-flex;align-items:center;gap:4px;font-size:9.4px;font-weight:800;letter-spacing:-.02em;
+  padding:4px 7px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink-2);
   cursor:pointer;line-height:1.2;transition:.15s;white-space:nowrap;
 }
+.chip .c-nm{font-size:8.4px;font-weight:700;opacity:.72}
+.chip .c-n{font-style:normal;font-size:8.2px;font-weight:800;background:rgba(30,58,95,.07);border-radius:99px;padding:1px 4px;letter-spacing:0}
+.chip.on .c-n{background:rgba(255,255,255,.22)}
+.chip.locked .c-n{background:rgba(0,0,0,.05)}
 .chip:active{transform:scale(.96)}
 .chip.on{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 3px 8px -3px rgba(30,58,95,.6)}
 .chip.locked{color:#AC9F8E;background:#F6F2EB;border-style:dashed}
 .chip.locked.on{background:#8C7C68;border-color:#8C7C68;color:#fff}
 
+@media (max-width:380px){
+  .chip{padding:4px 6px;gap:3px}
+  .chip .c-nm{display:none}
+}
+
 /* ---------- stage ---------- */
 .stage{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;padding:0 10px 6px}
-.deck{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:7px}
+.deck{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;justify-content:flex-start;gap:8px}
 
 /* ---------- single card ---------- */
 .card{
-  position:relative;flex:1 1 auto;min-height:0;max-height:480px;
+  position:relative;flex:0 0 auto;min-height:0;
   display:flex;flex-direction:column;
   background:#fff;border:1px solid var(--line);border-radius:20px;
   box-shadow:var(--shadow);overflow:hidden;
@@ -126,7 +135,7 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
 @keyframes slideL{from{opacity:.2;transform:translateX(20px)}to{opacity:1;transform:none}}
 @keyframes slideR{from{opacity:.2;transform:translateX(-20px)}to{opacity:1;transform:none}}
 
-.card-head{flex:none;display:flex;align-items:center;gap:5px;padding:10px 11px 0}
+.card-head{flex:none;display:flex;align-items:center;gap:5px;padding:8px 10px 0}
 .pos{
   font-size:9.8px;font-weight:800;color:var(--blue);background:var(--blue-wash);
   border:1px solid var(--blue-line);padding:3px 7px;border-radius:6px;letter-spacing:-.02em;white-space:nowrap;
@@ -139,7 +148,14 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
   font-size:9px;font-weight:800;color:var(--ink-2);background:#F4EFE6;
   border:1px solid #E9E0D2;padding:2.5px 6px;border-radius:5px;letter-spacing:.01em;white-space:nowrap;
 }
-.lvl{font-size:8.8px;font-weight:800;color:var(--ink-3);letter-spacing:.02em;white-space:nowrap}
+.lvl{
+  font-size:8.6px;font-weight:800;color:var(--ink-3);letter-spacing:.04em;white-space:nowrap;
+  border:1px solid var(--line);background:#F7F3EC;border-radius:5px;padding:2.5px 5px;
+}
+.lvl.lv-a1{color:#2F7A55;background:var(--ok-soft);border-color:#CFE7DA}
+.lvl.lv-a2{color:#2C6E7A;background:#EAF5F6;border-color:#CCE4E7}
+.lvl.lv-b1{color:var(--blue);background:var(--blue-wash);border-color:var(--blue-line)}
+.lvl.lv-b2{color:var(--seal);background:var(--seal-soft);border-color:#F1D9C9}
 .star{
   margin-left:auto;width:28px;height:28px;border-radius:50%;border:none;background:transparent;
   color:#D3C8B6;font-size:15px;line-height:1;display:grid;place-items:center;cursor:pointer;transition:.2s;
@@ -147,7 +163,7 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
 .star.on{color:var(--seal);transform:scale(1.06);text-shadow:0 2px 6px rgba(201,98,43,.25)}
 
 /* hero */
-.hero{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:2px 14px 4px;overflow:hidden}
+.hero{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:5px 12px 4px;overflow:hidden}
 .word{
   font-family:var(--sans);font-weight:800;line-height:1;color:var(--blue);
   letter-spacing:-.035em;white-space:nowrap;
@@ -155,7 +171,7 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
 }
 .pron{
   display:inline-flex;align-items:center;gap:6px;max-width:100%;
-  background:var(--paper-2);border-radius:9px;padding:4px 5px 4px 9px;
+  background:var(--paper-2);border-radius:9px;padding:3px 4px 3px 8px;
 }
 .pron .ipa{font-family:var(--serif);font-size:11.5px;color:var(--ink-2);letter-spacing:.01em;white-space:nowrap}
 .pron .dot{color:#CFC5B6;font-size:9px}
@@ -166,7 +182,7 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
   box-shadow:0 1px 3px rgba(30,58,95,.12);transition:.15s;
 }
 .speak:active{transform:scale(.9);background:var(--blue-wash)}
-.krhint{font-size:9.3px;font-weight:700;color:var(--ink-3);letter-spacing:-.01em;margin-top:-3px}
+.krhint{font-size:9.3px;font-weight:700;color:var(--ink-3);letter-spacing:-.01em;margin-top:-2px}
 .krhint b{color:var(--seal);font-weight:800}
 .core{
   font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.04em;text-align:center;line-height:1.3;
@@ -176,10 +192,10 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
 
 /* etymology bar inside the card */
 .formula{
-  flex:none;border-top:1px solid var(--line-2);padding:8px 11px 10px;
+  flex:none;border-top:1px solid var(--line-2);padding:7px 10px 8px;
   background:linear-gradient(180deg,#FFFDFA,#FBF8F2);
 }
-.fhead{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.fhead{display:flex;align-items:center;gap:6px;margin-bottom:5px}
 .flabel{
   font-size:9.2px;font-weight:800;color:var(--blue);background:var(--blue-wash);
   border:1px solid var(--blue-line);padding:2px 6px;border-radius:5px;letter-spacing:-.02em;white-space:nowrap;
@@ -212,31 +228,61 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
 .card.masked .core,.card.masked .fresult,.card.masked .fnote,.card.masked .krhint{filter:blur(6px);opacity:.75;user-select:none}
 .card.masked .mask-hint{display:block}
 
-/* ---------- example strip ---------- */
+/* ---------- example panel (main study area) ---------- */
 .exstrip{
-  flex:none;display:flex;align-items:stretch;gap:8px;
-  background:#fff;border:1px solid var(--line);border-radius:13px;
-  padding:8px 9px;box-shadow:var(--shadow-sm);cursor:pointer;
+  flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:7px;
+  background:#fff;border:1px solid var(--line);border-radius:18px;
+  padding:12px 13px 11px;box-shadow:var(--shadow);cursor:pointer;overflow:hidden;
 }
-.exbody{flex:1;min-width:0}
+.exhead{flex:none;display:flex;align-items:center;gap:5px}
 .extag{
-  display:inline-block;font-size:7.8px;font-weight:800;color:var(--blue-2);background:var(--blue-wash);
-  padding:1.5px 5px;border-radius:4px;letter-spacing:.01em;
+  display:inline-block;font-size:8.8px;font-weight:800;color:var(--blue-2);background:var(--blue-wash);
+  padding:2px 6px;border-radius:5px;letter-spacing:.01em;
 }
+.exlvl{
+  font-size:8.4px;font-weight:800;color:var(--blue);background:var(--paper-2);
+  border:1px solid var(--line);padding:2px 5px;border-radius:5px;letter-spacing:-.01em;white-space:nowrap;
+}
+.exlvl.lv-a1{color:#2F7A55;background:var(--ok-soft);border-color:#CFE7DA}
+.exlvl.lv-a2{color:#2C6E7A;background:#EAF5F6;border-color:#CCE4E7}
+.exlvl.lv-b1{color:var(--blue);background:var(--blue-wash);border-color:var(--blue-line)}
+.exlvl.lv-b2{color:var(--seal);background:var(--seal-soft);border-color:#F1D9C9}
+.exn{margin-left:auto;font-size:8.8px;font-weight:800;color:var(--ink-3);letter-spacing:-.01em;white-space:nowrap}
+.exbody{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:11px;overflow:hidden;padding:2px 1px}
 .ex-en{
-  margin:3px 0 0;font-size:10.1px;line-height:1.4;font-weight:700;color:var(--ink);letter-spacing:-.01em;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  margin:0;font-size:18px;line-height:1.6;font-weight:700;color:var(--ink);letter-spacing:-.02em;
+  overflow-wrap:break-word;
 }
 .ex-ko{
-  margin:2px 0 0;font-size:8.9px;line-height:1.4;color:var(--ink-3);font-weight:600;letter-spacing:-.02em;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  margin:0;font-size:11.6px;line-height:1.55;color:var(--ink-2);font-weight:600;letter-spacing:-.02em;
+  border-left:2px solid var(--blue-line);padding-left:9px;
 }
-.exside{flex:none;display:flex;flex-direction:column;justify-content:center;gap:4px}
-.exside button{
-  border:none;border-radius:7px;font-size:8.8px;font-weight:800;padding:5px 6px;cursor:pointer;
+.exhl{
+  background:linear-gradient(180deg,transparent 60%,#FBE0C6 60%);border-radius:2px;
+  font-weight:800;color:var(--blue);padding:0 1px;
+}
+.exnext{
+  background:#FBF8F2;border:1px solid var(--line-2);border-radius:11px;padding:8px 10px 9px;
+}
+.exnext .nx-tag{display:block;font-size:8.2px;font-weight:800;color:var(--ink-3);letter-spacing:.02em;margin-bottom:3px}
+.exnext .nx-en{
+  margin:0;font-size:11.4px;line-height:1.5;font-weight:700;color:var(--ink-2);letter-spacing:-.01em;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.exnext .nx-ko{margin:2px 0 0;font-size:10px;line-height:1.45;color:var(--ink-3);font-weight:600;letter-spacing:-.02em}
+.excolloc{
+  display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;
+  font-size:9.4px;color:var(--ink-3);font-weight:700;border-top:1px dashed var(--line);padding-top:8px;
+}
+.excolloc span{font-weight:800;letter-spacing:-.01em}
+.excolloc b{font-size:10.6px;font-weight:800;color:var(--blue);letter-spacing:-.01em}
+.excolloc i{font-style:normal;font-weight:700}
+.exfoot{flex:none;display:flex;gap:6px;border-top:1px solid var(--line-2);padding-top:8px}
+.exfoot button{
+  flex:1;border:none;border-radius:9px;font-size:9.6px;font-weight:800;padding:8px 4px;cursor:pointer;
   letter-spacing:-.02em;white-space:nowrap;
 }
-#exSpeak{background:var(--paper-2);color:var(--blue);font-size:10px;padding:4px 6px}
+#exSpeak{background:var(--paper-2);color:var(--blue)}
 #exOpen{background:var(--blue-wash);border:1px solid var(--blue-line);color:var(--blue-2)}
 
 /* ---------- bottom bar ---------- */
@@ -476,8 +522,18 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
 /* ---------- compact heights ---------- */
 @media (max-height:720px){
   .word{letter-spacing:-.04em}
-  .hero{gap:6px}
+  .hero{gap:5px}
+  .ex-en{font-size:16px}
   .sheet{max-height:92%}
+}
+@media (max-height:700px){
+  .exnext{display:none!important}
+  .exbody{gap:8px}
+  .exstrip{padding:10px 11px 10px;gap:6px}
+  .hero{gap:4px;padding:3px 12px 3px}
+  .core{font-size:15px}
+  .formula{padding:6px 10px 7px}
+  .card-head{padding:6px 10px 0}
 }
 @media (max-height:620px){
   .deck{justify-content:flex-start}
@@ -486,9 +542,9 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
 @media (max-height:640px){
   .topline{padding-top:6px}
   .chip{padding:3.5px 7px}
-  .ex-en{-webkit-line-clamp:1}
+  .ex-en{font-size:15px}
   .core small{display:none}
-  .formula{padding:7px 10px 8px}
+  .formula{padding:6px 10px 7px}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
@@ -496,7 +552,7 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
 </style>
 <style id="rpLockStyle">
   /* ============================================================
-     PASSWORD LOCK — 0909
+     PASSWORD LOCK
      The password itself is never written here: only its SHA-256 hex
      digest, checked in pure JS so it works the same on https:// and
      file:// (no crypto.subtle needed).
@@ -845,7 +901,7 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
 
   <div class="topline">
     <div class="brand">
-      <span class="seal">NL</span><b>DutchWhy</b><span class="tld">B1·B2</span>
+      <span class="seal">NL</span><b>DutchWhy</b><span class="tld">A1–B2</span>
     </div>
     <div class="meta">
       <span class="counter" id="counter">오늘 0 · 10</span>
@@ -892,14 +948,24 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
     </section>
 
     <div class="exstrip" id="exstrip">
-      <div class="exbody">
+      <div class="exhead">
         <span class="extag" id="exTag">예문</span>
-        <p class="ex-en" id="exEn"></p>
-        <p class="ex-ko" id="exKo"></p>
+        <span class="exlvl" id="exLvl">A1</span>
+        <span class="exn" id="exN">예문 1 / 3</span>
       </div>
-      <div class="exside">
-        <button id="exSpeak" aria-label="예문 듣기">🔊</button>
-        <button id="exOpen">예문 3 ›</button>
+      <div class="exbody" id="exBodyWrap">
+        <p class="ex-en" id="exEn" lang="nl"></p>
+        <p class="ex-ko" id="exKo"></p>
+        <div class="exnext" id="exNext">
+          <span class="nx-tag" id="nxTag">예문 2</span>
+          <p class="nx-en" id="nxEn"></p>
+          <p class="nx-ko" id="nxKo"></p>
+        </div>
+        <div class="excolloc" id="exColloc"></div>
+      </div>
+      <div class="exfoot">
+        <button id="exSpeak" aria-label="예문 듣기">🔊 예문 듣기</button>
+        <button id="exOpen">예문 3개 전체 ›</button>
       </div>
     </div>
    </div>
@@ -950,17 +1016,17 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
     <div class="sheet-body">
       <div class="pw-hero">
         <div class="kicker">STAATSEXAMEN NT2 · B2</div>
-        <div class="title">B1에서 멈추지 않고,<br>B2 어휘까지 한 번에</div>
+        <div class="title">A1·A2·B1 다음,<br>B2 어휘까지 한 번에</div>
         <div class="price">16단어<small>잠금 해제 테스트 · 프로토타입</small></div>
-        <div class="sub">B1 20단어는 계속 무료입니다</div>
+        <div class="sub">A1·A2·B1 44단어는 계속 무료입니다</div>
       </div>
       <div class="pw-compare">
-        <div><div class="t">무료 · B1</div><div class="v">B1 20단어<br>+ 접두사·빈칸 퀴즈</div></div>
-        <div class="hi"><div class="t">B2 확장팩</div><div class="v">B2 16단어<br>+ 전체 가문 36단어</div></div>
+        <div><div class="t">무료 · A1–B1</div><div class="v">A1·A2·B1 44단어<br>+ 접두사·빈칸 퀴즈</div></div>
+        <div class="hi"><div class="t">B2 확장팩</div><div class="v">B2 16단어<br>+ 전체 60단어</div></div>
       </div>
       <div class="pw-feat">
         <div><span class="tick">✓</span><span>B2 16단어 <b>전체 해금</b> (ontwikkelen, gedrag, gevolg …)</span></div>
-        <div><span class="tick">✓</span><span>접두사 가문 9개 · <b>36단어</b> 무제한</span></div>
+        <div><span class="tick">✓</span><span>가문 <b>14개 · 60단어</b> 무제한</span></div>
         <div><span class="tick">✓</span><span>B2 빈칸·접두사 퀴즈까지 출제</span></div>
         <div><span class="tick">✓</span><span>분리동사·과거분사 시험 포인트 전체</span></div>
       </div>
@@ -1002,8 +1068,8 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
       </div>
       <div class="hr"></div>
       <p class="muted" style="font-size:8.5px;line-height:1.7;margin:0">
-        DutchWhy 프로토타입 · v0.9 (2026-11-19)<br>
-        한국어 학습자 A2→B1·B2 기준 · Staatsexamen Nt2 / Inburgering B1 어휘<br>
+        DutchWhy 프로토타입 · v1.0 (2026-11-22)<br>
+        한국어 학습자 A1→B2 기준 · CEFR 레벨별 60단어 · Staatsexamen Nt2 / Inburgering B1 어휘<br>
         어원 표기는 게르만어·네덜란드어 실제 어형을 따랐습니다
       </p>
     </div>
@@ -1021,7 +1087,7 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
   <div class="onboard" id="onboard">
     <div class="ob-brand"><span class="seal">NL</span><b>DutchWhy</b><span>더치와이</span></div>
     <h1>네덜란드어 단어는<br><em>조각을 읽는</em> 것.</h1>
-    <p class="lead">B1·B2 단어는 접두사 하나가 뜻을 결정합니다.<br>조각 두 개면 긴 단어도 저절로 풀립니다.</p>
+    <p class="lead">A1부터 B2까지, 단어는 조각 하나가 뜻을 정합니다.<br>조각 두 개면 긴 단어도 저절로 풀립니다.</p>
 
     <div class="ob-card">
       <div class="ob-formula">
@@ -1035,8 +1101,8 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
     </div>
 
     <div class="ob-list">
-      <div><span>01</span>접두사 가문 9개 · B1·B2 36단어가 한 번에 열립니다</div>
-      <div><span>02</span>B1 20단어는 평생 무료 · 예문마다 🔊 네덜란드어 발음</div>
+      <div><span>01</span>A1·A2·B1·B2 레벨을 골라 단어를 학습합니다</div>
+      <div><span>02</span>가문 14개 · 60단어 · 예문마다 🔊 네덜란드어 발음</div>
       <div><span>03</span>접두사·빈칸 퀴즈로 시험 전에 바로 점검</div>
     </div>
 
@@ -1047,12 +1113,14 @@ button:focus-visible{outline:2px solid var(--blue-2);outline-offset:2px}
 <script>
 /* ============================================================
    DutchWhy — DATA
-   B1 20 + B2 16 = 36 words across 9 Dutch prefix/root families.
-   level: B1 = 무료 체험 / B2 = 잠금 해제(테스트)
+   A1 12 + A2 12 + B1 20 + B2 16 = 60 words across Dutch prefix/root families.
+   level: A1·A2·B1 = 무료 / B2 = 잠금 해제(테스트)
    ============================================================ */
 const LEVELS = [
-  { id: "B1", label: "B1 필수", full: "CEFR B1 · Staatsexamen Nt2 B1", free: true },
-  { id: "B2", label: "B2 확장", full: "CEFR B2 · Staatsexamen Nt2 B2", free: false }
+  { id: "A1", label: "A1 입문", short: "A1", name: "입문", full: "CEFR A1 · 기초 생활 어휘", free: true },
+  { id: "A2", label: "A2 기초", short: "A2", name: "기초", full: "CEFR A2 · 일상·행정 어휘", free: true },
+  { id: "B1", label: "B1 필수", short: "B1", name: "필수", full: "CEFR B1 · Staatsexamen Nt2 B1", free: true },
+  { id: "B2", label: "B2 확장", short: "B2", name: "확장", full: "CEFR B2 · Staatsexamen Nt2 B2", free: false }
 ];
 
 /* 네덜란드어 접두사·어근 가문 */
@@ -1065,10 +1133,444 @@ const ROOTS = {
   spreek:{ m: "말하다", latin: "spreken", family: "spreek" },
   denk:  { m: "생각하다", latin: "denken", family: "denk" },
   neem:  { m: "잡다", latin: "nemen", family: "neem" },
-  stel:  { m: "놓다", latin: "stellen", family: "stel" }
+  stel:  { m: "놓다", latin: "stellen", family: "stel" },
+  her:   { m: "다시", latin: "her- ‘다시’", family: "her-" },
+  sta:   { m: "서다", latin: "staan", family: "sta" },
+  woon:  { m: "살다·집", latin: "wonen", family: "woon" },
+  kom:   { m: "오다", latin: "komen", family: "kom" },
+  vraag: { m: "묻다", latin: "vragen", family: "vraag" }
 };
 
 const WORDS = [
+  /* ================= A1 · 입문 ================= */
+  {
+    w: "ontbijt", level: "A1", pos: "명사", art: "het", core: "아침 식사",
+    ipa: "ɔntˈbɛit", syl: "ont·bijt", kr: "온트바이트", root: "ont",
+    parts: [
+      { i: "🍳", a: "ont-", m: "벗김", k: "접두사" },
+      { i: "🍞", a: "bijten", m: "물다", k: "어근" }
+    ],
+    eq: "굶은 밤을 벗어 냄", res: "아침 식사",
+    story: "bijten(물다)에 ont-(벗기다)가 붙은 ontbijt. 밤새 굶은 상태를 ‘벗겨 내는’ 첫 끼니라는 뜻입니다. 동사 ontbijten(아침을 먹다)도 같은 조각입니다: Ik ontbijt om zeven uur.",
+    colloc: "het ontbijt overslaan", collockr: "아침을 거르다",
+    ex: [
+      { en: "In het hotel is het ontbijt van zeven tot tien uur bij de prijs inbegrepen.", ko: "호텔에서는 아침 식사가 7시부터 10시까지 요금에 포함되어 있다.", sk: "읽기" },
+      { en: "Elke ochtend eet ik een boterham met kaas als ontbijt, want ik heb weinig tijd.", ko: "매일 아침 시간이 없어서 빵에 치즈를 얹어 아침으로 먹어요.", sk: "말하기" },
+      { en: "Ik ontbijt meestal thuis, maar op zondag eet ik met mijn familie in een café.", ko: "보통은 집에서 아침을 먹지만 일요일에는 가족과 카페에서 먹습니다.", sk: "쓰기" }
+    ],
+    point: "het ontbijt(중성). 동사는 ontbijten — 과거분사는 ontbeten (×geontbijt). ‘아침을 먹다’는 ontbijten, ‘아침 식사’는 het ontbijt.",
+    gap: { s: "Ik heb vannacht slecht geslapen, dus ik neem vandaag een groot ___.", ko: "어젯밤에 잠을 설쳐서 오늘은 아침을 든든히 먹는다." }
+  },
+  {
+    w: "verkopen", level: "A1", pos: "동사", core: "팔다",
+    ipa: "vərˈkoːpən", syl: "ver·ko·pen", kr: "베르코펀", root: "ver",
+    parts: [
+      { i: "🔄", a: "ver-", m: "남에게 넘겨", k: "접두사" },
+      { i: "💰", a: "kopen", m: "사다", k: "어근" }
+    ],
+    eq: "사는 쪽에 넘김", res: "팔다",
+    story: "kopen(사다)에 ver-가 붙으면 방향이 뒤집혀 ‘남에게 넘기다’ = verkopen. 명사 de verkoop(판매), verkoper(판매원). 시장에서 Hoeveel kost dit? 다음에 바로 나오는 동사입니다.",
+    colloc: "te koop staan", collockr: "팔려 나오다",
+    ex: [
+      { en: "De winkel verkoopt geen kranten meer, alleen boeken en tijdschriften.", ko: "그 가게는 더 이상 신문을 팔지 않고 책과 잡지만 판다.", sk: "읽기" },
+      { en: "Ik wil mijn oude fiets verkopen. Weet jij hoeveel ik ervoor kan vragen?", ko: "오래된 자전거를 팔고 싶은데, 얼마를 받을 수 있을지 알겠어요?", sk: "말하기" },
+      { en: "Ik heb via Marktplaats een bank verkocht en de koper haalt hem morgen op.", ko: "마켓플라츠에서 소파를 팔았고 구매자가 내일 가지러 옵니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 verkocht (×geverkocht) — kopen은 gekocht지만 ver-가 붙으면 verkocht. ‘(값)에 팔다’는 voor … verkopen.",
+    gap: { s: "Wij ___ onze oude bank via Marktplaats, omdat we een nieuwe hebben gekocht.", ko: "우리는 새 소파를 사서 옛 소파를 마켓플라츠에서 판다." }
+  },
+  {
+    w: "vergeten", level: "A1", pos: "동사", core: "잊다",
+    ipa: "vərˈɣeːtən", syl: "ver·ge·ten", kr: "베르헤턴", root: "ver",
+    parts: [
+      { i: "🔄", a: "ver-", m: "멀리", k: "접두사" },
+      { i: "🤲", a: "geten", m: "옛말 ‘잡다·얻다’", k: "어근" }
+    ],
+    eq: "손에서 놓쳐 버림", res: "잊다",
+    story: "옛 네덜란드어 geten(잡다·지니다)에 ver-(멀리)가 붙어 ‘손에서 놓쳐 버린’ 상태가 vergeten입니다. 반대말 onthouden(기억하다)은 ont-가 ‘붙들어 두다’ 쪽이라 뜻이 갈립니다.",
+    colloc: "iets vergeten mee te nemen", collockr: "~을 챙기는 것을 잊다",
+    ex: [
+      { en: "Vergeet niet om je paspoort mee te nemen als je naar de gemeente gaat.", ko: "시청에 갈 때는 여권을 챙기는 것을 잊지 마세요.", sk: "읽기" },
+      { en: "Sorry, ik ben je naam vergeten. Kun je hem nog een keer zeggen?", ko: "미안해요, 이름을 잊어버렸어요. 한 번만 더 말해 줄 수 있어요?", sk: "말하기" },
+      { en: "Ik ben gisteren mijn sleutels thuis vergeten, dus ik kon niet naar binnen.", ko: "어제 열쇠를 집에 두고 나와서 들어갈 수 없었습니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 vergeten (×gevergeten). ‘~하는 것을 잊다’는 vergeten te + 동사원형. 재귀형 zich vergissen은 ‘착각하다’로 다른 동사입니다.",
+    gap: { s: "Ik ben mijn ov-kaart ___, dus ik moet vandaag een kaartje kopen.", ko: "교통카드를 잊어버려서 오늘은 표를 사야 한다." }
+  },
+  {
+    w: "betalen", level: "A1", pos: "동사", core: "지불하다 · 계산하다",
+    ipa: "bəˈtaːlən", syl: "be·ta·len", kr: "버탈런", root: "be",
+    parts: [
+      { i: "🎯", a: "be-", m: "대상에 붙이기", k: "접두사" },
+      { i: "🧮", a: "talen", m: "옛말 ‘셈하다’", k: "어근" }
+    ],
+    eq: "셈을 매듭지음", res: "지불하다",
+    story: "옛말 talen(셈하다·값을 매기다)에 be-가 붙어 ‘값을 셈해 넘긴다’ = betalen. 명사 de betaling(지불), 형용사 betaald(유료의). 식당에서 ‘계산할게요’는 Ik wil graag afrekenen.",
+    colloc: "contant betalen", collockr: "현금으로 지불하다",
+    ex: [
+      { en: "U kunt in deze winkel alleen met een pinpas betalen, niet met contant geld.", ko: "이 가게에서는 체크카드로만 계산할 수 있고 현금은 안 된다.", sk: "읽기" },
+      { en: "Mag ik met de creditcard betalen of moet dat contant?", ko: "신용카드로 계산해도 되나요, 아니면 현금이어야 하나요?", sk: "말하기" },
+      { en: "Ik heb de huur van deze maand te laat betaald; kan ik daarvoor een boete krijgen?", ko: "이번 달 월세를 늦게 냈는데 벌금이 나올 수 있나요?", sk: "쓰기" }
+    ],
+    point: "과거분사 betaald. ‘~에게 지불하다’는 iemand betalen, ‘~을 지불하다’는 iets betalen. 무료는 gratis, 유료는 betaald.",
+    gap: { s: "U kunt bij de kassa met uw pinpas ___; contant geld nemen wij niet aan.", ko: "계산대에서는 체크카드로 지불할 수 있습니다. 현금은 받지 않습니다." }
+  },
+  {
+    w: "beginnen", level: "A1", pos: "동사", core: "시작하다",
+    ipa: "bəˈɣɪnən", syl: "be·gin·nen", kr: "버히넌", root: "be",
+    parts: [
+      { i: "🎯", a: "be-", m: "대상에 붙이기", k: "접두사" },
+      { i: "🚩", a: "ginnen", m: "옛말 ‘열다’", k: "어근" }
+    ],
+    eq: "문을 열어 젖힘", res: "시작하다",
+    story: "옛말 ginnen(열다·시작하다)에 be-가 붙어 beginnen. 명사 het begin(시작) — ‘처음에’는 in het begin. 회화에서는 We beginnen om acht uur처럼 시각과 함께 자주 씁니다.",
+    colloc: "om te beginnen", collockr: "우선 · 먼저",
+    ex: [
+      { en: "De cursus Nederlands begint op 4 september en duurt twintig weken.", ko: "네덜란드어 과정은 9월 4일에 시작해 20주 동안 이어진다.", sk: "읽기" },
+      { en: "Kunnen we om half acht beginnen, of is dat te vroeg voor jou?", ko: "7시 30분에 시작할 수 있을까요, 아니면 너무 이른가요?", sk: "말하기" },
+      { en: "Ik schrijf u omdat de verbouwing later begint dan in de brief stond.", ko: "공사가 안내문에 적힌 것보다 늦게 시작한다고 알려 드리려고 합니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 begonnen (×gegennen). ‘~을 시작하다’는 beginnen met + 명사/동사원형. 시작 시각은 beginnen om.",
+    gap: { s: "De les ___ om negen uur precies, dus kom alsjeblieft op tijd.", ko: "수업은 9시 정각에 시작하니 제시간에 오세요." }
+  },
+  {
+    w: "werken", level: "A1", pos: "동사", core: "일하다",
+    ipa: "ˈʋɛrkən", syl: "wer·ken", kr: "베르컨", root: "werk",
+    parts: [
+      { i: "🛠️", a: "werk", m: "일", k: "어근" }
+    ],
+    eq: "일을 해 나감", res: "일하다",
+    story: "werk(일)에서 나온 기본 동사 werken. ‘~에서 일하다’는 werken bij + 회사, ‘~로 일하다’는 werken als + 직업. 같은 가문: samenwerken(협력하다), werknemer(직원), verwerken(처리하다).",
+    colloc: "fulltime werken", collockr: "전일제로 일하다",
+    ex: [
+      { en: "Steeds meer mensen werken thuis, maar niet iedereen heeft een rustige werkplek.", ko: "집에서 일하는 사람이 늘고 있지만, 모두가 조용한 작업 공간을 가진 것은 아니다.", sk: "읽기" },
+      { en: "Ik werk vier dagen per week bij een bakkerij in de stad.", ko: "저는 시내 빵집에서 주 4일 일해요.", sk: "말하기" },
+      { en: "Ik wil graag meer uren werken, omdat ik mijn huur moeilijk kan betalen.", ko: "월세를 내기가 어려워서 근무 시간을 늘리고 싶습니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 gewerkt. werken bij(회사·장소), werken aan(과제), werken als(직업). 명사 werk은 불가산이라 ‘직장’은 een baan.",
+    gap: { s: "Zij ___ al tien jaar als verpleegkundige in het ziekenhuis.", ko: "그녀는 병원에서 간호사로 10년째 일하고 있다." }
+  },
+  {
+    w: "spreken", level: "A1", pos: "동사", core: "말하다",
+    ipa: "ˈspreːkən", syl: "spre·ken", kr: "스프레컨", root: "spreek",
+    parts: [
+      { i: "🗣️", a: "spreek", m: "말하다", k: "어근" }
+    ],
+    eq: "입으로 꺼내다", res: "말하다",
+    story: "spreek(말하다) 가문의 기본 동사. afspreken(약속하다), bespreken(논의하다), uitspreken(발음하다·표명하다), toespraak(연설)이 모두 여기서 나옵니다. ‘네덜란드어 하세요?’는 Spreekt u Nederlands?",
+    colloc: "Nederlands spreken", collockr: "네덜란드어를 말하다",
+    ex: [
+      { en: "De burgemeester spreekt morgen met de bewoners over de nieuwe wijk.", ko: "시장은 내일 새 주택 단지에 대해 주민들과 이야기한다.", sk: "읽기" },
+      { en: "Ik spreek een beetje Nederlands, maar ik versta nog niet alles.", ko: "네덜란드어를 조금 하는데 아직 다 알아듣지는 못해요.", sk: "말하기" },
+      { en: "Ik bel u omdat ik een afspraak wil maken met mevrouw De Vries; spreekt u haar?", ko: "드 프리스 씨와 약속을 잡고 싶어 전화드렸습니다. 통화 가능하신가요?", sk: "쓰기" }
+    ],
+    point: "불규칙: spreek-sprak-gesproken. ‘~와 이야기하다’는 spreken met, ‘~에 대해’는 spreken over. 명사 het gesprek(대화).",
+    gap: { s: "Excuseer, ___ u Engels? Ik begrijp deze brief niet helemaal.", ko: "실례합니다, 영어를 하시나요? 이 편지를 다 이해하지 못하겠어요." }
+  },
+  {
+    w: "denken", level: "A1", pos: "동사", core: "생각하다",
+    ipa: "ˈdɛŋkən", syl: "den·ken", kr: "덴컨", root: "denk",
+    parts: [
+      { i: "💭", a: "denk", m: "생각하다", k: "어근" }
+    ],
+    eq: "머릿속에 그리다", res: "생각하다",
+    story: "denk(생각) 가문의 기본 동사. nadenken(곰곰이 생각하다), bedenken(생각해 내다), gedachte(생각), verdenken(의심하다)까지 이어집니다. ‘~인 것 같아요’는 Ik denk dat + 문장 — 회화에서 가장 자주 쓰는 틀입니다.",
+    colloc: "Ik denk dat …", collockr: "제 생각에는 …",
+    ex: [
+      { en: "Veel ouders denken dat hun kind te weinig slaapt, blijkt uit het onderzoek.", ko: "연구에 따르면 많은 부모가 자기 아이가 잠이 부족하다고 생각한다.", sk: "읽기" },
+      { en: "Ik denk dat de trein van negen uur vandaag niet rijdt.", ko: "오늘 9시 기차는 다니지 않는 것 같아요.", sk: "말하기" },
+      { en: "Ik denk dat ik de afspraak beter naar volgende week kan verzetten.", ko: "약속을 다음 주로 미루는 편이 좋을 것 같습니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 gedacht (×gedenkt). ‘~에 대해 생각하다’는 denken aan, ‘생각해 내다’는 bedenken. denk + dat 절에서는 주어-동사 어순을 지킵니다.",
+    gap: { s: "Ik ___ dat het morgen gaat regenen, dus neem een paraplu mee.", ko: "내일 비가 올 것 같으니 우산을 챙겨." }
+  },
+  {
+    w: "nemen", level: "A1", pos: "동사", core: "잡다 · 가져가다",
+    ipa: "ˈneːmən", syl: "ne·men", kr: "네먼", root: "neem",
+    parts: [
+      { i: "🫱", a: "neem", m: "잡다", k: "어근" }
+    ],
+    eq: "손으로 잡음", res: "잡다 · 타다",
+    story: "neem(잡다) 가문의 기본 동사 nemen. 앞에 조각이 붙으면 뜻이 갈라집니다: aannemen(받아들이다·채용하다), overnemen(인수하다), deelnemen(참여하다), ondernemen(착수하다), meenemen(가지고 가다).",
+    colloc: "de bus nemen", collockr: "버스를 타다",
+    ex: [
+      { en: "Wie de trein wil nemen, moet dit weekend rekening houden met werkzaamheden.", ko: "기차를 타려는 사람은 이번 주말 공사 일정을 고려해야 한다.", sk: "읽기" },
+      { en: "Ik neem morgen de vroege trein, dan ben ik voor tienen in Utrecht.", ko: "내일 첫 기차를 타면 10시 전에 위트레흐트에 도착해요.", sk: "말하기" },
+      { en: "Ik neem de vrijheid om u volgende week te bellen over de offerte.", ko: "견적 건으로 다음 주에 전화드리겠습니다.", sk: "쓰기" }
+    ],
+    point: "불규칙: neem-nam-genomen. ‘(교통수단)을 타다’는 nemen — de bus nemen. 분리동사 meenemen은 ik neem mee.",
+    gap: { s: "Wij ___ altijd de fiets naar het werk, ook als het regent.", ko: "우리는 비가 와도 항상 자전거를 타고 출근한다." }
+  },
+  {
+    w: "wonen", level: "A1", pos: "동사", core: "살다 · 거주하다",
+    ipa: "ˈʋoːnən", syl: "wo·nen", kr: "보넌", root: "woon",
+    parts: [
+      { i: "🏠", a: "woon", m: "살다 · 집", k: "어근" }
+    ],
+    eq: "집을 두고 살아감", res: "살다",
+    story: "woon(집·거처)에서 나온 wonen. 명사 de woning(주택), woonplaats(거주지)와 함께 행정 서류에 자주 나옵니다. ‘~에 살다’는 wonen in + 도시·나라, wonen op + 번지.",
+    colloc: "in een flat wonen", collockr: "아파트에 살다",
+    ex: [
+      { en: "De gemeente wil meer betaalbare huizen bouwen waar jongeren kunnen wonen.", ko: "시는 젊은 사람들이 살 수 있는 저렴한 주택을 더 짓고 싶어 한다.", sk: "읽기" },
+      { en: "Ik woon sinds vorig jaar in Amsterdam-Noord, vlak bij het water.", ko: "작년부터 암스테르담 노르트에서 물가에 가까이 살고 있어요.", sk: "말하기" },
+      { en: "Ik woon op nummer 12 en ik wil graag een parkeervergunning aanvragen.", ko: "저는 12번지에 살고 있고 주차 허가를 신청하고 싶습니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 gewoond. wonen in(도시·나라), wonen op(거리·번지), wonen bij(사람). ‘이사하다’는 verhuizen, ‘살아가다’는 leven.",
+    gap: { s: "Zij ___ al twintig jaar in hetzelfde huis aan de rand van de stad.", ko: "그녀는 도시 외곽 같은 집에서 20년째 살고 있다." }
+  },
+  {
+    w: "komen", level: "A1", pos: "동사", core: "오다",
+    ipa: "ˈkoːmən", syl: "ko·men", kr: "코먼", root: "kom",
+    parts: [
+      { i: "🚶", a: "kom", m: "오다", k: "어근" }
+    ],
+    eq: "이쪽으로 움직임", res: "오다",
+    story: "kom(오다) 가문. aankomen(도착하다), meekomen(따라오다), voorkomen(발생하다·예방하다)이 여기서 나옵니다. ‘어디서 오셨어요?’는 Waar komt u vandaan? — 네덜란드어에서 가장 먼저 배우는 문장 중 하나입니다.",
+    colloc: "Waar komt u vandaan?", collockr: "어디서 오셨어요?",
+    ex: [
+      { en: "De klachten komen vooral van bewoners die dicht bij de snelweg wonen.", ko: "불만은 주로 고속도로 가까이 사는 주민들에게서 나온다.", sk: "읽기" },
+      { en: "Ik kom uit Korea, maar ik woon nu twee jaar in Nederland.", ko: "저는 한국에서 왔고 지금은 네덜란드에서 2년째 살아요.", sk: "말하기" },
+      { en: "Ik kom morgen iets later, omdat ik eerst naar de tandarts moet.", ko: "먼저 치과에 가야 해서 내일은 조금 늦게 가겠습니다.", sk: "쓰기" }
+    ],
+    point: "불규칙: kom-kwam-gekomen. ‘~에서 오다’는 komen uit, ‘~하러 오다’는 komen + 동사원형 (Ik kom helpen).",
+    gap: { s: "Waar ___ u vandaan, en hoe lang woont u al in Nederland?", ko: "어디서 오셨고, 네덜란드에 얼마나 사셨나요?" }
+  },
+  {
+    w: "vragen", level: "A1", pos: "동사", core: "묻다 · 요청하다",
+    ipa: "ˈvraːɣən", syl: "vra·gen", kr: "프라헌", root: "vraag",
+    parts: [
+      { i: "❓", a: "vraag", m: "묻다", k: "어근" }
+    ],
+    eq: "답을 청함", res: "묻다 · 요청하다",
+    story: "vraag(질문)에서 나온 동사 vragen. 명사 de vraag(질문·수요). 회화의 공손한 요청 ‘Mag ik iets vragen?’과 ‘Ik wil u iets vragen’이 시험 말하기의 기본 틀입니다.",
+    colloc: "een vraag stellen", collockr: "질문을 하다",
+    ex: [
+      { en: "Reizigers kunnen bij de balie vragen naar een aangepaste reis.", ko: "승객은 안내 데스크에서 맞춤 여정을 문의할 수 있다.", sk: "읽기" },
+      { en: "Mag ik u iets vragen: waar is de dichtstbijzijnde apotheek?", ko: "하나 여쭤봐도 될까요? 가장 가까운 약국이 어디인가요?", sk: "말하기" },
+      { en: "Ik vraag u vriendelijk om mij de documenten voor vrijdag te sturen.", ko: "금요일까지 서류를 보내 주시길 정중히 부탁드립니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 gevraagd. ‘~에게 ~을 묻다’는 iemand iets vragen (사람이 먼저). ‘질문’은 de vraag, ‘요청’은 het verzoek.",
+    gap: { s: "Ik wil u iets ___: hoe laat sluit het gemeentehuis op vrijdag?", ko: "여쭤볼 게 있습니다. 금요일에 시청은 몇 시에 문을 닫나요?" }
+  },
+
+  /* ================= A2 · 기초 ================= */
+  {
+    w: "bezoeken", level: "A2", pos: "동사", core: "방문하다",
+    ipa: "bəˈzuːkən", syl: "be·zoe·ken", kr: "버주컨", root: "be",
+    parts: [
+      { i: "🎯", a: "be-", m: "대상에 붙이기", k: "접두사" },
+      { i: "🔍", a: "zoeken", m: "찾다", k: "어근" }
+    ],
+    eq: "찾아가 닿음", res: "방문하다",
+    story: "zoeken(찾다)에 be-가 붙어 ‘사람을 찾아가다’ = bezoeken. 명사 het bezoek(방문·손님). ‘방문하러 가다’는 op bezoek gaan bij — 사람에게 쓰는 표현입니다.",
+    colloc: "op bezoek gaan bij", collockr: "~를 방문하러 가다",
+    ex: [
+      { en: "De minister bezoekt deze week drie scholen om met leraren te praten.", ko: "장관은 이번 주 교사들과 이야기하기 위해 세 학교를 방문한다.", sk: "읽기" },
+      { en: "Ik wil mijn moeder in het ziekenhuis bezoeken; wanneer mag dat?", ko: "병원에 계신 어머니를 방문하고 싶은데 언제 가능한가요?", sk: "말하기" },
+      { en: "Ik heb vorige week de tentoonstelling bezocht en ik heb nog een vraag.", ko: "지난주에 전시회를 관람했는데 아직 궁금한 점이 있습니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 bezocht (×gebezocht). 사람을 ‘방문하다’는 bezoeken + 목적어로, 전치사를 쓰지 않습니다. 명사는 het bezoek.",
+    gap: { s: "Wij ___ elk jaar onze familie in Friesland met de kerst.", ko: "우리는 크리스마스마다 프리슬란트에 있는 가족을 방문한다." }
+  },
+  {
+    w: "vertellen", level: "A2", pos: "동사", core: "이야기하다 · 말해 주다",
+    ipa: "vərˈtɛlən", syl: "ver·tel·len", kr: "베르텔런", root: "ver",
+    parts: [
+      { i: "🔄", a: "ver-", m: "끝까지", k: "접두사" },
+      { i: "🔢", a: "tellen", m: "세다", k: "어근" }
+    ],
+    eq: "하나씩 세어 늘어놓음", res: "이야기하다",
+    story: "tellen(세다)에 ver-(끝까지)가 붙어 ‘차례로 세어 들려주다’ = vertellen. 명사 het verhaal(이야기). ‘~에게 ~을 이야기하다’는 iemand iets vertellen — 사람이 먼저 오는 두 목적어 순서를 그대로 외우세요.",
+    colloc: "een verhaal vertellen", collockr: "이야기를 들려주다",
+    ex: [
+      { en: "In het boek vertelt een oudere vrouw over haar jeugd in Rotterdam.", ko: "그 책에서 한 나이 든 여성이 로테르담에서 보낸 유년 시절을 이야기한다.", sk: "읽기" },
+      { en: "Kun je mij vertellen hoe ik het station het snelst bereik?", ko: "역에 가장 빨리 가는 길을 알려 줄 수 있어요?", sk: "말하기" },
+      { en: "Ik wil u graag vertellen waarom ik naar deze cursus solliciteer.", ko: "제가 왜 이 과정에 지원하는지 말씀드리고 싶습니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 verteld. iemand iets vertellen (사람 먼저). ‘~에 대해 이야기하다’는 vertellen over. 명사는 het verhaal.",
+    gap: { s: "Kunt u mij ___ waarom de trein naar Leiden niet rijdt?", ko: "레이던행 기차가 왜 다니지 않는지 말씀해 주실 수 있나요?" }
+  },
+  {
+    w: "verstaan", level: "A2", pos: "동사", core: "알아듣다",
+    ipa: "vərˈstaːn", syl: "ver·staan", kr: "베르스탄", root: "ver",
+    parts: [
+      { i: "🔄", a: "ver-", m: "끝까지", k: "접두사" },
+      { i: "🧍", a: "staan", m: "서다", k: "어근" }
+    ],
+    eq: "소리를 붙잡아 이해함", res: "알아듣다",
+    story: "staan(서다)에 ver-가 붙은 verstaan은 ‘들려서 이해하다’입니다. begrijpen(내용을 이해하다)과 다릅니다: Ik versta u niet(잘 안 들려요) / Ik begrijp het niet(이해가 안 돼요).",
+    colloc: "Ik versta u niet goed", collockr: "잘 안 들려요",
+    ex: [
+      { en: "Door het lawaai op de bouwplaats was de omroep niet te verstaan.", ko: "공사장 소음 때문에 안내 방송을 알아들을 수 없었다.", sk: "읽기" },
+      { en: "Sorry, ik versta u niet goed. Kunt u wat langzamer praten?", ko: "죄송합니다, 잘 안 들려요. 조금 천천히 말씀해 주시겠어요?", sk: "말하기" },
+      { en: "Ik bel u omdat ik de telefoniste niet goed verstond en nu een nieuwe afspraak wil.", ko: "상담원 말을 제대로 못 알아들어서 새 예약을 잡고자 전화드립니다.", sk: "쓰기" }
+    ],
+    point: "불규칙: versta-verstond-verstaan. ‘~을 알아듣다’는 verstaan + 목적어. 내용 이해는 begrijpen, 소리 청취는 verstaan.",
+    gap: { s: "Kunt u alstublieft langzamer spreken? Ik ___ u niet goed aan de telefoon.", ko: "조금 천천히 말씀해 주시겠어요? 전화로 잘 안 들려요." }
+  },
+  {
+    w: "gebruiken", level: "A2", pos: "동사", core: "사용하다 · 쓰다",
+    ipa: "ɣəˈbrœykən", syl: "ge·brui·ken", kr: "헐브뤼컨", root: "ge",
+    parts: [
+      { i: "🧩", a: "ge-", m: "모인 결과", k: "접두사" },
+      { i: "🛠️", a: "bruiken", m: "옛말 ‘쓰다’", k: "어근" }
+    ],
+    eq: "쓸 것을 갖다 씀", res: "사용하다",
+    story: "옛말 bruiken(쓰다) + ge- → gebruiken. 명사 het gebruik(사용)과 한 가문입니다. 식사·약·교통수단 모두에 쓰는 만능 동사이고, ‘~을 이용해’는 gebruikmaken van.",
+    colloc: "medicijnen gebruiken", collockr: "약을 복용하다",
+    ex: [
+      { en: "Patiënten mogen dit medicijn niet gebruiken zonder overleg met de arts.", ko: "환자는 의사와 상의 없이 이 약을 복용하면 안 된다.", sk: "읽기" },
+      { en: "Mag ik uw wc gebruiken? Het is echt dringend.", ko: "화장실을 써도 될까요? 정말 급해요.", sk: "말하기" },
+      { en: "Ik gebruik de app elke dag om mijn afspraken bij te houden.", ko: "저는 매일 이 앱으로 일정을 관리합니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 gebruikt. ‘~을 사용하다’는 gebruiken + 목적어. 명사 het gebruik은 불가산. 글을 ‘쓰다’는 schrijven.",
+    gap: { s: "U mag deze ingang niet ___; die is alleen voor het personeel.", ko: "이 출입구는 직원 전용이라 사용하실 수 없습니다." }
+  },
+  {
+    w: "gevoel", level: "A2", pos: "명사", art: "het", core: "느낌 · 감정",
+    ipa: "ɣəˈvul", syl: "ge·voel", kr: "헐불", root: "ge",
+    parts: [
+      { i: "🧩", a: "ge-", m: "모인 결과", k: "접두사" },
+      { i: "💗", a: "voelen", m: "느끼다", k: "어근" }
+    ],
+    eq: "느낀 것이 모인 것", res: "느낌",
+    story: "voelen(느끼다)에 ge-가 붙어 ‘느낀 것’ = het gevoel. ‘~한 느낌이 든다’는 Ik heb het gevoel dat + 문장 — 면접·상담에서 자주 쓰는 틀입니다.",
+    colloc: "het gevoel hebben dat", collockr: "~라는 느낌이 들다",
+    ex: [
+      { en: "Uit het onderzoek blijkt dat muziek een sterk effect heeft op ons gevoel.", ko: "연구에 따르면 음악은 우리 감정에 강한 영향을 준다.", sk: "읽기" },
+      { en: "Ik heb het gevoel dat ik de grammatica steeds beter begrijp.", ko: "문법을 점점 더 잘 이해하는 느낌이에요.", sk: "말하기" },
+      { en: "Ik heb het gevoel dat er iets mis is gegaan met mijn aanvraag.", ko: "제 신청에 문제가 생긴 것 같은 느낌이 듭니다.", sk: "쓰기" }
+    ],
+    point: "het gevoel(중성, 불가산). 감정 일반은 de emotie, 신체 감각도 het gevoel. 형용사 gevoelig는 ‘민감한’.",
+    gap: { s: "Ik heb het ___ dat we de afspraak verkeerd hebben begrepen.", ko: "우리가 약속을 잘못 이해한 것 같은 느낌이 든다." }
+  },
+  {
+    w: "geluk", level: "A2", pos: "명사", art: "het", core: "행운 · 행복",
+    ipa: "ɣəˈlœk", syl: "ge·luk", kr: "헐뤼크", root: "ge",
+    parts: [
+      { i: "🧩", a: "ge-", m: "모인 결과", k: "접두사" },
+      { i: "🍀", a: "luk", m: "옛말 ‘운’", k: "어근" }
+    ],
+    eq: "운이 모인 것", res: "행운 · 행복",
+    story: "ge- + 옛말 luk(운) → geluk. 한 단어가 ‘행운’과 ‘행복’을 함께 뜻합니다. Veel geluk!은 ‘행복하세요’, Gelukkig nieuwjaar는 ‘새해 복 많이 받으세요’.",
+    colloc: "veel geluk", collockr: "행운을 빌어요",
+    ex: [
+      { en: "Voor veel mensen betekent geluk vooral gezond zijn en tijd hebben voor familie.", ko: "많은 사람에게 행복은 무엇보다 건강하고 가족과 보낼 시간이 있는 것이다.", sk: "읽기" },
+      { en: "Ik heb veel geluk gehad met mijn buren; ze helpen me altijd.", ko: "이웃 복이 많아요. 항상 도와주거든요.", sk: "말하기" },
+      { en: "Ik wens u veel geluk met uw nieuwe baan in Groningen.", ko: "흐로닝언의 새 직장에서 행운을 빕니다.", sk: "쓰기" }
+    ],
+    point: "het geluk(중성, 복수 없음). 형용사 gelukkig은 ‘행복한’이자 부사 ‘다행히’ — Gelukkig regent het niet.",
+    gap: { s: "Ik wens je veel ___ met je nieuwe huis en je nieuwe baan.", ko: "새 집과 새 직장에서 행운을 빌어요." }
+  },
+  {
+    w: "herinneren", level: "A2", pos: "동사", core: "기억하다 · 상기시키다",
+    ipa: "hɛrˈɪnərən", syl: "her·in·ne·ren", kr: "헤르이너런", root: "her",
+    parts: [
+      { i: "🔁", a: "her-", m: "다시", k: "접두사" },
+      { i: "🧠", a: "inneren", m: "옛말 ‘안에 넣다’", k: "어근" }
+    ],
+    eq: "다시 안으로 불러냄", res: "기억하다",
+    story: "her-(다시) + inneren(안에 넣다) → herinneren. 두 가지로 씁니다: 재귀형 Ik herinner me …(~을 기억한다), 타동사형 Het herinnert me aan …(~을 떠올리게 한다). 명사 de herinnering(기억).",
+    colloc: "zich iets herinneren", collockr: "~을 기억하다",
+    ex: [
+      { en: "Veel ouderen herinneren zich de strenge winter van 1963 nog goed.", ko: "많은 노인들이 1963년의 혹독한 겨울을 아직도 잘 기억한다.", sk: "읽기" },
+      { en: "Ik kan me de naam van de straat niet meer herinneren.", ko: "그 거리 이름이 더 이상 기억나지 않아요.", sk: "말하기" },
+      { en: "Ik herinner me dat ik de factuur vorige maand al heb betaald; kunt u dat controleren?", ko: "지난달에 계산서를 이미 냈다고 기억하는데 확인해 주실 수 있나요?", sk: "쓰기" }
+    ],
+    point: "과거분사 herinnerd. ‘~을 기억하다’는 zich herinneren (재귀 필수). ‘~에게 상기시키다’는 iemand aan iets herinneren.",
+    gap: { s: "Ik kan me niet meer ___ waar ik mijn paspoort heb gelaten.", ko: "여권을 어디에 두었는지 더 이상 기억나지 않는다." }
+  },
+  {
+    w: "herhalen", level: "A2", pos: "동사", core: "반복하다",
+    ipa: "hɛrˈhaːlən", syl: "her·ha·len", kr: "헤르할런", root: "her",
+    parts: [
+      { i: "🔁", a: "her-", m: "다시", k: "접두사" },
+      { i: "🫱", a: "halen", m: "가져오다", k: "어근" }
+    ],
+    eq: "다시 가져옴", res: "반복하다",
+    story: "halen(가져오다)에 her-(다시)가 붙어 herhalen. 수업에서 ‘Kunt u dat herhalen?’은 ‘다시 한번 말씀해 주시겠어요?’. 명사 de herhaling(반복).",
+    colloc: "Kunt u dat herhalen?", collockr: "다시 말씀해 주시겠어요?",
+    ex: [
+      { en: "De leraar herhaalt de belangrijkste woorden aan het einde van de les.", ko: "선생님은 수업 끝에 핵심 단어를 다시 짚어 준다.", sk: "읽기" },
+      { en: "Sorry, kunt u de vraag herhalen? Ik was even afgeleid.", ko: "죄송한데 질문을 다시 해 주시겠어요? 잠깐 딴생각을 했어요.", sk: "말하기" },
+      { en: "Ik heb de oefening drie keer herhaald, maar ik maak nog steeds dezelfde fout.", ko: "연습을 세 번 반복했는데도 같은 실수를 합니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 herhaald (규칙 -d). her- 동사는 과거분사에 ge-를 붙이지 않습니다. ‘반복 연습’은 oefenen.",
+    gap: { s: "Kunt u de laatste zin nog een keer ___? Ik heb hem niet verstaan.", ko: "마지막 문장을 한 번 더 반복해 주시겠어요? 못 들었어요." }
+  },
+  {
+    w: "verhuizen", level: "A2", pos: "동사", core: "이사하다",
+    ipa: "vərˈhœyzən", syl: "ver·hui·zen", kr: "베르회이전", root: "ver",
+    parts: [
+      { i: "🔄", a: "ver-", m: "다른 곳으로", k: "접두사" },
+      { i: "🏠", a: "huis", m: "집", k: "어근" }
+    ],
+    eq: "집을 다른 곳으로 옮김", res: "이사하다",
+    story: "huis(집)에 ver-가 붙어 ‘집을 다른 곳으로 옮기다’ = verhuizen. 명사 de verhuizing(이사). 행정에서는 ‘이사 신고’를 verhuizing doorgeven aan de gemeente라고 합니다.",
+    colloc: "naar een andere stad verhuizen", collockr: "다른 도시로 이사하다",
+    ex: [
+      { en: "Steeds meer jonge gezinnen verhuizen van de stad naar het platteland.", ko: "도시에서 시골로 이사하는 젊은 가정이 늘고 있다.", sk: "읽기" },
+      { en: "Wij verhuizen volgende maand naar een groter huis in Utrecht.", ko: "우리는 다음 달 위트레흐트의 더 큰 집으로 이사해요.", sk: "말하기" },
+      { en: "Ik wil u laten weten dat ik volgende week verhuis; mijn nieuwe adres stuur ik u toe.", ko: "다음 주에 이사한다는 것을 알려 드립니다. 새 주소는 따로 보내 드리겠습니다.", sk: "쓰기" }
+    ],
+    point: "과거분사 verhuisd. ‘~로 이사하다’는 verhuizen naar. 짐을 옮기는 행위는 verhuizen, 살고 있는 상태는 wonen.",
+    gap: { s: "Zij ___ in december naar een kleinere woning, omdat de huur te hoog is.", ko: "그녀는 집세가 너무 비싸서 12월에 더 작은 집으로 이사한다." }
+  },
+  {
+    w: "verjaardag", level: "A2", pos: "명사", art: "de", core: "생일",
+    ipa: "vərˈjaːrdɑx", syl: "ver·jaar·dag", kr: "베르야르다흐", root: "ver",
+    parts: [
+      { i: "🔄", a: "ver-", m: "지나온", k: "접두사" },
+      { i: "📅", a: "jaar", m: "해", k: "어근" },
+      { i: "🎂", a: "dag", m: "날", k: "어근" }
+    ],
+    eq: "해가 지나온 그날", res: "생일",
+    story: "jaar(해)에 ver-(지나온)와 dag(날)가 붙어 verjaardag. ‘생일 축하해’는 Gefeliciteerd met je verjaardag! 네덜란드에서는 생일자를 가족 모두가 차례로 축하하는 풍습이 있습니다.",
+    colloc: "Gefeliciteerd met je verjaardag", collockr: "생일 축하해",
+    ex: [
+      { en: "Op de verjaardag van de koning hangt de vlag uit bij veel gemeentehuizen.", ko: "국왕 생일에는 많은 시청에 국기가 걸린다.", sk: "읽기" },
+      { en: "Mijn verjaardag is op zeven januari; kom je ook?", ko: "제 생일은 1월 7일인데, 너도 올래요?", sk: "말하기" },
+      { en: "Ik ben zaterdag niet aanwezig, omdat ik naar de verjaardag van mijn zus ga.", ko: "토요일에는 여동생 생일 파티에 가느라 참석하지 못합니다.", sk: "쓰기" }
+    ],
+    point: "de verjaardag(de 명사). ‘~의 생일’은 de verjaardag van + 사람. 동사 verjaren은 ‘해가 바뀌다·나이를 먹다’.",
+    gap: { s: "Gefeliciteerd met je ___! Hoe oud ben je vandaag geworden?", ko: "생일 축하해! 오늘 몇 살이 되었어?" }
+  },
+  {
+    w: "meenemen", level: "A2", pos: "동사", core: "가지고 가다 · 챙기다", sep: true,
+    ipa: "ˈmeːˌneːmən", syl: "mee·ne·men", kr: "메네먼", root: "neem",
+    parts: [
+      { i: "🤝", a: "mee", m: "함께", k: "부사" },
+      { i: "🫱", a: "nemen", m: "잡다", k: "어근" }
+    ],
+    eq: "함께 잡아 감", res: "가지고 가다",
+    story: "mee(함께) + nemen(잡다) → meenemen. 분리동사입니다: Ik neem een paraplu mee. 반대 방향은 meebrengen(가지고 오다). 관공서 안내의 ‘신분증을 지참하세요’가 Neem uw identiteitsbewijs mee.",
+    colloc: "iets meenemen", collockr: "~을 챙겨 가다",
+    ex: [
+      { en: "Bezoekers mogen geen eigen drank meenemen naar het concert.", ko: "관객은 공연장에 개인 음료를 가지고 들어갈 수 없다.", sk: "읽기" },
+      { en: "Ik neem morgen een taart mee naar het werk, want ik ben jarig.", ko: "생일이라 내일 회사에 케이크를 가져갈 거예요.", sk: "말하기" },
+      { en: "Neem bij de afspraak uw paspoort en een kopie van het contract mee.", ko: "예약 당일에는 여권과 계약서 사본을 지참하십시오.", sk: "쓰기" }
+    ],
+    point: "분리동사: ik neem mee, heb meegenomen. ‘가지고 가다’는 meenemen, 화자 쪽으로 ‘가지고 오다’는 meebrengen.",
+    gap: { s: "Vergeet niet om je identiteitsbewijs ___ naar de afspraak bij de gemeente.", ko: "시청 예약에 신분증을 챙겨 가는 것을 잊지 마세요." }
+  },
+  {
+    w: "opstaan", level: "A2", pos: "동사", core: "일어나다 · 기립하다", sep: true,
+    ipa: "ˈɔpˌstaːn", syl: "op·staan", kr: "옵스탄", root: "sta",
+    parts: [
+      { i: "⬆️", a: "op", m: "위로", k: "부사" },
+      { i: "🧍", a: "staan", m: "서다", k: "어근" }
+    ],
+    eq: "위로 서다", res: "일어나다",
+    story: "op(위로) + staan(서다) → opstaan. 두 뜻이 있습니다: 잠자리에서 일어나다(Ik sta om zeven uur op), 자리에서 일어나다(회의·수업). 반대는 gaan zitten(앉다).",
+    colloc: "vroeg opstaan", collockr: "일찍 일어나다",
+    ex: [
+      { en: "Mensen die elke dag op dezelfde tijd opstaan, slapen gemiddeld beter.", ko: "매일 같은 시간에 일어나는 사람은 평균적으로 잠을 더 잘 잔다.", sk: "읽기" },
+      { en: "Ik sta elke werkdag om half zeven op, ook in de winter.", ko: "저는 겨울에도 근무일마다 6시 30분에 일어나요.", sk: "말하기" },
+      { en: "Ik sta tijdens de vergadering even op om de presentatie te geven.", ko: "회의 중에 발표를 하기 위해 잠시 일어서겠습니다.", sk: "쓰기" }
+    ],
+    point: "분리동사: ik sta op, 과거 ik stond op, 과거분사 ben opgestaan(움직임이라 zijn).",
+    gap: { s: "Ik moet morgen om zes uur ___, want ik heb een vroege vlucht.", ko: "내일 이른 비행기가 있어서 6시에 일어나야 한다." }
+  },
   /* ================= ver- · 바뀜·끝까지 ================= */
   {
     w: "veranderen", level: "B1", pos: "동사", core: "바뀌다 · 바꾸다",
@@ -1866,14 +2368,23 @@ const WORDS = [
   }
 
   /* ---------------- render: level chips ---------------- */
+  function countOf(id) {
+    if (id === "ALL") return WORDS.length;
+    let n = 0;
+    for (let i = 0; i < WORDS.length; i++) if (WORDS[i].level === id) n++;
+    return n;
+  }
   function renderLevels() {
     const wrap = $("levels");
-    const items = [{ id: "ALL", label: "전체", free: true }].concat(LEVELS);
+    const items = [{ id: "ALL", short: "전체", name: "", free: true }].concat(LEVELS);
     wrap.innerHTML = items.map(function (lv) {
       const locked = lv.id !== "ALL" && !isOpen(lv.id);
       const on = S.filter === lv.id;
       return '<button class="chip' + (on ? " on" : "") + (locked ? " locked" : "") +
-        '" data-level="' + lv.id + '">' + (locked ? "🔒 " : "") + esc(lv.label) + "</button>";
+        '" data-level="' + lv.id + '" aria-pressed="' + (on ? "true" : "false") + '">' +
+        (locked ? "🔒 " : "") + esc(lv.short) +
+        (lv.name ? '<span class="c-nm">' + esc(lv.name) + "</span>" : "") +
+        '<em class="c-n">' + countOf(lv.id) + "</em></button>";
     }).join("");
   }
 
@@ -1884,9 +2395,9 @@ const WORDS = [
     const el = $("word");
     const hero = $("hero");
     const len = w.length;
-    let base = len <= 6 ? 80 : len <= 8 ? 64 : len <= 10 ? 54 : 46;
-    const vmax = window.innerHeight * 0.115;
-    if (vmax > 24) base = Math.min(base, vmax);
+    let base = len <= 5 ? 54 : len <= 7 ? 46 : len <= 9 ? 40 : 35;
+    const vmax = window.innerHeight * 0.075;
+    if (vmax > 22) base = Math.min(base, vmax);
     el.style.fontSize = base + "px";
     const avail = Math.max(120, hero.clientWidth - 26);
     let size = base, guard = 0;
@@ -1895,6 +2406,34 @@ const WORDS = [
       el.style.fontSize = size + "px";
       guard++;
     }
+  }
+
+  /* target word (or its inflected stem) highlighted inside the example */
+  function highlightIn(sentence, word) {
+    const s = String(sentence || "");
+    const wd = String(word || "");
+    if (!s || wd.length < 3) return esc(s);
+    for (let len = wd.length; len >= 3; len--) {
+      const stem = wd.slice(0, len);
+      const re = new RegExp("(^|[^A-Za-zÀ-ÿ])(" + stem + "[A-Za-zÀ-ÿ]*)", "i");
+      const m = s.match(re);
+      if (!m) continue;
+      const hit = m[2];
+      const at = m.index + m[1].length;
+      return esc(s.slice(0, at)) + '<mark class="exhl">' + esc(hit) + "</mark>" + esc(s.slice(at + hit.length));
+    }
+    return esc(s);
+  }
+
+  function fitExample() {
+    const el = $("exEn"), box = $("exBodyWrap"), nx = $("exNext");
+    if (!el || !box) return;
+    el.style.fontSize = "";
+    const over = function () { return box.scrollHeight > box.clientHeight + 1; };
+    let size = 18, guard = 0;
+    while (over() && size > 15 && guard < 10) { size -= 0.5; el.style.fontSize = size + "px"; guard++; }
+    if (over() && nx && !nx.hidden) { nx.hidden = true; }
+    while (over() && size > 13 && guard < 40) { size -= 0.5; el.style.fontSize = size + "px"; guard++; }
   }
 
   function render(dir) {
@@ -1910,7 +2449,8 @@ const WORDS = [
     $("art").hidden = !w.art;
     $("art").textContent = w.art || "";
     $("sep").hidden = !w.sep;
-    $("lvl").textContent = lvDef(w.level).label;
+    $("lvl").textContent = w.level;
+    $("lvl").className = "lvl lv-" + String(w.level).toLowerCase();
     $("star").classList.toggle("on", S.bookmarks.indexOf(w.w) >= 0);
 
     $("word").textContent = w.w;
@@ -1939,9 +2479,28 @@ const WORDS = [
 
     /* example strip */
     const ex = w.ex[0] || { en: "", ko: "", sk: "" };
-    $("exTag").textContent = lvDef(w.level).label + " · " + (ex.sk || "예문");
-    $("exEn").textContent = ex.en;
+    $("exTag").textContent = ex.sk || "예문";
+    $("exLvl").textContent = w.level + " " + (lvDef(w.level).name || "");
+    $("exLvl").className = "exlvl lv-" + String(w.level).toLowerCase();
+    $("exN").textContent = "예문 1 / " + w.ex.length;
+    $("exEn").innerHTML = highlightIn(ex.en, w.w);
     $("exKo").textContent = ex.ko;
+    const nx = w.ex[1];
+    if (nx) {
+      $("nxTag").textContent = "예문 2" + (nx.sk ? " · " + nx.sk : "");
+      $("nxEn").innerHTML = highlightIn(nx.en, w.w);
+      $("nxKo").textContent = nx.ko;
+      $("exNext").hidden = false;
+    } else {
+      $("exNext").hidden = true;
+    }
+    if (w.colloc) {
+      $("exColloc").innerHTML = "<span>함께 외우는 표현</span><b>" + esc(w.colloc) + "</b><i>" + esc(w.collockr || "") + "</i>";
+      $("exColloc").hidden = false;
+    } else {
+      $("exColloc").innerHTML = "";
+      $("exColloc").hidden = true;
+    }
 
     /* header + progress */
     const n = S.today.words.length;
@@ -1950,6 +2509,7 @@ const WORDS = [
     $("progBar").style.width = pct + "%";
 
     fitWord(w.w);
+    fitExample();
 
     $("card").classList.remove("anim-next", "anim-prev");
     if (dir) {
@@ -2244,7 +2804,7 @@ const WORDS = [
       h += '<div class="comingsoon">카드 오른쪽 위 ★를 누르면 여기에 모아 둘 수 있어요.</div>';
     }
 
-    h += "<h4>가문 9개 · " + WORDS.length + "단어</h4><div class=\"rootgrid\">";
+    h += "<h4>가문 " + Object.keys(ROOTS).length + "개 · " + WORDS.length + "단어</h4><div class=\"rootgrid\">";
     Object.keys(ROOTS).forEach(function (k) {
       const fam = WORDS.filter(function (x) { return x.root === k; });
       const openN = fam.filter(function (x) { return isOpen(x.level); }).length;
@@ -2256,9 +2816,9 @@ const WORDS = [
 
     h += "<h4>더 보기</h4>";
     if (!S.pass) {
-      h += '<div class="listrow" data-menu="b2"><div class="ic">🔓</div><div><div class="tt">B2 확장팩</div><div class="ss">B2 16단어 · 전체 가문 36단어 · 잠금 해제 테스트</div></div><div class="go">›</div></div>';
+      h += '<div class="listrow" data-menu="b2"><div class="ic">🔓</div><div><div class="tt">B2 확장팩</div><div class="ss">B2 16단어 · 전체 60단어 · 잠금 해제 테스트</div></div><div class="go">›</div></div>';
     }
-    h += '<div class="listrow" data-menu="quiz"><div class="ic">🧩</div><div><div class="tt">접두사 · 빈칸 퀴즈</div><div class="ss">B1·B2 시험형 어휘 점검</div></div><div class="go">›</div></div>';
+    h += '<div class="listrow" data-menu="quiz"><div class="ic">🧩</div><div><div class="tt">접두사 · 빈칸 퀴즈</div><div class="ss">A1–B2 레벨별 시험형 어휘 점검</div></div><div class="go">›</div></div>';
     h += '<div class="listrow" data-menu="settings"><div class="ic">⚙️</div><div><div class="tt">설정</div><div class="ss">발음·B2 잠금·목표</div></div><div class="go">›</div></div>';
     h += '<div class="hr"></div><p class="muted" style="font-size:8.5px;margin:0">DutchWhy 프로토타입 · 게르만어 접두사 표기 기준</p>';
 
@@ -2593,7 +3153,7 @@ const WORDS = [
       renderLevels();
       render();
       renderMenu();
-      toast("B2 확장팩 열기 — 36단어 전체가 열렸어요 (프로토타입)");
+      toast("B2 확장팩 열기 — 60단어 전체가 열렸어요 (프로토타입)");
     };
 
     /* settings */
@@ -2655,7 +3215,7 @@ const WORDS = [
       else if (e.key === "q") openQuiz();
     });
 
-    window.addEventListener("resize", function () { fitWord(cur().w); });
+    window.addEventListener("resize", function () { fitWord(cur().w); fitExample(); });
   }
 
   init();
