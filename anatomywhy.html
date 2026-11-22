@@ -170,9 +170,11 @@ ol,ul{list-style:none}
 #scene{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
 #scene:active{cursor:grabbing}
 .stop{
-  position:absolute;left:9px;right:9px;top:9px;display:flex;align-items:flex-start;justify-content:space-between;
-  gap:8px;pointer-events:none;z-index:4;
+  position:absolute;left:9px;right:9px;top:9px;display:flex;flex-direction:column;align-items:stretch;
+  gap:6px;pointer-events:none;z-index:4;
 }
+.stoprow{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;pointer-events:none}
+.stoprow > *{pointer-events:auto}
 .stop > *{pointer-events:auto}
 .layers{display:flex;flex-wrap:wrap;gap:5px;max-width:72%}
 .lay{
@@ -218,6 +220,61 @@ ol,ul{list-style:none}
 }
 .hint.on{opacity:1}
 .hint b{color:#FFD98A}
+
+/* ---------- 3D 검색 (v16) ---------- */
+.awsearch{position:relative;width:100%;pointer-events:auto}
+.awsbox{
+  display:flex;align-items:center;gap:7px;height:38px;padding:0 7px 0 10px;border-radius:11px;
+  background:rgba(11,18,26,.74);border:1px solid rgba(255,255,255,.16);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  transition:border-color .15s,background .15s,box-shadow .15s;
+}
+.awsbox.on{border-color:rgba(239,200,113,.82);background:rgba(9,15,21,.93);box-shadow:0 0 0 3px rgba(239,200,113,.13)}
+.awsi{width:14px;height:14px;flex:0 0 auto;color:#D9C79F;fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round}
+#awq{
+  flex:1 1 auto;min-width:0;height:100%;border:0;outline:none;background:none;padding:0;
+  font-size:16px;font-weight:700;letter-spacing:-.2px;color:#F5EEE1;
+  -webkit-appearance:none;appearance:none;border-radius:0;
+}
+#awq::placeholder{color:#93A3B2;font-weight:700;font-size:13px;letter-spacing:-.1px}
+#awq::-webkit-search-cancel-button,#awq::-webkit-search-decoration{display:none}
+.awclear{
+  flex:0 0 auto;display:none;place-items:center;width:20px;height:20px;border-radius:50%;
+  background:rgba(255,255,255,.16);color:#F0F4F8;font-size:13px;font-weight:800;line-height:1;
+}
+.awclear.on{display:grid}
+.awclear:active{background:rgba(255,255,255,.3)}
+.awres{
+  position:absolute;left:0;right:0;top:calc(100% + 5px);z-index:12;overflow:hidden;
+  border-radius:12px;background:rgba(9,15,21,.97);border:1px solid rgba(255,255,255,.15);
+  box-shadow:0 24px 44px -24px #000;
+}
+.awres[hidden]{display:none}
+.awrow{display:flex;align-items:center;gap:7px;width:100%;padding:8px 9px;text-align:left;color:#E7EEF5}
+.awrow + .awrow{border-top:1px solid rgba(255,255,255,.055)}
+.awrow .an{flex:1 1 auto;min-width:0;font-size:12px;font-weight:800;letter-spacing:-.25px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.awrow .an em{font-style:normal;color:#FFD98A;background:rgba(239,200,113,.16);border-radius:3px;padding:0 1px}
+.awrow .al{flex:0 1 40%;font-size:9.5px;font-weight:700;color:#9FB2C2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right}
+.awrow .ac{
+  flex:0 0 auto;font-size:8.5px;font-weight:900;color:#D8C79C;background:rgba(239,200,113,.12);
+  border:1px solid rgba(239,200,113,.26);padding:1px 5px;border-radius:99px;letter-spacing:-.2px;
+}
+.awrow.on{background:rgba(239,200,113,.15)}
+.awrow.on .an{color:#FFF6E4}
+.awmsg{padding:11px 10px;font-size:10.5px;font-weight:700;line-height:1.55;color:#9FB2C2;letter-spacing:-.1px}
+.awmsg b{color:#F5EEE1}
+.awtips{display:flex;flex-wrap:wrap;gap:5px;padding:0 8px 9px}
+.awtips button{
+  font-size:10.5px;font-weight:800;color:#E7EEF5;background:rgba(255,255,255,.09);
+  border:1px solid rgba(255,255,255,.14);border-radius:99px;padding:4px 9px;letter-spacing:-.1px;
+}
+.awtips button:active{background:rgba(239,200,113,.2)}
+.awfoot{
+  display:flex;justify-content:space-between;gap:8px;padding:5px 9px 6px;
+  border-top:1px solid rgba(255,255,255,.08);font-size:8.5px;font-weight:800;color:#8B9AA8;letter-spacing:-.1px;
+}
+.awfoot .t{display:none}
+@media (max-width:560px){.awfoot .k{display:none}.awfoot .t{display:inline}}
 
 /* bottom controls */
 .sbot{position:absolute;left:0;right:0;bottom:0;z-index:4;padding:10px 10px calc(9px + env(safe-area-inset-bottom));background:linear-gradient(to top,rgba(8,13,19,.92) 0%,rgba(8,13,19,.55) 62%,rgba(8,13,19,0) 100%)}
@@ -845,8 +902,20 @@ input[type=range]::-moz-range-thumb{width:15px;height:15px;border:0;border-radiu
     <div class="stage" id="stage">
       <canvas id="scene"></canvas>
       <div class="stop">
-        <div class="layers" id="layers"></div>
-        <button class="resetbtn" id="resetView" data-act="reset" type="button" aria-label="시점 초기화"><span>↺</span><em>시점</em></button>
+        <div class="stoprow">
+          <div class="layers" id="layers"></div>
+          <button class="resetbtn" id="resetView" data-act="reset" type="button" aria-label="시점 초기화"><span>↺</span><em>시점</em></button>
+        </div>
+        <div class="awsearch" id="awsearch">
+          <div class="awsbox">
+            <svg class="awsi" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.6-4.6"/></svg>
+            <input id="awq" type="text" inputmode="search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                   role="combobox" aria-expanded="false" aria-controls="awres" aria-autocomplete="list"
+                   placeholder="근육·뼈·신경 검색" aria-label="3D 해부 용어 검색 — 한글·영문·라틴어·한자" />
+            <button class="awclear" id="awclear" type="button" aria-label="검색어 지우기" tabindex="-1">×</button>
+          </div>
+          <div class="awres" id="awres" role="listbox" aria-label="검색 결과" hidden></div>
+        </div>
       </div>
       <div class="vcap" id="vcap"><b></b><i></i></div>
       <div class="hint" id="hint">👆 끌어서 돌리기 · 두 손가락 확대 · <b>↺</b> 시점 초기화</div>
@@ -3836,8 +3905,249 @@ function firstUnseen(id) {
 function goHome() {
   showScreen('home');
   renderHome();
+  if (typeof awqClose === 'function') awqClose();
   if (window.__pause3D) window.__pause3D();
   try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
+}
+
+/* ============================================================
+   3D 검색 (v16) — 80개 항목을 한글·영문·라틴어·한자로 찾아
+   단원을 넘어가며 3D 하이라이트 + 카드(역할·기능)까지 함께 연다
+   ============================================================ */
+var AWR = { q: '', rows: [], total: 0, i: -1, open: false, idx: null, max: 6 };
+
+function awqNorm(v) {
+  return String(v == null ? '' : v).toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+/* 단원 목록은 고정이라 한 번만 만든다 — 1~7단원 80개 항목 */
+function awqIndex() {
+  if (AWR.idx) return AWR.idx;
+  var out = [];
+  CH.forEach(function (c) {
+    if (c.status !== 'open') return;
+    chCards(c.id).forEach(function (id) {
+      var d = CARDS[id]; if (!d) return;
+      out.push({
+        id: id, ch: c.id, chNo: c.no, tag: d.tag || '',
+        name: d.name || id, latin: d.latin || '', en: d.en || '',
+        hanja: d.hanja || '', hanjaRead: d.hanjaRead || '', ko: d.koNative || '',
+        hay: awqNorm([d.name, d.latin, d.en, d.hanja, d.hanjaRead, d.koNative].join(' | '))
+      });
+    });
+  });
+  AWR.idx = out;
+  return out;
+}
+
+function awqScore(it, q, toks) {
+  var name = awqNorm(it.name), la = awqNorm(it.latin), en = awqNorm(it.en);
+  if (name === q) return 0;
+  if (la === q || en === q || awqNorm(it.hanja) === q || awqNorm(it.hanjaRead) === q) return 1;
+  if (name.indexOf(q) === 0) return 2;
+  if (la.indexOf(q) === 0 || en.indexOf(q) === 0) return 3;
+  if (name.indexOf(q) >= 0) return 4;
+  if (it.hay.indexOf(q) >= 0) return 5;
+  if (toks.length > 1) {
+    for (var i = 0; i < toks.length; i++) if (it.hay.indexOf(toks[i]) < 0) return -1;
+    return 6;
+  }
+  return -1;
+}
+
+function awqFind(raw) {
+  var q = awqNorm(raw);
+  AWR.total = 0;
+  if (!q) return [];
+  var toks = q.split(' ');
+  var list = awqIndex(), hits = [], seen = {}, out = [], i;
+  for (i = 0; i < list.length; i++) {
+    var sc = awqScore(list[i], q, toks);
+    if (sc >= 0) hits.push({ it: list[i], sc: sc });
+  }
+  hits.sort(function (a, b) {
+    if (a.sc !== b.sc) return a.sc - b.sc;
+    var ca = a.it.ch === cur.ch ? 0 : 1, cb = b.it.ch === cur.ch ? 0 : 1;
+    if (ca !== cb) return ca - cb;
+    return a.it.chNo - b.it.chNo;
+  });
+  for (i = 0; i < hits.length; i++) {
+    if (seen[hits[i].it.id]) continue;
+    seen[hits[i].it.id] = 1;
+    out.push(hits[i].it);
+    if (out.length >= AWR.max) break;
+  }
+  AWR.total = Object.keys(seen).length;
+  return out;
+}
+
+function awqMark(text, q) {
+  var t = String(text == null ? '' : text), qq = String(q || '').trim();
+  if (!qq) return esc(t);
+  var i = t.toLowerCase().indexOf(qq.toLowerCase());
+  if (i < 0) return esc(t);
+  return esc(t.slice(0, i)) + '<em>' + esc(t.slice(i, i + qq.length)) + '</em>' + esc(t.slice(i + qq.length));
+}
+
+function awqOpen(on) {
+  var r = $('awres'); if (!r) return;
+  r.hidden = !on;
+  AWR.open = !!on;
+  var inp = $('awq'); if (inp) inp.setAttribute('aria-expanded', on ? 'true' : 'false');
+  var b = document.querySelector('.awsbox'); if (b) b.classList.toggle('on', !!on);
+}
+
+function awqClose() {
+  AWR.i = -1; AWR.rows = []; awqOpen(false);
+}
+
+function awqTips() {
+  var r = $('awres'); if (!r) return;
+  var ex = ['극상근', '횡격막', '좌골신경', '다열근', '시상면'];
+  var h = '<div class="awmsg">근육·뼈·신경·근막을 <b>한글·영문·라틴어·한자</b> 이름으로 찾고,<br>고르면 3D에서 바로 하이라이트합니다.</div><div class="awtips">';
+  for (var i = 0; i < ex.length; i++) h += '<button type="button" data-awq="' + esc(ex[i]) + '">' + esc(ex[i]) + '</button>';
+  r.innerHTML = h + '</div>';
+  AWR.rows = []; AWR.total = 0; AWR.i = -1;
+  awqOpen(true);
+}
+
+function awqRender() {
+  var r = $('awres'); if (!r) return;
+  var q = AWR.q;
+  if (!q.trim()) { awqTips(); return; }
+  var rows = AWR.rows, h = '';
+  if (!rows.length) {
+    h = '<div class="awmsg"><b>' + esc(q.trim()) + '</b> — 맞는 부위가 없어요.<br>한글 이름이나 라틴어 일부(예: supraspinatus)로 다시 찾아보세요.</div>';
+  } else {
+    for (var i = 0; i < rows.length; i++) {
+      var it = rows[i];
+      h += '<button class="awrow' + (i === AWR.i ? ' on' : '') + '" type="button" role="option" id="awrow' + i +
+        '" aria-selected="' + (i === AWR.i ? 'true' : 'false') + '" data-aw="' + i + '">' +
+        '<span class="an">' + awqMark(it.name, q) + '</span>' +
+        '<span class="al">' + esc(it.latin || it.en) + '</span>' +
+        '<span class="ac">' + it.chNo + '단원</span>' +
+        '</button>';
+    }
+    h += (AWR.total > rows.length)
+      ? '<div class="awfoot"><span>' + rows.length + '/' + AWR.total + '개 표시</span><span>검색어를 더 입력</span></div>'
+      : '<div class="awfoot"><span>' + rows.length + '개 결과</span><span class="k">↑↓ 이동 · Enter 선택</span><span class="t">눌러서 선택</span></div>';
+  }
+  r.innerHTML = h;
+  awqOpen(true);
+  if (AWR.i >= 0) {
+    var el = $('awrow' + AWR.i);
+    if (el && el.scrollIntoView) { try { el.scrollIntoView({ block: 'nearest' }); } catch (e) { } }
+  }
+}
+
+function awqInput() {
+  var inp = $('awq'); if (!inp) return;
+  AWR.q = inp.value;
+  var cl = $('awclear'); if (cl) cl.classList.toggle('on', !!inp.value);
+  if (!inp.value.trim()) { AWR.rows = []; AWR.total = 0; AWR.i = -1; awqTips(); return; }
+  AWR.rows = awqFind(inp.value);
+  AWR.i = AWR.rows.length ? 0 : -1;
+  awqRender();
+}
+
+/* 검색 결과 선택 — 단원이 다르면 이동, 같으면 그 자리에서 하이라이트 */
+function awqPick(it) {
+  if (!it) return;
+  var inp = $('awq');
+  if (inp) { inp.value = it.name; inp.blur(); }
+  var cl = $('awclear'); if (cl) cl.classList.add('on');
+  AWR.q = it.name;
+  awqClose();
+  hideHint();
+  if (cur.ch !== it.ch) openChapter(it.ch, it.id);
+  else renderCard(it.id, true);
+  var ce = $('card');
+  if (ce) { ce.classList.remove('flash'); void ce.offsetWidth; ce.classList.add('flash'); }
+  setCaption(it.name, it.latin || it.en);
+  toast(it.name + ' · ' + it.chNo + '단원 — ' + String(it.latin || it.en || ''));
+}
+
+function awqClear() {
+  var inp = $('awq'); if (!inp) return;
+  inp.value = ''; AWR.q = ''; AWR.rows = []; AWR.total = 0; AWR.i = -1;
+  var cl = $('awclear'); if (cl) cl.classList.remove('on');
+  try { inp.focus(); } catch (e) { }
+  awqTips();
+}
+
+function awqBind() {
+  var inp = $('awq'), res = $('awres'), cl = $('awclear');
+  if (!inp || !res) return;
+
+  inp.addEventListener('input', awqInput);
+
+  inp.addEventListener('focus', function () {
+    hideHint();
+    if (!inp.value.trim()) { awqTips(); return; }
+    AWR.q = inp.value;
+    AWR.rows = awqFind(inp.value);
+    AWR.i = AWR.rows.length ? 0 : -1;
+    awqRender();
+  });
+
+  inp.addEventListener('keydown', function (e) {
+    var k = e.key;
+    if (k === 'ArrowDown' || k === 'ArrowUp') {
+      e.preventDefault(); e.stopPropagation();
+      if (!AWR.open) { awqInput(); return; }
+      if (!AWR.rows.length) return;
+      var n = AWR.rows.length;
+      AWR.i = (AWR.i + (k === 'ArrowDown' ? 1 : -1) + n) % n;
+      awqRender();
+      return;
+    }
+    if (k === 'Enter') {
+      e.preventDefault(); e.stopPropagation();
+      if (AWR.open && AWR.rows.length) awqPick(AWR.rows[AWR.i < 0 ? 0 : AWR.i]);
+      else { inp.blur(); awqClose(); }
+      return;
+    }
+    if (k === 'Escape') {
+      e.preventDefault(); e.stopPropagation();
+      if (AWR.open) awqClose(); else inp.blur();
+    }
+  });
+
+  res.addEventListener('click', function (e) {
+    var t = e.target.closest ? e.target.closest('[data-aw],[data-awq]') : null;
+    if (!t) return;
+    if (t.hasAttribute('data-awq')) {
+      inp.value = t.getAttribute('data-awq');
+      var c2 = $('awclear'); if (c2) c2.classList.add('on');
+      AWR.q = inp.value;
+      AWR.rows = awqFind(inp.value);
+      AWR.i = AWR.rows.length ? 0 : -1;
+      awqRender();
+      try { inp.focus(); } catch (er) { }
+      return;
+    }
+    awqPick(AWR.rows[parseInt(t.getAttribute('data-aw'), 10)]);
+  });
+
+  if (cl) cl.addEventListener('click', function (e) { e.preventDefault(); awqClear(); });
+
+  /* 바깥을 누르면 목록을 닫는다 */
+  document.addEventListener('pointerdown', function (e) {
+    if (!AWR.open) return;
+    var box = $('awsearch');
+    if (box && !box.contains(e.target)) awqClose();
+  });
+
+  /* 데스크톱: / 키로 검색창 포커스 */
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (!$('chapter').classList.contains('on')) return;
+    if ($('sheet') && $('sheet').classList.contains('on')) return;
+    var t = e.target;
+    if (t && /^(INPUT|TEXTAREA)$/.test(t.tagName)) return;
+    e.preventDefault();
+    try { inp.focus(); inp.select(); } catch (er) { }
+  });
 }
 
 /* ---------- 힌트 ---------- */
@@ -6179,6 +6489,7 @@ function togglePlay() {
 }
 
 function bindUI() {
+  awqBind();
   document.addEventListener('click', function (e) {
     var t = e.target.closest ? e.target.closest('[data-ch],[data-act]') : null;
     if (!t) return;
@@ -6232,6 +6543,8 @@ function bindUI() {
   document.addEventListener('keydown', function (e) {
     if (!$('chapter').classList.contains('on')) return;
     if ($('sheet').classList.contains('on')) return;
+    /* 검색창에 글자를 쓰는 중에는 좌우 화살표로 카드를 넘기지 않는다 */
+    if (e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
       var ids = chCards(cur.ch), i = ids.indexOf(cur.card);
       var n = e.key === 'ArrowLeft' ? (i - 1 + ids.length) % ids.length : (i + 1) % ids.length;
@@ -6263,7 +6576,7 @@ function bindUI() {
 }
 
 /* 테스트·검증용 최소 핸들 (비밀 정보 없음) */
-window.__AW = { R: R, ST: ST, state: S, cur: cur, reset: resetView, chapter: openChapter, Q: Q };
+window.__AW = { R: R, ST: ST, state: S, cur: cur, reset: resetView, chapter: openChapter, Q: Q, SEARCH: { index: awqIndex, find: awqFind, pick: awqPick, state: AWR } };
 
 /* ---------- 시작 ---------- */
 function start() {
