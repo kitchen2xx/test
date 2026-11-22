@@ -1309,6 +1309,7 @@
             }
           }
           drawFrame(V.currentTime);
+          updateHead(V.currentTime);
           var done = Math.min(total, (performance.now() - started) / 1000);
           $('#expBar').style.width = Math.min(99, done / total * 100) + '%';
           $('#expStat').textContent = '녹화 중… ' + done.toFixed(1) + ' / ' + total.toFixed(1) + '초';
@@ -1331,8 +1332,9 @@
       var ov = $('#outVideo');
       ov.src = S.outUrl;
       ov.load();
+      try { ov.poster = cv.toDataURL('image/jpeg', 0.82); } catch (e4) {}
       ov.addEventListener('loadeddata', function () {
-        try { ov.currentTime = 0.15; } catch (e4) {}
+        try { ov.currentTime = 0.15; } catch (e5) {}
       }, { once: true });
       $('#outDl').href = S.outUrl;
       $('#outDl').download = name;
@@ -1348,6 +1350,7 @@
         '“파일 저장”을 누르면 내려받아집니다. 컷 지점에서 아주 짧은 끊김은 브라우저 녹화 방식의 한계입니다 ' +
         '(정확한 MP4는 파이썬 버전 사용).';
       toast('내보내기 완료 · ' + name);
+      seek(S.segments[0].in);          /* 미리보기를 편집 시작 지점으로 되돌립니다 */
     } catch (err) {
       toast('내보내기 실패: ' + (err && err.message ? err.message : err));
       $('#expStat').textContent = '실패';
