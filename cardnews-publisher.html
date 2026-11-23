@@ -1716,7 +1716,9 @@ function onPropsClick(e) {
     case 'ai-target':
       state.ai.target = b.dataset.v === 'bg' ? 'bg' : 'img'; aiSave(); renderProps(); return;
     case 'ai-prov':
-      state.ai.provider = b.dataset.v === 'gemini' ? 'gemini' : 'openai'; aiSave(); renderProps(); return;
+      state.ai.provider = b.dataset.v === 'gemini' ? 'gemini' : 'openai';
+      state.ai.status = ''; state.ai.statusKind = '';
+      aiSave(); renderProps(); return;
     case 'ai-key-save': {
       const kv = document.getElementById('aiKey');
       const v = ((kv && kv.value) || '').trim();
@@ -2365,7 +2367,7 @@ const AI_PROVIDERS = {
 };
 const AI_DEFAULT = {
   topic: '', subject: '', keyword: '', style: 'halftone', comp: 'right',
-  noText: true, target: 'img', provider: 'openai',
+  noText: true, target: 'img', provider: 'gemini',
   model: { openai: 'gpt-image-1', gemini: 'gemini-2.5-flash-image' },
   status: '', statusKind: ''
 };
@@ -2487,10 +2489,13 @@ function renderAiTab() {
 
   h += `<div class="sect">
     <div class="sect-h">AI로 바로 생성 <span class="badge-lbl blue">선택 · 내 키</span></div>
-    <div class="segbtns" style="margin-bottom:9px">
-      <button data-action="ai-prov" data-v="openai" class="${a.provider === 'openai' ? 'on' : ''}">OpenAI</button>
+    <div class="segbtns" style="margin-bottom:6px">
       <button data-action="ai-prov" data-v="gemini" class="${a.provider === 'gemini' ? 'on' : ''}">Gemini</button>
+      <button data-action="ai-prov" data-v="openai" class="${a.provider === 'openai' ? 'on' : ''}">OpenAI</button>
     </div>
+    <p class="mini" style="margin:0 0 9px">${a.provider === 'openai'
+      ? 'OpenAI는 브라우저 직접 호출을 막는 경우가 많습니다(CORS). 실제 생성은 Gemini를 권장합니다.'
+      : 'Gemini 이미지 모델은 이 브라우저에서 바로 호출됩니다.'}</p>
     <div class="ai-field"><span>${esc(prov.name)} API 키</span>
       <div class="keyrow">
         <input type="password" id="aiKey" placeholder="${saved ? '저장된 키 사용 중 \u00b7 새 키를 넣으면 교체' : prov.ph}" autocomplete="off" spellcheck="false">
@@ -2622,7 +2627,9 @@ async function apiFetch(url, opts, ms) {
     return await fetch(url, Object.assign({}, opts, ctrl ? { signal: ctrl.signal } : {}));
   } catch (e) {
     if (e && e.name === 'AbortError') throw new Error('응답이 없습니다(시간 초과). 잠시 뒤 다시 시도해 주세요.');
-    throw new Error('요청이 브라우저에서 차단되었습니다. 네트워크·CORS 설정을 확인해 주세요.');
+    const ne = new Error('요청이 브라우저에서 차단되었습니다. 네트워크·CORS 설정을 확인해 주세요.');
+    ne.code = 'NETWORK';
+    throw ne;
   } finally {
     if (timer) clearTimeout(timer);
   }
@@ -2676,7 +2683,7 @@ async function genOpenAI(key, prompt, model) {
   throw new Error('OpenAI 응답에 이미지가 없습니다.');
 }
 function gAspect(f) {
-  return f.key === '1:1' ? '1:1' : f.key === '9:16' ? '9:16' : '3:4';
+  return f.key === '1:1' ? '1:1' : f.key === '9:16' ? '9:16' : '4:5';
 }
 async function genGemini(key, prompt, model) {
   model = model || 'gemini-2.5-flash-image';
@@ -2700,7 +2707,7 @@ async function genGemini(key, prompt, model) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { responseModalities: ['IMAGE'] }
+      generationConfig: { responseModalities: ['IMAGE'], imageConfig: { aspectRatio: gAspect(fmt()) } }
     })
   });
   if (!res.ok) throw new Error(await apiErr(res, 'Gemini'));
@@ -2739,7 +2746,11 @@ async function aiGenerate() {
     toast('이미지를 생성했습니다.');
   } catch (err) {
     busy(false);
-    aiStatusSet(String((err && err.message) || err), 'err');
+    let msg = String((err && err.message) || err);
+    if (a.provider === 'openai' && err && err.code === 'NETWORK') {
+      msg = 'OpenAI는 브라우저에서 직접 호출을 허용하지 않습니다(CORS). Gemini로 바꿔 다시 시도하거나, 위 프롬프트를 복사해 외부 도구에서 만든 뒤 2번 칸으로 올려 주세요.';
+    }
+    aiStatusSet(msg, 'err');
     console.warn('[cardnews] image generation failed:', err);
   }
 }
