@@ -1,0 +1,2670 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<script>
+  /* 저장된 잠금 해제 상태를 첫 페인트 전에 적용해 잠금 화면이 깜빡이지 않게 한다. */
+  (function () {
+    try {
+      if (window.sessionStorage.getItem('rp.lock.v1') === 'unlocked') {
+        document.documentElement.className += ' rp-unlocked';
+      }
+    } catch (e) { /* 저장소 차단 시 비밀번호를 넣을 때까지 잠금 */ }
+  })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#F8F6F1" />
+<meta name="color-scheme" content="light" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="description" content="네이버 검색량과 블로그 문서 수로 기회지수(총 검색 ÷ 블로그)를 자동 계산하는 황금키워드 수집기" />
+<title>황금키워드 · 네이버 기회지수 수집기</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2316181C'/%3E%3Cpath d='M10 22V10h4l4 6 4-6h0v12' fill='none' stroke='%23D2A94A' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+<style>/* ============ 황금키워드 · golden keyword ============ */
+:root{
+  --paper:#F8F6F1;
+  --paper2:#F2EFE6;
+  --card:#FFFFFF;
+  --ink:#16181C;
+  --ink2:#5A5D61;
+  --ink3:#96978F;
+  --line:#E5E0D5;
+  --line2:#EFEBE2;
+  --gold:#A87C1C;
+  --gold2:#D2A94A;
+  --goldsoft:#FBF3DE;
+  --good:#1F6D4A;
+  --bad:#B23B2E;
+  --radius:18px;
+  --shadow:0 1px 2px rgba(22,24,28,.04), 0 18px 40px -28px rgba(22,24,28,.45);
+  --font:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR","Malgun Gothic","Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{scroll-padding-top:84px}
+body{
+  font-family:var(--font);
+  background:var(--paper);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  font-size:14px;
+  line-height:1.5;
+  min-height:100vh;
+}
+body::before{
+  content:"";
+  position:fixed;inset:0 0 auto 0;height:340px;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(760px 300px at 82% -60px, rgba(210,169,74,.20), rgba(210,169,74,0) 70%),
+    radial-gradient(520px 260px at 8% -80px, rgba(31,109,74,.08), rgba(31,109,74,0) 70%);
+}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--gold)}
+::selection{background:rgba(210,169,74,.28)}
+:focus-visible{outline:2px solid var(--gold2);outline-offset:2px}
+
+/* ---------- lock ---------- */
+#lockScreen{display:none}
+html:not(.rp-unlocked) #lockScreen{
+  display:flex;position:fixed;inset:0;z-index:9000;
+  align-items:center;justify-content:center;padding:24px;
+  background:
+    radial-gradient(700px 420px at 50% -10%, rgba(210,169,74,.22), rgba(210,169,74,0) 70%),
+    var(--paper);
+}
+html:not(.rp-unlocked) body > *:not(#lockScreen){display:none !important}
+html:not(.rp-unlocked){overflow:hidden !important}
+.rp-lock-card{
+  width:100%;max-width:352px;background:var(--card);border:1px solid var(--line2);
+  border-radius:22px;padding:30px 26px 24px;box-shadow:0 30px 70px -40px rgba(22,24,28,.55);
+  text-align:center;
+}
+.rp-lock-card.shake{animation:rpLockShake .38s ease-in-out}
+.rp-lock-icon{
+  width:46px;height:46px;margin:0 auto 14px;border-radius:14px;
+  background:linear-gradient(150deg,#221F19,#12110E);color:var(--gold2);
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.rp-lock-title{margin:0;font-size:19px;font-weight:800;letter-spacing:-.5px;color:#16181C}
+.rp-lock-sub{margin:6px 0 20px;font-size:12.5px;color:var(--ink2);line-height:1.55}
+.rp-lock-field{position:relative}
+.rp-lock-field input{
+  width:100%;height:48px;border-radius:12px;border:1px solid var(--line);
+  background:#FDFCFA;padding:0 58px 0 14px;font-size:16px;letter-spacing:.32em;
+  text-align:center;font-weight:700;
+}
+.rp-lock-field input:focus{border-color:var(--gold2);box-shadow:0 0 0 3px rgba(210,169,74,.18);outline:none}
+.rp-lock-field input.err{border-color:#D92D20;box-shadow:0 0 0 3px rgba(217,45,32,.13)}
+.rp-lock-field input::placeholder{letter-spacing:.3em;font-weight:400;color:#BCB6A8}
+.rp-lock-eye{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  height:34px;padding:0 10px;border:0;border-radius:8px;background:transparent;
+  color:var(--ink3);font-size:12px;font-weight:700;
+}
+.rp-lock-eye:hover{background:var(--paper2);color:var(--ink)}
+.rp-lock-error{margin:10px 0 0;font-size:12.5px;font-weight:700;color:#D92D20;line-height:1.5}
+.rp-lock-error[hidden]{display:none}
+.rp-lock-submit{
+  width:100%;height:48px;margin-top:16px;border:0;border-radius:12px;
+  background:linear-gradient(180deg,#22252A,#101216);color:#fff;font-size:14px;font-weight:800;letter-spacing:-.2px;
+}
+.rp-lock-submit:hover{background:#000}
+.rp-lock-submit:disabled{opacity:.55}
+.rp-lock-foot{margin:14px 0 0;font-size:11.5px;color:var(--ink3);line-height:1.55}
+@keyframes rpLockShake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-7px)}40%{transform:translateX(7px)}
+  60%{transform:translateX(-4px)}80%{transform:translateX(4px)}
+}
+
+/* ---------- shell ---------- */
+.app{position:relative;z-index:1;padding-bottom:48px}
+.topbar{
+  position:sticky;top:0;z-index:60;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:14px 28px;
+  background:rgba(248,246,241,.86);
+  -webkit-backdrop-filter:saturate(180%) blur(14px);
+  backdrop-filter:saturate(180%) blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.mark{
+  width:38px;height:38px;border-radius:12px;flex:none;
+  background:linear-gradient(150deg,#26231C,#111110);
+  color:var(--gold2);display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:700;letter-spacing:0;
+  box-shadow:inset 0 0 0 1px rgba(210,169,74,.28);
+}
+.brandtxt{min-width:0}
+.brandtxt h1{margin:0;font-size:17px;font-weight:800;letter-spacing:-.55px;line-height:1.2}
+.brandtxt p{margin:1px 0 0;font-size:11.5px;color:var(--ink3);letter-spacing:-.1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topactions{display:flex;align-items:center;gap:8px;flex:none}
+
+.conn{
+  display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 11px;border-radius:99px;
+  background:#fff;border:1px solid var(--line);font-size:11.5px;font-weight:700;color:var(--ink2);
+  white-space:nowrap;
+}
+.conn i{width:7px;height:7px;border-radius:50%;background:#B9B4A6;flex:none}
+.conn.ok i{background:var(--good);box-shadow:0 0 0 3px rgba(31,109,74,.14)}
+.conn.warn i{background:#C88A22;box-shadow:0 0 0 3px rgba(200,138,34,.16)}
+.conn.demo i{background:var(--gold2);box-shadow:0 0 0 3px rgba(210,169,74,.2)}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  height:38px;padding:0 15px;border-radius:11px;border:1px solid transparent;
+  font-size:13px;font-weight:800;letter-spacing:-.25px;white-space:nowrap;
+  background:#fff;color:var(--ink);transition:transform .12s ease,background .15s ease,border-color .15s ease,box-shadow .15s ease;
+}
+.btn:active{transform:translateY(1px)}
+.btn.dark{background:#181A1E;color:#fff;box-shadow:0 8px 18px -12px rgba(22,24,28,.8)}
+.btn.dark:hover{background:#000}
+.btn.primary{
+  height:46px;border-radius:13px;font-size:14.5px;
+  background:linear-gradient(180deg,#23262C,#0F1115);color:#fff;
+  box-shadow:0 14px 26px -18px rgba(16,18,22,.9), inset 0 1px 0 rgba(255,255,255,.1);
+}
+.btn.primary:hover{background:linear-gradient(180deg,#000,#000)}
+.btn.primary[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none}
+.btn.line{background:#fff;border-color:var(--line);color:var(--ink)}
+.btn.line:hover{border-color:#D8D2C2;background:#FDFCF8}
+.btn.ghost{background:transparent;color:var(--ink2)}
+.btn.ghost:hover{background:rgba(22,24,28,.05);color:var(--ink)}
+.btn.sm{height:32px;padding:0 11px;font-size:12px;border-radius:9px}
+.btn.wide{width:100%}
+.btn.gold{background:linear-gradient(180deg,#E7C572,#C89B33);color:#231B08;box-shadow:0 10px 22px -16px rgba(168,124,28,.9)}
+.btn[hidden]{display:none !important}
+.mobile-only{display:none}
+#btnSampleM{background:transparent;border:0;color:var(--gold);text-decoration:underline;text-underline-offset:3px;font-size:12.5px;height:34px}
+
+/* ---------- layout ---------- */
+.layout{
+  display:grid;grid-template-columns:396px minmax(0,1fr);gap:22px;
+  padding:22px 28px 0;max-width:1560px;margin:0 auto;align-items:start;
+}
+.panel{display:flex;flex-direction:column;gap:14px;position:sticky;top:82px}
+.card{
+  background:var(--card);border:1px solid var(--line2);border-radius:var(--radius);
+  padding:16px 16px 18px;box-shadow:var(--shadow);
+}
+.cardhd{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px}
+#filterDetails > summary{list-style:none;cursor:pointer;user-select:none;margin-bottom:0}
+#filterDetails > summary::-webkit-details-marker{display:none}
+#filterDetails > summary .hint{display:inline-flex;align-items:center;gap:5px}
+#filterDetails > summary .hint::after{content:"▾";font-size:9px;color:var(--ink3);transition:transform .16s ease}
+#filterDetails[open] > summary{margin-bottom:12px}
+#filterDetails[open] > summary .hint::after{transform:rotate(180deg)}
+.cardhd h2{
+  margin:0;font-size:12.5px;font-weight:800;letter-spacing:-.2px;color:var(--ink);
+  display:flex;align-items:center;gap:7px;
+}
+.cardhd h2::before{
+  content:"";width:5px;height:5px;border-radius:50%;background:var(--gold2);flex:none;
+}
+.hint{font-size:11.5px;color:var(--ink3);letter-spacing:-.1px;white-space:nowrap}
+
+.sources{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+.src{
+  position:relative;display:flex;align-items:center;gap:7px;
+  padding:9px 10px;border:1px solid var(--line);border-radius:10px;
+  background:#FDFCFA;font-size:12.5px;font-weight:700;color:var(--ink2);
+  cursor:pointer;transition:all .14s ease;letter-spacing:-.2px;user-select:none;
+}
+.src input{position:absolute;opacity:0;width:0;height:0}
+.src::before{
+  content:"";width:13px;height:13px;border-radius:4px;border:1.5px solid #CFC8B7;flex:none;
+  background:#fff;transition:all .14s ease;
+}
+.src.on{border-color:rgba(168,124,28,.45);background:var(--goldsoft);color:#4A3A12}
+.src.on::before{background:var(--gold);border-color:var(--gold);box-shadow:inset 0 0 0 2px #fff}
+.src:hover{border-color:#D8D2C2}
+
+.field{display:block;margin-top:10px}
+.field > span{display:block;font-size:11.5px;font-weight:800;color:var(--ink2);margin-bottom:5px;letter-spacing:-.15px}
+.field input,.field select,.field textarea{
+  width:100%;height:40px;border:1px solid var(--line);border-radius:10px;
+  background:#FDFCFA;padding:0 11px;font-size:13.5px;color:var(--ink);
+  transition:border-color .14s ease,box-shadow .14s ease;
+}
+.field textarea{height:auto;min-height:92px;padding:10px 11px;resize:vertical;line-height:1.55}
+.field input:focus,.field select:focus,.field textarea:focus{
+  outline:none;border-color:var(--gold2);box-shadow:0 0 0 3px rgba(210,169,74,.16);background:#fff;
+}
+.field input::placeholder,.field textarea::placeholder{color:#B7B1A3}
+.field select{appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%2396978F' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:30px;
+}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.switch{display:flex;align-items:center;gap:8px;height:40px;margin-top:24px;font-size:12.5px;font-weight:700;color:var(--ink2);cursor:pointer;user-select:none}
+.switch input{appearance:none;-webkit-appearance:none;width:34px;height:20px;border-radius:99px;background:#DDD7C8;position:relative;transition:background .16s ease;flex:none;margin:0;cursor:pointer}
+.switch input::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:transform .16s ease}
+.switch input:checked{background:var(--gold)}
+.switch input:checked::after{transform:translateX(14px)}
+.switch span{margin:0}
+.seedstat{display:flex;align-items:center;justify-content:space-between;margin-top:7px;font-size:11.5px;color:var(--ink3)}
+.seedstat b{color:var(--gold);font-weight:800}
+.linkbtn{border:0;background:transparent;color:var(--ink3);font-size:11.5px;font-weight:700;padding:2px 0;text-decoration:underline;text-underline-offset:3px;text-decoration-color:#DCD6C7}
+.linkbtn:hover{color:var(--ink)}
+
+.runbar{display:flex;flex-direction:column;gap:8px}
+.progress{margin-top:2px}
+.progress[hidden]{display:none}
+.pbar{height:5px;border-radius:99px;background:#E7E2D5;overflow:hidden}
+.pbar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .28s ease}
+.ptxt{display:flex;justify-content:space-between;margin-top:6px;font-size:11.5px;color:var(--ink3);letter-spacing:-.1px}
+
+/* ---------- results ---------- */
+.results{
+  background:var(--card);border:1px solid var(--line2);border-radius:var(--radius);
+  box-shadow:var(--shadow);overflow:hidden;min-height:520px;display:flex;flex-direction:column;
+}
+.resbar{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:14px 18px;border-bottom:1px solid var(--line2);flex-wrap:wrap;
+}
+.resmeta{font-size:13px;color:var(--ink2);letter-spacing:-.2px;display:flex;align-items:baseline;gap:0;min-width:0}
+.resmeta > span{margin-left:0;margin-right:5px}
+.resmeta strong{font-size:19px;font-weight:800;color:var(--ink);letter-spacing:-.7px;font-variant-numeric:tabular-nums}
+.resmeta em{font-style:normal;color:var(--ink3);font-size:11.5px;font-weight:600}
+.resactions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.mini{height:32px;border:1px solid var(--line);border-radius:9px;background:#FDFCFA;font-size:12px;font-weight:700;color:var(--ink2);padding:0 9px}
+
+.tablewrap{flex:1;overflow-x:auto;overflow-y:visible}
+table{border-collapse:collapse;width:100%;min-width:100%;table-layout:fixed}
+#tbl th:nth-child(1),#tbl td:nth-child(1){width:54px}
+#tbl th:nth-child(3),#tbl td:nth-child(3){width:148px}
+#tbl th:nth-child(4),#tbl td:nth-child(4){width:124px}
+#tbl th:nth-child(5),#tbl td:nth-child(5){width:148px}
+thead th{
+  position:sticky;top:0;z-index:2;background:#FCFBF7;
+  text-align:left;font-size:11px;font-weight:800;color:var(--ink3);letter-spacing:.02em;
+  padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap;
+}
+thead th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
+thead th.rankcol{width:44px;text-align:center}
+tbody td{padding:11px 14px;border-bottom:1px solid var(--line2);font-size:13.5px;vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:#FBFAF5}
+td.rankcol{width:44px;text-align:center;color:var(--ink3);font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums}
+td.kw{font-weight:800;letter-spacing:-.35px;color:var(--ink)}
+td.kw .sub{display:block;font-size:10.5px;font-weight:600;color:var(--ink3);letter-spacing:-.1px;margin-top:1px}
+td.num{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink2)}
+td.opp{text-align:right;font-variant-numeric:tabular-nums}
+.oppv{
+  position:relative;display:inline-block;min-width:74px;padding:4px 9px;border-radius:8px;
+  font-weight:800;letter-spacing:-.3px;background:#F5F3EC;color:var(--ink);
+}
+.oppv.hi{background:linear-gradient(180deg,#FBEFCB,#F6E3AE);color:#5C4508;box-shadow:inset 0 0 0 1px rgba(168,124,28,.22)}
+.oppv.mid{background:#EFF2EC;color:#2C4A36}
+.oppv.na{background:transparent;color:var(--ink3);font-weight:700}
+tr.err td{color:var(--bad)}
+tr.err td.kw{color:var(--bad)}
+.tag{display:inline-block;margin-left:6px;padding:1px 5px;border-radius:5px;background:#F3F1EA;color:var(--ink3);font-size:9.5px;font-weight:800;vertical-align:1px;letter-spacing:0}
+
+.empty{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  padding:64px 24px;text-align:center;color:var(--ink2);flex:1;
+}
+.empty[hidden]{display:none}
+.empty .badge{
+  width:58px;height:58px;border-radius:18px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(150deg,#26231C,#131211);color:var(--gold2);font-size:24px;
+  box-shadow:inset 0 0 0 1px rgba(210,169,74,.3), 0 20px 40px -28px rgba(0,0,0,.8);
+}
+.empty h3{margin:4px 0 0;font-size:16px;font-weight:800;letter-spacing:-.5px;color:var(--ink)}
+.empty p{margin:0;font-size:12.5px;color:var(--ink3);max-width:380px;line-height:1.65}
+.empty .rows{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+
+.cachebar{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 18px;border-top:1px solid var(--line2);background:#FCFBF7;
+  font-size:11.5px;color:var(--ink3);letter-spacing:-.1px;
+}
+
+/* ---------- media query: tablet ---------- */
+@media (max-width:1180px){
+  .layout{grid-template-columns:344px minmax(0,1fr);gap:16px;padding:18px 18px 0}
+  .topbar{padding:12px 18px}
+}
+/* ---------- mobile ---------- */
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;padding:14px 14px 0;gap:14px}
+  .panel{position:static}
+  .topbar{padding:11px 14px;gap:10px;flex-wrap:wrap}
+  .brandtxt p{display:none}
+  .mark{width:32px;height:32px;border-radius:10px;font-size:16px}
+  .brandtxt h1{font-size:15.5px}
+  .topactions{gap:6px;flex:1;justify-content:flex-end}
+  .conn{height:28px;font-size:10.5px;padding:0 9px}
+  #btnSample{display:none}
+  .mobile-only{display:flex !important}
+  .btn{height:34px;padding:0 12px;font-size:12.5px;border-radius:10px}
+  .btn.primary{height:46px;font-size:14px}
+  .card{padding:14px 13px 15px;border-radius:16px}
+  .results{border-radius:16px;min-height:360px}
+  .resbar{padding:12px 14px;gap:10px}
+  .tablewrap{padding:0 0 4px}
+
+  /* table -> cards */
+  table,thead,tbody,tr,td{display:block}
+  thead{display:none}
+  tbody{padding:4px 10px 10px}
+  tbody tr{
+    position:relative;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 10px;
+    padding:12px 12px 12px;margin:8px 0;border:1px solid var(--line2);border-radius:13px;
+    background:#FDFCF9;
+  }
+  #tbl th:nth-child(n),#tbl td:nth-child(n){width:auto}
+  tbody tr:hover{background:#FCFBF6}
+  tbody td{border:0;padding:0;font-size:13px}
+  td.rankcol{
+    position:absolute;top:12px;right:12px;width:auto;font-size:10.5px;
+    color:var(--ink3);
+  }
+  td.rankcol::before{content:"#"}
+  td.kw{grid-column:1 / -1;padding-right:34px;font-size:14.5px;line-height:1.35;margin-bottom:6px}
+  td.num{text-align:left;font-weight:700;color:var(--ink);font-size:13.5px}
+  td.num::before,td.opp::before{
+    content:attr(data-label);display:block;font-size:10px;font-weight:800;color:var(--ink3);
+    letter-spacing:.02em;margin-bottom:2px;
+  }
+  td.opp{text-align:left;font-weight:700}
+  .oppv{min-width:0;padding:4px 8px;font-size:12.5px}
+  .cachebar{padding:9px 14px;font-size:10.5px}
+}
+
+/* ---------- modal ---------- */
+.modal{
+  position:fixed;inset:0;z-index:8000;display:none;
+  align-items:flex-start;justify-content:center;padding:24px 16px;
+  background:rgba(20,19,16,.42);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  overflow-y:auto;
+}
+.modal.open{display:flex}
+.sheet{
+  width:100%;max-width:620px;background:var(--card);border-radius:20px;
+  border:1px solid var(--line2);box-shadow:0 40px 90px -50px rgba(0,0,0,.7);
+  margin:auto;overflow:hidden;
+}
+.sheet.wide{max-width:760px}
+.sheethd{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:16px 18px;border-bottom:1px solid var(--line2);position:sticky;top:0;background:#fff;z-index:2;
+}
+.sheethd h3{margin:0;font-size:15px;font-weight:800;letter-spacing:-.45px}
+.sheethd p{margin:2px 0 0;font-size:11.5px;color:var(--ink3)}
+.xbtn{width:30px;height:30px;border:0;border-radius:9px;background:var(--paper2);color:var(--ink2);font-size:15px;line-height:1;flex:none}
+.xbtn:hover{background:#E7E2D5;color:var(--ink)}
+.sheetbody{padding:16px 18px 20px;max-height:calc(100vh - 190px);overflow-y:auto}
+.sheetft{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:13px 18px;border-top:1px solid var(--line2);background:#FCFBF7;
+}
+.grp{margin-bottom:18px}
+.grp:last-child{margin-bottom:2px}
+.grp h4{
+  margin:0 0 8px;font-size:11.5px;font-weight:800;color:var(--gold);letter-spacing:.02em;
+  display:flex;align-items:center;gap:6px;
+}
+.grp h4 span{color:var(--ink3);font-weight:600;letter-spacing:-.1px}
+.note{font-size:11.5px;color:var(--ink3);line-height:1.6;margin:8px 0 0;letter-spacing:-.1px}
+.note b{color:var(--ink2)}
+.srow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.srow.one{grid-template-columns:1fr}
+.step{display:flex;gap:11px;margin-bottom:14px}
+.step .n{
+  width:23px;height:23px;border-radius:8px;background:#16181C;color:var(--gold2);
+  font-size:11.5px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px;
+}
+.step .b{flex:1 1 auto;min-width:0}
+.step .b > b{display:block;font-size:13px;font-weight:800;letter-spacing:-.25px;margin-bottom:2px}
+.step .b p{margin:0;font-size:12px;color:var(--ink2);line-height:1.62}
+.step .b p code{
+  background:var(--paper2);border:1px solid var(--line2);border-radius:5px;padding:0 4px;
+  font-size:11px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+.codebox{position:relative;margin-top:12px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#15171B}
+.codebox .cb-hd{
+  display:flex;align-items:center;justify-content:space-between;padding:8px 12px;
+  border-bottom:1px solid rgba(255,255,255,.09);color:#B9BDC6;font-size:11px;font-weight:700;
+}
+.codebox pre{
+  margin:0;padding:12px;max-height:300px;overflow:auto;color:#DDE3EA;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:1.62;
+  white-space:pre;tab-size:2;
+}
+.checkline{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:700;color:var(--ink2);cursor:pointer;user-select:none}
+.checkline input{width:16px;height:16px;accent-color:var(--gold)}
+
+/* ---------- toast ---------- */
+.toasts{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:9500;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{
+  padding:11px 16px;border-radius:12px;background:#16181C;color:#fff;font-size:12.5px;font-weight:700;
+  box-shadow:0 18px 40px -20px rgba(0,0,0,.7);max-width:min(92vw,520px);line-height:1.5;
+  animation:tin .22s ease-out;letter-spacing:-.2px;
+}
+.toast.warn{background:#7A4A0B}
+.toast.good{background:#14512F}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ---------- print ---------- */
+@media print{
+  .topbar,.panel,.resbar,.cachebar,.modal,.toasts{display:none !important}
+  body{background:#fff}
+  .results{border:0;box-shadow:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ 잠금 ============ -->
+<div id="lockScreen" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
+  <form class="rp-lock-card" id="lockForm" autocomplete="off" novalidate>
+    <div class="rp-lock-icon" aria-hidden="true">✦</div>
+    <h1 class="rp-lock-title" id="lockTitle">황금키워드</h1>
+    <p class="rp-lock-sub">비밀번호를 입력해 주세요.</p>
+    <div class="rp-lock-field">
+      <input type="password" id="lockInput" inputmode="numeric" autocomplete="off"
+             spellcheck="false" placeholder="••••" aria-label="비밀번호" />
+      <button type="button" class="rp-lock-eye" id="lockEye" aria-label="비밀번호 보기">보기</button>
+    </div>
+    <p class="rp-lock-error" id="lockError" role="alert" hidden></p>
+    <button type="submit" class="rp-lock-submit" id="lockSubmit">잠금 해제</button>
+    <noscript><p class="rp-lock-error">자바스크립트가 꺼져 있어 잠금을 해제할 수 없습니다. 브라우저에서 자바스크립트를 허용한 뒤 새로고침해 주세요.</p></noscript>
+    <p class="rp-lock-foot">잠금은 이 탭에서만 유지됩니다. 탭을 닫으면 다시 잠깁니다.</p>
+  </form>
+</div>
+
+<!-- ============ 앱 ============ -->
+<div class="app" id="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark" aria-hidden="true">黃</span>
+      <div class="brandtxt">
+        <h1>황금키워드</h1>
+        <p>네이버 총 검색 ÷ 블로그 문서 수 = 기회지수</p>
+      </div>
+    </div>
+    <div class="topactions">
+      <span class="conn" id="connChip" title="프록시 · API 연결 상태"><i></i><span id="connText">프록시 미설정</span></span>
+      <button class="btn ghost" id="btnSample" type="button">샘플로 체험</button>
+      <button class="btn dark" id="btnSettings" type="button">설정</button>
+    </div>
+  </header>
+
+  <main class="layout">
+
+    <!-- ============ 왼쪽: 수집 · 필터 ============ -->
+    <aside class="panel">
+
+      <section class="card">
+        <div class="cardhd"><h2>키워드 수집</h2><span class="hint" id="sourceHint">소스 선택</span></div>
+
+        <div class="sources" id="sourceList">
+          <label class="src on" data-src="signal"><input type="checkbox" checked value="signal" /><span>시그널 실시간</span></label>
+          <label class="src" data-src="google"><input type="checkbox" value="google" /><span>구글 트렌드</span></label>
+          <label class="src" data-src="nate"><input type="checkbox" value="nate" /><span>네이트 랭킹</span></label>
+          <label class="src" data-src="news"><input type="checkbox" value="news" /><span>뉴스 헤드라인</span></label>
+        </div>
+
+        <button class="btn line wide" id="btnCollect" type="button">선택한 소스에서 키워드 가져오기</button>
+
+        <label class="field">
+          <span>직접 입력 · 붙여넣기</span>
+          <textarea id="seedInput" placeholder="한 줄에 하나씩, 또는 쉼표로 구분해 붙여넣으세요.&#10;예) 젠슨 황 폭언 파문, 라이어 기본정보"></textarea>
+        </label>
+
+        <div class="row2">
+          <label class="field">
+            <span>최대 키워드 수</span>
+            <input id="inpCount" type="number" min="1" max="500" step="1" inputmode="numeric" value="30" />
+          </label>
+          <label class="switch"><input type="checkbox" id="inpExpand" checked /><span>연관검색어 확장</span></label>
+        </div>
+
+        <div class="seedstat">
+          <span>현재 <b id="seedCount">0</b>개</span>
+          <button class="linkbtn" id="btnClearSeed" type="button">입력 비우기</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <details id="filterDetails">
+          <summary class="cardhd"><h2>필터 · 정렬</h2><span class="hint">조회 후 즉시 반영</span></summary>
+          <div class="row3">
+            <label class="field">
+              <span>최소 검색량</span>
+              <input id="inpMinSearch" type="number" min="0" step="100" inputmode="numeric" placeholder="0" />
+            </label>
+            <label class="field">
+              <span>최대 블로그</span>
+              <input id="inpMaxBlog" type="number" min="0" step="100" inputmode="numeric" placeholder="제한없음" />
+            </label>
+            <label class="field">
+              <span>최소 기회지수</span>
+              <input id="inpMinOpp" type="number" min="0" step="1" inputmode="decimal" placeholder="0" />
+            </label>
+          </div>
+          <label class="field">
+            <span>검색어 필터</span>
+            <input id="inpFilter" type="text" placeholder="포함할 단어 (예: 라이어)" />
+          </label>
+        </details>
+      </section>
+
+      <div class="runbar">
+        <button class="btn primary wide" id="btnRun" type="button">조회 시작</button>
+        <button class="btn line wide" id="btnStop" type="button" hidden>중단</button>
+        <div class="progress" id="progress" hidden>
+          <div class="pbar"><i id="pbarFill"></i></div>
+          <div class="ptxt"><span id="pbarLabel">준비 중</span><span id="pbarValue">0 / 0</span></div>
+        </div>
+        <button class="btn mobile-only" id="btnSampleM" type="button" style="width:100%">샘플 데이터로 체험하기</button>
+      </div>
+
+    </aside>
+
+    <!-- ============ 오른쪽: 결과 ============ -->
+    <section class="results" id="results">
+
+      <div class="resbar">
+        <div class="resmeta">
+          <strong id="resCount">0</strong><span>개</span>
+          <em id="resSub">아직 조회한 결과가 없습니다</em>
+        </div>
+        <div class="resactions">
+          <select class="mini" id="sortSelect" aria-label="정렬">
+            <option value="opp_desc">기회지수 높은 순</option>
+            <option value="opp_asc">기회지수 낮은 순</option>
+            <option value="total_desc">총 검색 많은 순</option>
+            <option value="blog_asc">블로그 적은 순</option>
+            <option value="kw_asc">키워드 가나다순</option>
+          </select>
+          <button class="btn line sm" id="btnCsv" type="button">CSV</button>
+          <button class="btn line sm" id="btnXlsx" type="button">엑셀 .xlsx</button>
+        </div>
+      </div>
+
+      <div class="tablewrap">
+        <table id="tbl">
+          <thead>
+            <tr>
+              <th class="rankcol">순위</th>
+              <th>키워드</th>
+              <th class="num">총 검색</th>
+              <th class="num">블로그</th>
+              <th class="num">기회지수</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+
+        <div class="empty" id="emptyState">
+          <div class="badge" aria-hidden="true">✦</div>
+          <h3>아직 담긴 키워드가 없습니다</h3>
+          <p>왼쪽에서 소스를 고르거나 키워드를 붙여넣고 <b>조회 시작</b>을 누르세요. API 키와 프록시가 없어도 예시 데이터로 표·필터·다운로드를 그대로 확인할 수 있습니다.</p>
+          <div class="rows">
+            <button class="btn gold" id="btnSample2" type="button">샘플 데이터로 바로 체험</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="cachebar">
+        <span id="cacheInfo">캐시 비어 있음</span>
+        <button class="linkbtn" id="btnClearCache" type="button">캐시 초기화</button>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<!-- ============ 설정 모달 ============ -->
+<div class="modal" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+  <div class="sheet">
+    <div class="sheethd">
+      <div>
+        <h3 id="settingsTitle">설정</h3>
+        <p>키는 이 브라우저(localStorage)에만 저장되며, 입력한 프록시로만 전달됩니다.</p>
+      </div>
+      <button class="xbtn" id="settingsClose" type="button" aria-label="닫기">✕</button>
+    </div>
+    <div class="sheetbody">
+
+      <div class="grp">
+        <h4>네이버 검색광고 API <span>총 검색(PC+모바일 월간)</span></h4>
+        <div class="srow">
+          <label class="field"><span>액세스라이선스</span><input id="setAdLicense" type="password" autocomplete="off" spellcheck="false" placeholder="Access License" /></label>
+          <label class="field"><span>비밀키 (Secret Key)</span><input id="setAdSecret" type="password" autocomplete="off" spellcheck="false" placeholder="Secret Key" /></label>
+        </div>
+        <label class="field"><span>고객 ID (CUSTOMER_ID)</span><input id="setAdCustomer" type="password" autocomplete="off" spellcheck="false" placeholder="예: 1234567" /></label>
+      </div>
+
+      <div class="grp">
+        <h4>네이버 오픈 API <span>블로그 문서 수</span></h4>
+        <div class="srow">
+          <label class="field"><span>Client ID</span><input id="setClientId" type="password" autocomplete="off" spellcheck="false" /></label>
+          <label class="field"><span>Client Secret</span><input id="setClientSecret" type="password" autocomplete="off" spellcheck="false" /></label>
+        </div>
+      </div>
+
+      <div class="grp">
+        <h4>CORS 프록시 <span>브라우저에서 네이버 API를 부르기 위한 통로</span></h4>
+        <label class="field"><span>프록시 URL</span><input id="setProxy" type="url" autocomplete="off" spellcheck="false" placeholder="https://golden-keyword.내이름.workers.dev" /></label>
+        <div class="srow">
+          <label class="field"><span>프록시 키 (선택)</span><input id="setProxyKey" type="text" autocomplete="off" spellcheck="false" placeholder="Worker에 PROXY_KEY를 넣은 경우" /></label>
+          <div class="field">
+            <span>연결 확인</span>
+            <button class="btn line wide" id="btnTestProxy" type="button" style="height:40px">프록시 연결 테스트</button>
+          </div>
+        </div>
+        <p class="note" id="proxyTestResult">아직 확인하지 않았습니다. Worker를 만들었다면 위 칸에 주소를 넣고 테스트해 보세요.</p>
+        <button class="btn ghost sm" id="btnOpenGuide" type="button" style="margin-top:8px;padding-left:0">↗ Cloudflare Workers 프록시 코드 · 3단계 가이드 열기</button>
+      </div>
+
+      <div class="grp">
+        <h4>조회 옵션</h4>
+        <div class="srow">
+          <label class="field"><span>호출 간격 (ms)</span><input id="setDelay" type="number" min="100" max="3000" step="50" inputmode="numeric" /></label>
+          <label class="field"><span>캐시 유지 (시간)</span><input id="setTtl" type="number" min="1" max="720" step="1" inputmode="numeric" /></label>
+        </div>
+        <label class="checkline" style="margin-top:12px"><input type="checkbox" id="setShowKeys" /><span>입력한 키 보기</span></label>
+        <p class="note"><b>API 호출 한도</b>를 지키기 위해 키워드는 순차 조회하며, 같은 키워드는 캐시 유지 시간 동안 다시 부르지 않습니다.</p>
+      </div>
+
+    </div>
+    <div class="sheetft">
+      <span class="note" style="margin:0">검색광고 API 응답의 <code>&lt; 10</code>은 5로 계산합니다.</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn line" id="settingsCancel" type="button">닫기</button>
+        <button class="btn dark" id="btnSaveSettings" type="button">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 프록시 가이드 모달 ============ -->
+<div class="modal" id="guideModal" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+  <div class="sheet wide">
+    <div class="sheethd">
+      <div>
+        <h3 id="guideTitle">Cloudflare Workers 프록시 — 3단계</h3>
+        <p>무료 플랜으로 충분합니다. 5분이면 끝납니다.</p>
+      </div>
+      <button class="xbtn" id="guideClose" type="button" aria-label="닫기">✕</button>
+    </div>
+    <div class="sheetbody">
+
+      <div class="step">
+        <div class="n">1</div>
+        <div class="b">
+          <b>Worker를 만들고 아래 코드를 붙여넣기</b>
+          <p><code>dash.cloudflare.com</code> → <b>Workers &amp; Pages</b> → <b>Create</b> → <b>Worker</b> → 이름 입력(예: golden-keyword) → <b>Deploy</b>. 그다음 <b>Edit code</b>에서 기본 코드를 모두 지우고 아래 코드를 붙여넣은 뒤 다시 <b>Deploy</b>.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="n">2</div>
+        <div class="b">
+          <b>네이버 키 5개를 Worker에 넣기</b>
+          <p>Worker → <b>Settings</b> → <b>Variables and Secrets</b>에서 추가:<br />
+            <code>NAVER_AD_LICENSE</code>, <code>NAVER_AD_SECRET</code>, <code>NAVER_AD_CUSTOMER_ID</code> (검색광고)<br />
+            <code>NAVER_CLIENT_ID</code>, <code>NAVER_CLIENT_SECRET</code> (오픈 API)<br />
+            값을 넣을 때 형식을 <b>Secret</b>으로 고르면 대시보드에서도 다시 보이지 않습니다. 키를 여기 넣으면 이 페이지에는 키를 입력하지 않아도 됩니다.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="n">3</div>
+        <div class="b">
+          <b>주소를 이 페이지에 등록</b>
+          <p>Worker 주소 <code>https://golden-keyword.계정.workers.dev</code>를 위 설정의 <b>프록시 URL</b>에 붙여넣고 <b>프록시 연결 테스트</b>를 누르세요. 주소 끝 <code>/health</code>를 브라우저에 열어 <code>"ad": true</code>가 보이면 준비 완료입니다.</p>
+        </div>
+      </div>
+
+      <div class="codebox">
+        <div class="cb-hd">
+          <span>worker.js · 네이버 서명은 Worker가 직접 만듭니다</span>
+          <button class="btn gold sm" id="btnCopyWorker" type="button">코드 복사</button>
+        </div>
+        <pre id="workerCodeView"></pre>
+      </div>
+
+      <p class="note" style="margin-top:12px">
+        <b>막힐 때</b> · <b>401/403</b>이면 검색광고 키·고객ID를 확인하세요(서명은 Worker가 생성). · <b>브라우저에서 CORS 오류</b>가 나면 Worker의 <code>ALLOW_ORIGIN</code>에 이 페이지 주소(<code>https://kitchen2xx.github.io</code>)를 넣거나, 파일로 열 때는 <code>*</code>로 두세요. · <b>429</b>는 호출 한도이므로 설정의 호출 간격을 500ms 이상으로 올리세요. · 프록시에 키를 넣지 않고 이 페이지의 키를 쓰려면 그대로 두면 됩니다(브라우저가 키를 Worker로만 전달).
+      </p>
+      <p class="note">
+        <b>보안</b> · Worker 주소를 아는 사람은 누구나 이 프록시로 네이버 API를 호출할 수 있습니다. <code>ALLOW_ORIGIN</code>과 <code>PROXY_KEY</code>를 꼭 함께 쓰는 것을 권합니다(이 페이지 설정의 <b>프록시 키</b> 칸에 같은 값을 넣으면 됩니다).
+      </p>
+
+    </div>
+    <div class="sheetft">
+      <span class="note" style="margin:0">코드는 복사 버튼으로 그대로 가져갈 수 있습니다.</span>
+      <button class="btn dark" id="guideOk" type="button">확인</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<!-- 프록시 Worker 코드 (복사용 원본) -->
+<script type="text/plain" id="workerCode">
+/**
+ * 네이버 황금키워드 프록시 — Cloudflare Worker (단일 파일)
+ * ------------------------------------------------------------------
+ * 브라우저는 CORS 때문에 네이버 API를 직접 부를 수 없습니다.
+ * 이 Worker가 대신 호출하고, 검색광고 API의 HMAC-SHA256 서명도 여기서 만듭니다.
+ *
+ * 경로
+ *   GET /health                      연결 확인 (키 설정 여부만 알려줌)
+ *   GET /ad/keywordstool?hintKeywords=키워드1,키워드2&showDetail=1
+ *   GET /blog?query=키워드&display=1&sort=sim
+ *   GET /trends/signal               시그널(signal.bz) 실시간 이슈
+ *   GET /trends/google?geo=KR        구글 트렌드 RSS
+ *   GET /trends/news?hl=ko&gl=KR     구글 뉴스 헤드라인 RSS
+ *   GET /trends/nate                 네이트 랭킹뉴스 제목(EUC-KR → base64)
+ *
+ * 환경 변수(Settings → Variables and Secrets)
+ *   NAVER_AD_LICENSE, NAVER_AD_SECRET, NAVER_AD_CUSTOMER_ID   (검색광고 API)
+ *   NAVER_CLIENT_ID, NAVER_CLIENT_SECRET                      (오픈 API)
+ *   ALLOW_ORIGIN  선택 — 허용할 페이지 주소(쉼표 구분). 비우면 "*"
+ *   PROXY_KEY     선택 — 이 값을 넣으면 요청에 같은 값(x-proxy-key)이 있어야 통과
+ *
+ * 키를 환경 변수에 넣지 않아도 됩니다. 그때는 이 페이지가 보낸
+ * x-naver-ad-license / x-naver-ad-secret / x-naver-ad-customer,
+ * x-naver-client-id / x-naver-client-secret 헤더로 서명·호출합니다.
+ */
+
+const AD_HOST = 'https://api.searchad.naver.com';
+const OPEN_HOST = 'https://openapi.naver.com';
+const SERVICE = 'naver-golden-keyword-proxy';
+
+export default {
+  async fetch(request, env) {
+    const ctx = env || {};
+    const url = new URL(request.url);
+    const cors = corsHeaders(ctx, request);
+
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: cors });
+    }
+    if (request.method !== 'GET' && request.method !== 'HEAD') {
+      return json({ ok: false, error: 'GET 요청만 지원합니다.' }, 405, cors);
+    }
+
+    try {
+      if (url.pathname === '/' || url.pathname === '/health') {
+        return json({
+          ok: true,
+          service: SERVICE,
+          ad: hasAdCredentials(ctx, request),
+          blog: hasBlogCredentials(ctx, request),
+          routes: ['/health', '/ad/keywordstool', '/blog', '/trends/signal', '/trends/google', '/trends/news', '/trends/nate'],
+          note: 'ad/blog 가 true 이면 Worker에 키가 설정되어 이 페이지가 키를 보내지 않습니다.'
+        }, 200, cors);
+      }
+
+      if (ctx.PROXY_KEY && request.headers.get('x-proxy-key') !== ctx.PROXY_KEY) {
+        return json({ ok: false, code: 'PROXY_KEY', error: '프록시 키가 필요합니다.' }, 401, cors);
+      }
+
+      switch (url.pathname) {
+        case '/ad/keywordstool':
+          return await adKeywordstool(url, request, ctx, cors);
+        case '/blog':
+          return await blogSearch(url, request, ctx, cors);
+        case '/trends/signal':
+          return await trendsSignal(cors);
+        case '/trends/google':
+          return await trendsRss('https://trends.google.com/trending/rss?geo=' + encodeURIComponent(url.searchParams.get('geo') || 'KR'), cors, {});
+        case '/trends/news':
+          return await trendsRss(
+            'https://news.google.com/rss?hl=' + encodeURIComponent(url.searchParams.get('hl') || 'ko') +
+            '&gl=' + encodeURIComponent(url.searchParams.get('gl') || 'KR') +
+            '&ceid=' + encodeURIComponent(url.searchParams.get('ceid') || 'KR:ko'),
+            cors, {}
+          );
+        case '/trends/nate':
+          return await trendsNate(cors);
+        default:
+          return json({ ok: false, error: '알 수 없는 경로입니다: ' + url.pathname }, 404, cors);
+      }
+    } catch (err) {
+      return json({
+        ok: false,
+        code: 'WORKER_ERROR',
+        error: (err && err.message) ? err.message : 'Worker 내부 오류'
+      }, 500, cors);
+    }
+  }
+};
+
+/* ---------------- CORS ----------------
+ * ALLOW_ORIGIN 이 비어 있으면 "*" — 파일로 열 때(file://)는 Origin 이 "null" 이라
+ * "*" 여야 동작합니다. GitHub Pages 주소를 넣으면 그 주소에서만 허용됩니다. */
+function corsHeaders(env, request) {
+  const origin = request.headers.get('Origin') || '';
+  const allowed = String(env.ALLOW_ORIGIN || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+  let allow = '*';
+  if (allowed.length) {
+    allow = allowed.indexOf(origin) >= 0 ? origin : allowed[0];
+  } else if (origin) {
+    allow = '*';
+  }
+  return {
+    'Access-Control-Allow-Origin': allow,
+    'Access-Control-Allow-Methods': 'GET,HEAD,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, x-proxy-key, x-naver-ad-license, x-naver-ad-secret, x-naver-ad-customer, x-naver-client-id, x-naver-client-secret',
+    'Access-Control-Max-Age': '86400',
+    'Access-Control-Expose-Headers': 'X-Naver-Error',
+    'Vary': 'Origin',
+    'Cache-Control': 'no-store'
+  };
+}
+
+function json(body, status, cors) {
+  const headers = Object.assign({ 'Content-Type': 'application/json; charset=utf-8' }, cors || {});
+  return new Response(JSON.stringify(body), { status: status || 200, headers });
+}
+
+function text(body, status, cors, type) {
+  const headers = Object.assign({ 'Content-Type': type || 'text/plain; charset=utf-8' }, cors || {});
+  return new Response(body, { status: status || 200, headers });
+}
+
+/* ---------------- 자격 증명 ---------------- */
+function hasAdCredentials(env, request) {
+  return !!((env.NAVER_AD_LICENSE || header(request, 'x-naver-ad-license')) &&
+            (env.NAVER_AD_SECRET || header(request, 'x-naver-ad-secret')) &&
+            (env.NAVER_AD_CUSTOMER_ID || header(request, 'x-naver-ad-customer')));
+}
+function hasBlogCredentials(env, request) {
+  return !!((env.NAVER_CLIENT_ID || header(request, 'x-naver-client-id')) &&
+            (env.NAVER_CLIENT_SECRET || header(request, 'x-naver-client-secret')));
+}
+function header(request, name) {
+  const v = request.headers.get(name);
+  return v ? String(v).trim() : '';
+}
+
+async function hmacBase64(secret, message) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(message));
+  const bytes = new Uint8Array(sig);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+
+/* ---------------- 검색광고 API (/keywordstool) ----------------
+ * 서명 규칙: base64(HMAC-SHA256(secretKey, timestamp + "." + "GET" + "." + "/keywordstool"))
+ * 헤더: X-Timestamp, X-API-KEY(액세스라이선스), X-Customer(고객ID), X-Signature  */
+async function adKeywordstool(url, request, env, cors) {
+  const license = env.NAVER_AD_LICENSE || header(request, 'x-naver-ad-license');
+  const secret = env.NAVER_AD_SECRET || header(request, 'x-naver-ad-secret');
+  const customer = env.NAVER_AD_CUSTOMER_ID || header(request, 'x-naver-ad-customer');
+
+  if (!license || !secret || !customer) {
+    return json({
+      ok: false,
+      code: 'NO_CREDENTIALS',
+      error: '검색광고 API 키가 없습니다. Worker 환경 변수(NAVER_AD_LICENSE / NAVER_AD_SECRET / NAVER_AD_CUSTOMER_ID) 또는 이 페이지 설정에 키를 넣어 주세요.'
+    }, 400, cors);
+  }
+
+  const hints = (url.searchParams.get('hintKeywords') || url.searchParams.get('hintKeywords') || '').trim();
+  if (!hints) {
+    return json({ ok: false, code: 'NO_KEYWORDS', error: 'hintKeywords 파라미터가 필요합니다.' }, 400, cors);
+  }
+
+  const showDetail = url.searchParams.get('showDetail');
+  let qs = 'hintKeywords=' + encodeURIComponent(hints);
+  if (showDetail) qs += '&showDetail=' + encodeURIComponent(showDetail);
+
+  const path = '/keywordstool';
+  const method = 'GET';
+  const timestamp = String(Date.now());
+  const signature = await hmacBase64(secret, timestamp + '.' + method + '.' + path);
+
+  const upstream = await fetch(AD_HOST + path + '?' + qs, {
+    method: 'GET',
+    headers: {
+      'X-Timestamp': timestamp,
+      'X-API-KEY': license,
+      'X-Customer': customer,
+      'X-Signature': signature,
+      'Accept': 'application/json'
+    }
+  });
+
+  const bodyText = await upstream.text();
+  return passthrough(upstream.status, bodyText, cors);
+}
+
+/* ---------------- 오픈 API 블로그 검색 (/blog) ---------------- */
+async function blogSearch(url, request, env, cors) {
+  const clientId = env.NAVER_CLIENT_ID || header(request, 'x-naver-client-id');
+  const clientSecret = env.NAVER_CLIENT_SECRET || header(request, 'x-naver-client-secret');
+
+  if (!clientId || !clientSecret) {
+    return json({
+      ok: false,
+      code: 'NO_CREDENTIALS',
+      error: '오픈 API 키가 없습니다. Worker 환경 변수(NAVER_CLIENT_ID / NAVER_CLIENT_SECRET) 또는 이 페이지 설정에 키를 넣어 주세요.'
+    }, 400, cors);
+  }
+
+  const query = (url.searchParams.get('query') || '').trim();
+  if (!query) {
+    return json({ ok: false, code: 'NO_QUERY', error: 'query 파라미터가 필요합니다.' }, 400, cors);
+  }
+
+  const display = Math.min(Math.max(parseInt(url.searchParams.get('display') || '1', 10) || 1, 1), 100);
+  const sort = url.searchParams.get('sort') === 'date' ? 'date' : 'sim';
+
+  const upstream = await fetch(
+    OPEN_HOST + '/v1/search/blog.json?query=' + encodeURIComponent(query) +
+    '&display=' + display + '&sort=' + sort,
+    {
+      method: 'GET',
+      headers: {
+        'X-Naver-Client-Id': clientId,
+        'X-Naver-Client-Secret': clientSecret,
+        'Accept': 'application/json'
+      }
+    }
+  );
+
+  const bodyText = await upstream.text();
+  return passthrough(upstream.status, bodyText, cors);
+}
+
+function passthrough(status, bodyText, cors) {
+  let body = bodyText;
+  try {
+    const parsed = JSON.parse(bodyText);
+    body = JSON.stringify(parsed);
+    if (status >= 400 && parsed && parsed.errorMessage) {
+      body = JSON.stringify({ ok: false, code: 'UPSTREAM', error: parsed.errorMessage, upstreamStatus: status, raw: parsed });
+    }
+  } catch (e) { /* JSON이 아니면 그대로 전달 */ }
+  const headers = Object.assign({ 'Content-Type': 'application/json; charset=utf-8' }, cors, { 'X-Upstream-Status': String(status) });
+  return new Response(body, { status: status, headers: headers });
+}
+
+/* ---------------- 트렌드 소스 ---------------- */
+async function trendsSignal(cors) {
+  const upstream = await fetch('https://api.signal.bz/news/realtime', {
+    headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0 GoldenKeywordProxy' },
+    cf: { cacheTtl: 30, cacheEverything: true }
+  });
+  const bodyText = await upstream.text();
+  return passthrough(upstream.status, bodyText, cors);
+}
+
+async function trendsRss(target, cors, headers) {
+  const upstream = await fetch(target, {
+    headers: Object.assign({
+      'Accept': 'application/rss+xml, application/xml;q=0.9, */*;q=0.8',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0 Safari/537.36'
+    }, headers || {}),
+    cf: { cacheTtl: 60, cacheEverything: true }
+  });
+  const bodyText = await upstream.text();
+  const out = new Response(bodyText, {
+    status: upstream.status,
+    headers: Object.assign({ 'Content-Type': 'application/xml; charset=utf-8' }, cors)
+  });
+  return out;
+}
+
+/* 네이트 랭킹뉴스: 페이지가 EUC-KR 이라 Worker에서는 제목 바이트만 잘라 base64로 넘기고,
+ * 한글 변환은 브라우저의 TextDecoder('euc-kr')가 합니다. */
+async function trendsNate(cors) {
+  const upstream = await fetch('https://news.nate.com/rank/interest?mid=n1000', {
+    headers: {
+      'Accept': 'text/html,application/xhtml+xml',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0 Safari/537.36',
+      'Referer': 'https://news.nate.com/'
+    },
+    cf: { cacheTtl: 60, cacheEverything: true }
+  });
+  if (!upstream.ok) {
+    return json({ ok: false, code: 'UPSTREAM', error: '네이트 응답 ' + upstream.status }, 502, cors);
+  }
+  const buf = await upstream.arrayBuffer();
+  const latin = toLatin1(buf);
+  const titles = extractNateTitles(latin, 40);
+  return json({ ok: true, charset: 'euc-kr', count: titles.length, titles: titles }, 200, cors);
+}
+
+function toLatin1(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let out = '';
+  const CHUNK = 0x8000;
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    out += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + CHUNK, bytes.length)));
+  }
+  return out;
+}
+
+function extractNateTitles(latin, limit) {
+  const out = [];
+  const seen = Object.create(null);
+  /* 네이트는 상위 5개만 <h2 class="tit">, 나머지는 <span class="tit"> 로 내려준다 */
+  const re = /<(h2|strong|span)[^>]*class="[^"]*\btit\b[^"]*"[^>]*>([\s\S]*?)<\/\1>/g;
+  {
+    let m;
+    while ((m = re.exec(latin)) !== null && out.length < limit) {
+      let raw = m[2]
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&apos;/g, "'")
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (!raw || raw.length < 6) continue;
+      if (seen[raw]) continue;
+      seen[raw] = 1;
+      out.push(btoa(raw));
+    }
+  }
+  return out;
+}
+</script>
+
+<script>
+/* ---- lock ---- */
+
+(function () {
+  'use strict';
+
+  var PASSWORD_HASH = '9552e277ebcc7fa191292c6e900d94dfe6e837d8abf76a2da927d4530d2c8f69';
+  var STORE_KEY = 'rp.lock.v1';
+  var STORE_VAL = 'unlocked';
+
+  /* ---------- pure-JS SHA-256 (works on https:// and file://) ---------- */
+  var K = [
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+  ];
+
+  function utf8Bytes(str) {
+    var out = [], i, c, d, cp;
+    for (i = 0; i < str.length; i++) {
+      c = str.charCodeAt(i);
+      if (c < 0x80) {
+        out.push(c);
+      } else if (c < 0x800) {
+        out.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f));
+      } else if (c >= 0xd800 && c <= 0xdbff && i + 1 < str.length &&
+                 (d = str.charCodeAt(i + 1)) >= 0xdc00 && d <= 0xdfff) {
+        cp = 0x10000 + ((c - 0xd800) << 10) + (d - 0xdc00);
+        out.push(0xf0 | (cp >> 18), 0x80 | ((cp >> 12) & 0x3f),
+                 0x80 | ((cp >> 6) & 0x3f), 0x80 | (cp & 0x3f));
+        i++;
+      } else {
+        out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
+      }
+    }
+    return out;
+  }
+
+  function sha256Hex(str) {
+    var bytes = utf8Bytes(String(str == null ? '' : str));
+    var len = bytes.length;
+    var total = (((len + 9) + 63) >> 6) << 6;
+    var msg = new Array(total);
+    var i;
+
+    for (i = 0; i < len; i++) msg[i] = bytes[i] & 0xff;
+    msg[len] = 0x80;
+    for (i = len + 1; i < total; i++) msg[i] = 0;
+
+    var hi = Math.floor(len / 536870912);
+    var lo = (len * 8) >>> 0;
+    msg[total - 8] = (hi >>> 24) & 0xff;
+    msg[total - 7] = (hi >>> 16) & 0xff;
+    msg[total - 6] = (hi >>> 8) & 0xff;
+    msg[total - 5] = hi & 0xff;
+    msg[total - 4] = (lo >>> 24) & 0xff;
+    msg[total - 3] = (lo >>> 16) & 0xff;
+    msg[total - 2] = (lo >>> 8) & 0xff;
+    msg[total - 1] = lo & 0xff;
+
+    var H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+             0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+    var w = new Array(64);
+    var off, a, b, c, d, e, f, g, h, t1, t2, s0, s1, ch, maj, j, tmp;
+
+    for (off = 0; off < total; off += 64) {
+      for (j = 0; j < 16; j++) {
+        w[j] = ((msg[off + j * 4] << 24) | (msg[off + j * 4 + 1] << 16) |
+                (msg[off + j * 4 + 2] << 8) | msg[off + j * 4 + 3]) >>> 0;
+      }
+      for (j = 16; j < 64; j++) {
+        tmp = w[j - 15];
+        s0 = ((tmp >>> 7) | (tmp << 25)) ^ ((tmp >>> 18) | (tmp << 14)) ^ (tmp >>> 3);
+        tmp = w[j - 2];
+        s1 = ((tmp >>> 17) | (tmp << 15)) ^ ((tmp >>> 19) | (tmp << 13)) ^ (tmp >>> 10);
+        w[j] = (w[j - 16] + s0 + w[j - 7] + s1) >>> 0;
+      }
+      a = H[0]; b = H[1]; c = H[2]; d = H[3];
+      e = H[4]; f = H[5]; g = H[6]; h = H[7];
+      for (j = 0; j < 64; j++) {
+        s1 = ((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7));
+        ch = (e & f) ^ (~e & g);
+        t1 = (h + s1 + ch + K[j] + w[j]) >>> 0;
+        s0 = ((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10));
+        maj = (a & b) ^ (a & c) ^ (b & c);
+        t2 = (s0 + maj) >>> 0;
+        h = g; g = f; f = e; e = (d + t1) >>> 0;
+        d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+      }
+      H[0] = (H[0] + a) >>> 0; H[1] = (H[1] + b) >>> 0;
+      H[2] = (H[2] + c) >>> 0; H[3] = (H[3] + d) >>> 0;
+      H[4] = (H[4] + e) >>> 0; H[5] = (H[5] + f) >>> 0;
+      H[6] = (H[6] + g) >>> 0; H[7] = (H[7] + h) >>> 0;
+    }
+    var hex = '';
+    for (i = 0; i < 8; i++) hex += ('00000000' + H[i].toString(16)).slice(-8);
+    return hex;
+  }
+
+  function sameHex(a, b) {
+    if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
+    var diff = 0, i;
+    for (i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    return diff === 0;
+  }
+
+  function normalize(value) {
+    return String(value == null ? '' : value).replace(/^\s+|\s+$/g, '');
+  }
+
+  function verify(value) {
+    return sameHex(sha256Hex(normalize(value)), PASSWORD_HASH);
+  }
+
+  /* ---------- session unlock state ---------- */
+  var memoryUnlocked = false;
+
+  function isUnlocked() {
+    try { return window.sessionStorage.getItem(STORE_KEY) === STORE_VAL; }
+    catch (e) { return memoryUnlocked; }
+  }
+
+  function saveUnlocked(on) {
+    memoryUnlocked = !!on;
+    try {
+      if (on) window.sessionStorage.setItem(STORE_KEY, STORE_VAL);
+      else window.sessionStorage.removeItem(STORE_KEY);
+    } catch (e) { /* storage blocked: keep the state in memory for this page only */ }
+  }
+
+  /* ---------- screen ---------- */
+  var root = document.documentElement;
+  var form = document.getElementById('lockForm');
+  var input = document.getElementById('lockInput');
+  var errorEl = document.getElementById('lockError');
+  var eyeBtn = document.getElementById('lockEye');
+  var submitBtn = document.getElementById('lockSubmit');
+  var wrongCount = 0;
+  var cooling = false;
+
+  function focusInput() {
+    if (!input || isUnlocked()) return;
+    try { input.focus({ preventScroll: true }); }
+    catch (e) { try { input.focus(); } catch (e2) {} }
+    try { input.setSelectionRange(input.value.length, input.value.length); } catch (e3) {}
+  }
+
+  function clearError() {
+    if (errorEl) { errorEl.textContent = ''; errorEl.hidden = true; }
+    if (input) input.classList.remove('err');
+  }
+
+  function resetEye() {
+    if (!input) return;
+    input.type = 'password';
+    if (eyeBtn) {
+      eyeBtn.textContent = '보기';
+      eyeBtn.setAttribute('aria-label', '비밀번호 보기');
+    }
+  }
+
+  function applyState() {
+    var unlocked = isUnlocked();
+    if (unlocked) root.classList.add('rp-unlocked');
+    else root.classList.remove('rp-unlocked');
+
+    resetEye();
+    if (input) input.value = '';
+    clearError();
+
+    if (unlocked) wrongCount = 0;
+    else setTimeout(focusInput, 40);
+  }
+
+  function showError(msg) {
+    if (errorEl) { errorEl.textContent = msg; errorEl.hidden = false; }
+    if (input) { input.value = ''; input.classList.add('err'); }
+    if (form) {
+      form.classList.remove('shake');
+      void form.offsetWidth;
+      form.classList.add('shake');
+      setTimeout(function () { if (form) form.classList.remove('shake'); }, 420);
+    }
+    focusInput();
+  }
+
+  function unlockNow() {
+    saveUnlocked(true);
+    applyState();
+    window.scrollTo(0, 0);
+  }
+
+  function lockNow() {
+    saveUnlocked(false);
+    applyState();
+    window.scrollTo(0, 0);
+  }
+
+  if (form) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (cooling) return;
+
+      var value = input ? input.value : '';
+      if (!normalize(value)) {
+        showError('비밀번호를 입력해 주세요.');
+        return;
+      }
+      if (verify(value)) {
+        unlockNow();
+        return;
+      }
+
+      wrongCount += 1;
+      showError('비밀번호가 맞지 않습니다. 다시 확인해 주세요.');
+
+      if (wrongCount >= 3) {
+        cooling = true;
+        var wait = Math.min(3000, (wrongCount - 2) * 800);
+        if (submitBtn) submitBtn.disabled = true;
+        if (errorEl) {
+          errorEl.textContent = '비밀번호를 ' + wrongCount + '번 틀렸습니다. ' +
+            (wait / 1000).toFixed(1) + '초 후 다시 시도해 주세요.';
+          errorEl.hidden = false;
+        }
+        setTimeout(function () {
+          cooling = false;
+          if (submitBtn) submitBtn.disabled = false;
+          focusInput();
+        }, wait);
+      }
+    });
+  }
+
+  if (eyeBtn) {
+    eyeBtn.addEventListener('click', function () {
+      if (!input) return;
+      var reveal = input.type === 'password';
+      input.type = reveal ? 'text' : 'password';
+      eyeBtn.textContent = reveal ? '숨기기' : '보기';
+      eyeBtn.setAttribute('aria-label', reveal ? '비밀번호 숨기기' : '비밀번호 보기');
+      focusInput();
+    });
+  }
+
+  applyState();
+
+  /* hook so the lock can be checked from automation */
+  window.RP_LOCK = {
+    hash: sha256Hex,
+    verify: verify,
+    isUnlocked: isUnlocked,
+    unlock: function () { unlockNow(); },
+    lock: function () { lockNow(); }
+  };
+})();
+
+
+/* ---- app ---- */
+/* =========================================================================
+   황금키워드 · 네이버 기회지수 수집기
+   총 검색 = 검색광고 API PC + 모바일 월간 검색량
+   블로그  = 오픈 API 블로그 검색 total
+   기회지수 = 총 검색 ÷ 블로그 (소수 둘째 자리)
+   ========================================================================= */
+(function () {
+  'use strict';
+
+  var LS_SET = 'gk.settings.v1';
+  var LS_CACHE = 'gk.cache.v1';
+  var LS_ROWS = 'gk.rows.v1';
+
+  var DEFAULTS = {
+    adLicense: '', adSecret: '', adCustomer: '',
+    clientId: '', clientSecret: '',
+    proxy: '', proxyKey: '',
+    delay: 350, ttl: 12,
+    count: 30, minSearch: 0, maxBlog: 0, minOpp: 0,
+    filter: '', sort: 'opp_desc', expand: true
+  };
+
+  var S = DEFAULTS;
+  var cache = {};
+  var rows = [];
+  var running = false;
+  var cancelFlag = false;
+  var demoMode = false;
+  var lastRunAt = 0;
+  var proxyInfo = { checked: false, ok: false, ad: false, blog: false, message: '' };
+  var credWarned = false;
+
+  /* ---------------- helpers ---------------- */
+  function $(id) { return document.getElementById(id); }
+  function on(el, ev, fn) { if (el) el.addEventListener(ev, fn); }
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function num(v) {
+    if (v === null || v === undefined || v === '' || isNaN(v)) return '—';
+    return Number(v).toLocaleString('ko-KR');
+  }
+  function kwKey(s) { return String(s || '').replace(/\s+/g, '').toLowerCase(); }
+  function toNum(v, dflt) { var n = parseFloat(String(v).replace(/,/g, '')); return isNaN(n) ? dflt : n; }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function stamp(d) {
+    d = d || new Date();
+    return d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + '_' + pad2(d.getHours()) + pad2(d.getMinutes());
+  }
+  function hhmm(ts) {
+    var d = new Date(ts);
+    return pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+  }
+
+  /* ---------------- settings ---------------- */
+  function loadSettings() {
+    var out = {};
+    for (var k in DEFAULTS) if (Object.prototype.hasOwnProperty.call(DEFAULTS, k)) out[k] = DEFAULTS[k];
+    try {
+      var raw = localStorage.getItem(LS_SET);
+      if (raw) {
+        var o = JSON.parse(raw);
+        for (var k2 in out) if (Object.prototype.hasOwnProperty.call(o, k2) && o[k2] !== null) out[k2] = o[k2];
+      }
+    } catch (e) { /* 저장소 차단 시 기본값 */ }
+    return out;
+  }
+  function saveSettings() {
+    try { localStorage.setItem(LS_SET, JSON.stringify(S)); } catch (e) { /* 무시 */ }
+  }
+
+  function applySettingsToUI() {
+    $('setAdLicense').value = S.adLicense || '';
+    $('setAdSecret').value = S.adSecret || '';
+    $('setAdCustomer').value = S.adCustomer || '';
+    $('setClientId').value = S.clientId || '';
+    $('setClientSecret').value = S.clientSecret || '';
+    $('setProxy').value = S.proxy || '';
+    $('setProxyKey').value = S.proxyKey || '';
+    $('setDelay').value = S.delay;
+    $('setTtl').value = S.ttl;
+    $('inpCount').value = S.count;
+    $('inpExpand').checked = !!S.expand;
+    $('inpMinSearch').value = S.minSearch ? S.minSearch : '';
+    $('inpMaxBlog').value = S.maxBlog ? S.maxBlog : '';
+    $('inpMinOpp').value = S.minOpp ? S.minOpp : '';
+    $('inpFilter').value = S.filter || '';
+    $('sortSelect').value = S.sort || 'opp_desc';
+  }
+
+  function readFilterInputs() {
+    S.count = Math.max(1, Math.min(500, Math.round(toNum($('inpCount').value, 30))));
+    S.expand = !!$('inpExpand').checked;
+    S.minSearch = Math.max(0, toNum($('inpMinSearch').value, 0));
+    S.maxBlog = Math.max(0, toNum($('inpMaxBlog').value, 0));
+    S.minOpp = Math.max(0, toNum($('inpMinOpp').value, 0));
+    S.filter = String($('inpFilter').value || '').trim();
+    S.sort = $('sortSelect').value || 'opp_desc';
+  }
+
+  /* ---------------- cache ---------------- */
+  function loadCache() {
+    try { cache = JSON.parse(localStorage.getItem(LS_CACHE) || '{}') || {}; }
+    catch (e) { cache = {}; }
+  }
+  function cacheCount() { return Object.keys(cache).length; }
+  function saveCache() {
+    try {
+      var keys = Object.keys(cache);
+      if (keys.length > 1500) {
+        keys.sort(function (a, b) { return (cache[a].ts || 0) - (cache[b].ts || 0); });
+        for (var i = 0; i < keys.length - 1500; i++) delete cache[keys[i]];
+      }
+      localStorage.setItem(LS_CACHE, JSON.stringify(cache));
+    } catch (e) {
+      /* 용량 초과 시 절반만 남긴다 */
+      try {
+        var ks = Object.keys(cache);
+        ks.sort(function (a, b) { return (cache[b].ts || 0) - (cache[a].ts || 0); });
+        var keep = {};
+        for (var j = 0; j < Math.min(300, ks.length); j++) keep[ks[j]] = cache[ks[j]];
+        localStorage.setItem(LS_CACHE, JSON.stringify(keep));
+      } catch (e2) { /* 무시 */ }
+    }
+  }
+  function cacheGet(keyword) {
+    var e = cache[kwKey(keyword)];
+    if (!e) return null;
+    var ttl = Math.max(1, toNum(S.ttl, 12)) * 3600000;
+    if (Date.now() - (e.ts || 0) > ttl) return null;
+    return e;
+  }
+  function cachePut(keyword, data) {
+    var e = { pc: data.pc, mobile: data.mobile, total: data.total, blog: data.blog, ts: Date.now() };
+    cache[kwKey(keyword)] = e;
+    saveCache();
+    updateCacheInfo();
+  }
+  function updateCacheInfo() {
+    var n = cacheCount();
+    $('cacheInfo').textContent = n
+      ? '캐시 ' + n + '개 · ' + S.ttl + '시간 동안 재호출 없이 사용'
+      : '캐시 비어 있음';
+  }
+
+  /* ---------------- toast ---------------- */
+  function toast(msg, tone) {
+    var wrap = $('toasts');
+    if (!wrap) return;
+    var el = document.createElement('div');
+    el.className = 'toast' + (tone ? ' ' + tone : '');
+    el.textContent = msg;
+    wrap.appendChild(el);
+    setTimeout(function () {
+      el.style.transition = 'opacity .25s ease, transform .25s ease';
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(6px)';
+      setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 260);
+    }, 3400);
+  }
+
+  /* ---------------- proxy ---------------- */
+  function proxyBase() { return String(S.proxy || '').trim().replace(/\/+$/, ''); }
+  function hasKeys(kind) {
+    if (kind === 'ad') return !!(S.adLicense && S.adSecret && S.adCustomer);
+    if (kind === 'blog') return !!(S.clientId && S.clientSecret);
+    return !!(S.adLicense && S.adSecret && S.adCustomer && S.clientId && S.clientSecret);
+  }
+  function authHeaders(kind) {
+    var h = {};
+    if (S.proxyKey) h['x-proxy-key'] = S.proxyKey;
+    if (kind === 'ad') {
+      if (!proxyInfo.ad) {
+        if (S.adLicense) h['x-naver-ad-license'] = S.adLicense;
+        if (S.adSecret) h['x-naver-ad-secret'] = S.adSecret;
+        if (S.adCustomer) h['x-naver-ad-customer'] = S.adCustomer;
+      }
+    } else if (kind === 'blog') {
+      if (!proxyInfo.blog) {
+        if (S.clientId) h['x-naver-client-id'] = S.clientId;
+        if (S.clientSecret) h['x-naver-client-secret'] = S.clientSecret;
+      }
+    }
+    return h;
+  }
+
+  function checkProxy(silent) {
+    var base = proxyBase();
+    proxyInfo = { checked: true, ok: false, ad: false, blog: false, message: '' };
+    if (!base) { updateConn(); return Promise.resolve(proxyInfo); }
+    return fetch(base + '/health', { headers: authHeaders('none'), cache: 'no-store' })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { r: r, j: j }; }); })
+      .then(function (res) {
+        if (res.r.ok && res.j && res.j.ok) {
+          proxyInfo.ok = true;
+          proxyInfo.ad = !!res.j.ad;
+          proxyInfo.blog = !!res.j.blog;
+          proxyInfo.message = '연결됨';
+        } else {
+          proxyInfo.message = (res.j && res.j.error) ? res.j.error : ('HTTP ' + res.r.status);
+        }
+        updateConn();
+        if (!silent) {
+          var el = $('proxyTestResult');
+          if (proxyInfo.ok) {
+            el.innerHTML = '<b style="color:#1F6D4A">연결됨.</b> Worker 키 — 검색광고 ' + (proxyInfo.ad ? 'O' : '없음') +
+              ' · 오픈 API ' + (proxyInfo.blog ? 'O' : '없음') + '. ' +
+              (proxyInfo.ad && proxyInfo.blog
+                ? '키가 Worker에 있으니 이 페이지에는 키를 넣지 않아도 됩니다.'
+                : 'Worker에 키가 없어 이 페이지에 입력한 키를 전달합니다.');
+          } else {
+            el.innerHTML = '<b style="color:#B23B2E">연결 실패.</b> ' + escapeHtml(proxyInfo.message) +
+              ' — 주소(https://…workers.dev)와 배포 상태를 확인하세요.';
+          }
+        }
+        return proxyInfo;
+      })
+      .catch(function (e) {
+        proxyInfo.message = '요청 실패 — ' + (e && e.message ? e.message : '네트워크');
+        updateConn();
+        if (!silent) {
+          $('proxyTestResult').innerHTML = '<b style="color:#B23B2E">연결 실패.</b> ' +
+            escapeHtml(proxyInfo.message) + ' — 주소가 맞는지, Worker가 배포됐는지 확인하세요.';
+        }
+        return proxyInfo;
+      });
+  }
+
+  function updateConn() {
+    var chip = $('connChip'), txt = $('connText');
+    if (!chip) return;
+    if (demoMode) { chip.className = 'conn demo'; txt.textContent = '샘플 데이터'; return; }
+    if (!proxyBase()) { chip.className = 'conn'; txt.textContent = '프록시 미설정'; return; }
+    if (proxyInfo.ok) {
+      var serverKeys = proxyInfo.ad && proxyInfo.blog;
+      if (serverKeys) { chip.className = 'conn ok'; txt.textContent = '프록시 · 서버 키'; }
+      else if (hasKeys('none')) { chip.className = 'conn ok'; txt.textContent = '프록시 · 브라우저 키'; }
+      else { chip.className = 'conn warn'; txt.textContent = '프록시 연결 · 키 필요'; }
+    } else {
+      chip.className = 'conn warn';
+      txt.textContent = proxyInfo.checked ? '프록시 확인 필요' : '프록시 미확인';
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s === undefined || s === null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  /* ---------------- API ---------------- */
+  function apiError(j, r) {
+    if (j) {
+      if (j.code === 'NO_CREDENTIALS') return j.error || 'API 키가 필요합니다.';
+      if (j.code === 'PROXY_KEY') return j.error || '프록시 키가 필요합니다.';
+      if (j.error) return j.error;
+    }
+    if (r && (r.status === 401 || r.status === 403)) return '인증 실패(' + r.status + ') — 키를 확인해 주세요.';
+    if (r && r.status === 429) return '호출 한도 초과(429) — 호출 간격을 늘리거나 잠시 후 다시 시도하세요.';
+    return 'API 오류' + (r ? ' ' + r.status : '');
+  }
+
+  function adCall(keywords) {
+    var base = proxyBase();
+    if (!base) return Promise.reject(new Error('프록시 URL이 설정되지 않았습니다.'));
+    var u = base + '/ad/keywordstool?hintKeywords=' + encodeURIComponent(keywords.join(',')) + '&showDetail=1';
+    return fetch(u, { headers: authHeaders('ad'), cache: 'no-store' }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        if (!r.ok || !j || j.ok === false) {
+          var err = new Error(apiError(j, r));
+          err.code = j && j.code;
+          throw err;
+        }
+        return j;
+      });
+    });
+  }
+
+  function blogCall(keyword) {
+    var base = proxyBase();
+    if (!base) return Promise.reject(new Error('프록시 URL이 설정되지 않았습니다.'));
+    var u = base + '/blog?query=' + encodeURIComponent(keyword) + '&display=1&sort=sim';
+    return fetch(u, { headers: authHeaders('blog'), cache: 'no-store' }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        if (!r.ok || !j || j.ok === false) {
+          var err = new Error(apiError(j, r));
+          err.code = j && j.code;
+          throw err;
+        }
+        return j;
+      });
+    });
+  }
+
+  function parseQc(v) {
+    if (v === null || v === undefined || v === '') return 0;
+    if (typeof v === 'number') return v;
+    var s = String(v).trim();
+    if (s.charAt(0) === '<') return 5;
+    var n = parseInt(s.replace(/[^0-9]/g, ''), 10);
+    return isNaN(n) ? 0 : n;
+  }
+
+  /* ---------------- 소스 ---------------- */
+  function sourceList() {
+    var out = [];
+    var boxes = document.querySelectorAll('#sourceList input[type=checkbox]');
+    for (var i = 0; i < boxes.length; i++) if (boxes[i].checked) out.push(boxes[i].value);
+    return out;
+  }
+
+  function headlineToKeyword(title) {
+    var t = String(title || '');
+    t = t.replace(/\[[^\]]*\]/g, ' ').replace(/\([^)]*\)/g, ' ').replace(/[〈〉《》「」『』]/g, ' ');
+    t = t.replace(/\s[-–—]\s[^-–—]{2,20}$/, ' ');
+    t = t.replace(/["'“”‘’<>]/g, ' ');
+    t = t.replace(/[.,·…!?~|]/g, ' ');
+    t = t.replace(/\s+/g, ' ').replace(/^ +| +$/g, '');
+    var words = t.split(' ').filter(function (w) { return w.length > 0; });
+    if (!words.length) return '';
+    words = words.slice(0, 3);
+    var last = words[words.length - 1];
+    if (words.length > 1 && last.length > 2) {
+      last = last.replace(/(으로서|으로써|에서는|에게서|이라고|라고|에서|에게|부터|까지|처럼|보다|이나|라도|은|는|이|가|을|를|의|에|도|만|과|와|로|서|며|고)$/, '');
+      if (last.length >= 2) words[words.length - 1] = last;
+    }
+    return words.join(' ').trim();
+  }
+
+  function parseRssTitles(xmlText) {
+    var out = [];
+    try {
+      var doc = new DOMParser().parseFromString(xmlText, 'text/xml');
+      if (doc.getElementsByTagName('parsererror').length) return out;
+      var items = doc.getElementsByTagName('item');
+      for (var i = 0; i < items.length; i++) {
+        var t = items[i].getElementsByTagName('title')[0];
+        if (t && t.textContent) out.push(t.textContent.trim());
+      }
+    } catch (e) { /* 파싱 실패 */ }
+    return out;
+  }
+
+  function b64ToTextEucKr(b64) {
+    try {
+      var bin = atob(b64);
+      var bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return new TextDecoder('euc-kr').decode(bytes);
+    } catch (e) { return ''; }
+  }
+
+  var SOURCE_LABEL = { signal: '시그널', google: '구글 트렌드', nate: '네이트', news: '뉴스 헤드라인' };
+
+  function fetchSignal() {
+    function viaDirect() {
+      return fetch('https://api.signal.bz/news/realtime', { cache: 'no-store' }).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      });
+    }
+    function viaProxy() {
+      var base = proxyBase();
+      if (!base) return Promise.reject(new Error('프록시 URL이 필요합니다.'));
+      return fetch(base + '/trends/signal', { headers: authHeaders('none'), cache: 'no-store' }).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      });
+    }
+    return viaDirect().catch(viaProxy).then(function (j) {
+      var out = [];
+      var top = (j && j.top10) || [];
+      for (var i = 0; i < top.length; i++) if (top[i] && top[i].keyword) out.push(top[i].keyword);
+      return out;
+    });
+  }
+
+  function requireProxy(name) {
+    if (!proxyBase()) throw new Error(name + ' 소스는 프록시가 필요합니다.');
+    return proxyBase();
+  }
+
+  function fetchGoogle() {
+    var base = requireProxy('구글 트렌드');
+    return fetch(base + '/trends/google?geo=KR', { headers: authHeaders('none'), cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+      .then(parseRssTitles);
+  }
+
+  function fetchNews() {
+    var base = requireProxy('뉴스 헤드라인');
+    return fetch(base + '/trends/news?hl=ko&gl=KR&ceid=KR:ko', { headers: authHeaders('none'), cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+      .then(parseRssTitles);
+  }
+
+  function fetchNate() {
+    var base = requireProxy('네이트');
+    return fetch(base + '/trends/nate', { headers: authHeaders('none'), cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (j) {
+        var out = [];
+        var arr = (j && j.titles) || [];
+        for (var i = 0; i < arr.length; i++) {
+          var t = b64ToTextEucKr(arr[i]);
+          if (t) out.push(t);
+        }
+        return out;
+      });
+  }
+
+  var SOURCE_FN = { signal: fetchSignal, google: fetchGoogle, nate: fetchNate, news: fetchNews };
+
+  function collectKeywords() {
+    if (running) return Promise.resolve();
+    var picked = sourceList();
+    if (!picked.length) { toast('가져올 소스를 하나 이상 선택해 주세요.', 'warn'); return Promise.resolve(); }
+    var btn = $('btnCollect');
+    var old = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '가져오는 중…';
+    var collected = [];
+    var failed = [];
+
+    var chain = Promise.resolve();
+    picked.forEach(function (name) {
+      chain = chain.then(function () {
+        return SOURCE_FN[name]().then(function (list) {
+          var n = 0;
+          for (var i = 0; i < list.length; i++) {
+            var k = headlineToKeyword(list[i]);
+            if (k && k.length >= 2) { collected.push(k); n++; }
+          }
+          if (!n) failed.push(SOURCE_LABEL[name] + ' 결과 없음');
+        }).catch(function (e) {
+          failed.push(SOURCE_LABEL[name] + ' ' + (e && e.message ? e.message : '실패'));
+        });
+      });
+    });
+
+    return chain.then(function () {
+      btn.disabled = false;
+      btn.textContent = old;
+      if (collected.length) {
+        appendSeeds(collected);
+        toast(collected.length + '개 키워드를 가져왔습니다.' + (failed.length ? ' (' + failed.join(' · ') + ')' : ''), 'good');
+      } else {
+        toast('키워드를 가져오지 못했습니다. ' + (failed.join(' · ') || ''), 'warn');
+      }
+    });
+  }
+
+  function seedKeywords() {
+    var raw = String($('seedInput').value || '');
+    var parts = raw.split(/[\n,;\t]+/);
+    var out = [], seen = {};
+    for (var i = 0; i < parts.length; i++) {
+      var k = parts[i].replace(/^\s*[#·\-]+\s*/, '').replace(/\s+/g, ' ').trim();
+      if (!k) continue;
+      var key = kwKey(k);
+      if (seen[key]) continue;
+      seen[key] = 1;
+      out.push(k);
+    }
+    return out;
+  }
+
+  function appendSeeds(list) {
+    var cur = seedKeywords();
+    var seen = {};
+    for (var i = 0; i < cur.length; i++) seen[kwKey(cur[i])] = 1;
+    for (var j = 0; j < list.length; j++) {
+      var k = String(list[j] || '').replace(/\s+/g, ' ').trim();
+      if (!k || seen[kwKey(k)]) continue;
+      seen[kwKey(k)] = 1;
+      cur.push(k);
+    }
+    var max = Math.max(1, Math.min(500, toNum(S.count, 30)));
+    var cut = cur.slice(0, Math.max(max, 60));
+    $('seedInput').value = cut.join('\n');
+    updateSeedCount();
+  }
+
+  function updateSeedCount() {
+    var n = seedKeywords().length;
+    $('seedCount').textContent = n;
+  }
+
+  /* ---------------- 조회 ---------------- */
+  function oppCalc(total, blog) {
+    if (total === null || total === undefined) return null;
+    if (blog === null || blog === undefined) return null;
+    if (blog > 0) return total / blog;
+    return total > 0 ? Infinity : null;
+  }
+
+  function mkRow(keyword, pc, mobile, total, blog, src, err) {
+    return {
+      keyword: keyword,
+      pc: pc,
+      mobile: mobile,
+      total: total,
+      blog: blog,
+      opp: oppCalc(total, blog),
+      src: src || 'live',
+      err: err || null
+    };
+  }
+
+  function setProgress(done, total, label) {
+    var p = $('progress');
+    if (!p) return;
+    p.hidden = false;
+    var pct = total > 0 ? Math.min(100, Math.round(done / total * 100)) : 0;
+    $('pbarFill').style.width = pct + '%';
+    $('pbarLabel').textContent = label || '조회 중';
+    $('pbarValue').textContent = done + ' / ' + total;
+  }
+  function hideProgress() { $('progress').hidden = true; $('pbarFill').style.width = '0%'; }
+
+  function setRunUI(on) {
+    running = on;
+    $('btnRun').disabled = on;
+    $('btnRun').textContent = on ? '조회 중…' : '조회 시작';
+    $('btnStop').hidden = !on;
+    $('btnCollect').disabled = on;
+  }
+
+  function runQuery() {
+    if (running) return;
+    readFilterInputs();
+    saveSettings();
+    var kws = seedKeywords();
+    if (!kws.length) { toast('키워드가 없습니다. 소스에서 가져오거나 직접 입력해 주세요.', 'warn'); return; }
+    if (!proxyBase()) {
+      openSettings();
+      toast('네이버 API 조회에는 CORS 프록시가 먼저 필요합니다. 가이드를 따라 Worker를 만들어 주세요.', 'warn');
+      return;
+    }
+    kws = kws.slice(0, S.count);
+    cancelFlag = false;
+    demoMode = false;
+    updateConn();
+    setRunUI(true);
+    rows = [];
+    render();
+
+    var adCache = {};   /* kwKey -> {pc, mobile, rel} */
+    var pending = [];
+    var totalSteps = kws.length;
+    var done = 0;
+
+    /* 1) 캐시 먼저 */
+    for (var i = 0; i < kws.length; i++) {
+      var c = cacheGet(kws[i]);
+      if (c && c.blog !== null && c.total !== null && !isNaN(c.total)) {
+        rows.push(mkRow(kws[i], c.pc, c.mobile, c.total, c.blog, 'cache'));
+        done++;
+      } else {
+        pending.push(kws[i]);
+      }
+    }
+    render();
+    setProgress(done, totalSteps, '캐시 확인');
+
+    var credsFailed = false;
+    function failAll(list, message) {
+      for (var i = 0; i < list.length; i++) {
+        rows.push(mkRow(list[i], null, null, null, null, 'live', message));
+      }
+    }
+
+    /* 2) 검색광고 API — 5개씩 묶어 조회, 응답에 연관검색어도 함께 온다 */
+    var batches = [];
+    for (var b = 0; b < pending.length; b += 5) batches.push(pending.slice(b, b + 5));
+
+    var chain = Promise.resolve();
+    batches.forEach(function (batch, bi) {
+      chain = chain.then(function () {
+        if (cancelFlag) return;
+        setProgress(done, totalSteps, '검색량 조회 ' + Math.min((bi + 1) * 5, pending.length) + '/' + pending.length);
+        return adCall(batch).then(function (j) {
+          var list = (j && j.keywordList) || [];
+          for (var i = 0; i < list.length; i++) {
+            var r = list[i];
+            var key = kwKey(r.relKeyword);
+            adCache[key] = { pc: parseQc(r.monthlyPcQcCnt), mobile: parseQc(r.monthlyMobileQcCnt), rel: r.relKeyword };
+          }
+          return sleep(Math.max(100, toNum(S.delay, 350)));
+        }).catch(function (e) {
+          if (e && e.code === 'NO_CREDENTIALS') {
+            credsFailed = true;
+            failAll(batch, e.message);
+          } else if (e && e.code === 'PROXY_KEY') {
+            credsFailed = true;
+            failAll(batch, e.message);
+          } else {
+            failAll(batch, e && e.message ? e.message : '검색량 조회 실패');
+          }
+          return sleep(Math.max(150, toNum(S.delay, 350)));
+        });
+      });
+    });
+
+    chain = chain.then(function () {
+      if (credsFailed) {
+        toast('키가 필요합니다. 설정에서 API 키를 넣거나 Worker 환경 변수를 확인하세요.', 'warn');
+        openSettings();
+      }
+    });
+
+    /* 3) 연관검색어 확장 + 4) 블로그 문서 수 */
+    chain = chain.then(function () {
+      if (cancelFlag) return;
+
+      var candidates = pending.slice();
+      if (S.expand) {
+        var seen = {};
+        for (var i = 0; i < pending.length; i++) seen[kwKey(pending[i])] = 1;
+        var related = [];
+        for (var key in adCache) {
+          if (!Object.prototype.hasOwnProperty.call(adCache, key)) continue;
+          if (seen[key]) continue;
+          var a = adCache[key];
+          var vol = (a.pc || 0) + (a.mobile || 0);
+          related.push({ keyword: a.rel, vol: vol });
+        }
+        related.sort(function (x, y) { return y.vol - x.vol; });
+        var perSeed = Math.max(1, Math.min(8, Math.round(Math.max(1, pending.length ? (S.count - pending.length) / pending.length : 2))));
+        var cap = Math.max(0, S.count - pending.length);
+        for (var r2 = 0; r2 < related.length && candidates.length < pending.length + cap; r2++) {
+          var cand = related[r2];
+          if (seen[kwKey(cand.keyword)]) continue;
+          if (candidates.length >= pending.length + perSeed * pending.length) break;
+          seen[kwKey(cand.keyword)] = 1;
+          candidates.push(cand.keyword);
+        }
+      }
+
+      totalSteps = done + candidates.length;
+      var blogDelay = Math.min(300, Math.max(80, toNum(S.delay, 350) / 2));
+      var cchain = Promise.resolve();
+
+      candidates.forEach(function (k, idx) {
+        cchain = cchain.then(function () {
+          if (cancelFlag) return;
+          var ad = adCache[kwKey(k)];
+          var c2 = cacheGet(k);
+          var pc = ad ? ad.pc : (c2 ? c2.pc : null);
+          var mobile = ad ? ad.mobile : (c2 ? c2.mobile : null);
+          var total = (pc === null && mobile === null) ? null : (pc || 0) + (mobile || 0);
+          var displayName = ad ? ad.rel : k;
+
+          setProgress(done, totalSteps, '블로그 조회 · ' + displayName);
+
+          if (c2 && c2.blog !== null && c2.blog !== undefined) {
+            rows.push(mkRow(displayName, pc, mobile, total, c2.blog, 'cache'));
+            done++;
+            render();
+            return Promise.resolve();
+          }
+          return blogCall(k).then(function (j) {
+            var blog = (j && typeof j.total !== 'undefined') ? Number(j.total) : null;
+            rows.push(mkRow(displayName, pc, mobile, total, blog, 'live'));
+            if (blog !== null && total !== null) cachePut(displayName, { pc: pc, mobile: mobile, total: total, blog: blog });
+            done++;
+            render();
+            return sleep(blogDelay);
+          }).catch(function (e) {
+            rows.push(mkRow(displayName, pc, mobile, total, null, 'live', e && e.message ? e.message : '블로그 조회 실패'));
+            done++;
+            render();
+            return sleep(blogDelay);
+          });
+        });
+      });
+      return cchain;
+    }).then(function () {
+      setRunUI(false);
+      lastRunAt = Date.now();
+      hideProgress();
+      if (cancelFlag) toast('중단했습니다 · ' + rows.length + '개 결과', 'warn');
+      else toast('조회 완료 · ' + rows.length + '개', 'good');
+      render();
+      persistRows();
+      updateCacheInfo();
+      scrollToResults();
+    }).catch(function (e) {
+      setRunUI(false);
+      hideProgress();
+      toast('조회 중 멈췄습니다: ' + (e && e.message ? e.message : e), 'warn');
+      render();
+    });
+  }
+
+  function persistRows() {
+    try {
+      var slim = rows.map(function (r) {
+        return { keyword: r.keyword, pc: r.pc, mobile: r.mobile, total: r.total, blog: r.blog, opp: r.opp === Infinity ? 'inf' : r.opp, src: r.src, err: r.err };
+      });
+      localStorage.setItem(LS_ROWS, JSON.stringify({ at: lastRunAt, demo: demoMode, rows: slim }));
+    } catch (e) { /* 용량 초과 무시 */ }
+  }
+
+  function restoreRows() {
+    try {
+      var raw = localStorage.getItem(LS_ROWS);
+      if (!raw) return;
+      var o = JSON.parse(raw);
+      if (!o || !o.rows || !o.rows.length) return;
+      rows = o.rows.map(function (r) {
+        return {
+          keyword: r.keyword, pc: r.pc, mobile: r.mobile, total: r.total, blog: r.blog,
+          opp: r.opp === 'inf' ? Infinity : r.opp, src: r.src, err: r.err
+        };
+      });
+      lastRunAt = o.at || 0;
+      demoMode = !!o.demo;
+    } catch (e) { rows = []; }
+  }
+
+  /* ---------------- 표시 ---------------- */
+  function sortRows(list) {
+    var s = S.sort || 'opp_desc';
+    return list.slice().sort(function (a, b) {
+      function ov(r) { return (r.err || r.opp === null || r.opp === undefined) ? -Infinity : r.opp; }
+      if (s === 'opp_asc') return ov(a) - ov(b);
+      if (s === 'total_desc') return (b.total || 0) - (a.total || 0);
+      if (s === 'blog_asc') {
+        var ab = a.blog === null ? Infinity : a.blog;
+        var bb = b.blog === null ? Infinity : b.blog;
+        return ab - bb;
+      }
+      if (s === 'kw_asc') return String(a.keyword).localeCompare(String(b.keyword), 'ko');
+      return ov(b) - ov(a);
+    });
+  }
+
+  function filteredRows() {
+    var q = S.filter ? S.filter.toLowerCase() : '';
+    var list = rows.filter(function (r) {
+      if (r.err) return true;
+      if (S.minSearch > 0 && !(r.total >= S.minSearch)) return false;
+      if (S.maxBlog > 0 && !(r.blog !== null && r.blog <= S.maxBlog)) return false;
+      if (S.minOpp > 0 && !(r.opp !== null && r.opp >= S.minOpp)) return false;
+      if (q && String(r.keyword).toLowerCase().indexOf(q) < 0) return false;
+      return true;
+    });
+    return sortRows(list);
+  }
+
+  function oppHtml(r) {
+    if (r.err) return '<span class="oppv na">—</span>';
+    if (r.opp === null || r.opp === undefined) return '<span class="oppv na">—</span>';
+    var text = r.opp === Infinity ? '∞' : r.opp.toFixed(2);
+    var cls = 'oppv';
+    if (r.opp === Infinity || r.opp >= 100) cls += ' hi';
+    else if (r.opp >= 30) cls += ' mid';
+    return '<span class="' + cls + '">' + text + '</span>';
+  }
+
+  function render() {
+    var list = filteredRows();
+    var tbody = $('tbody');
+    var html = '';
+    for (var i = 0; i < list.length; i++) {
+      var r = list[i];
+      var sub = '';
+      if (r.err) {
+        sub = '<span class="sub" style="color:#B23B2E">' + escapeHtml(r.err) + '</span>';
+      } else if (r.pc !== null && r.pc !== undefined) {
+        sub = '<span class="sub">PC ' + num(r.pc) + ' · 모바일 ' + num(r.mobile) + (r.src === 'cache' ? ' · 캐시' : '') + '</span>';
+      } else if (r.src === 'cache') {
+        sub = '<span class="sub">캐시</span>';
+      }
+      html += '<tr' + (r.err ? ' class="err"' : '') + '>' +
+        '<td class="rankcol">' + (i + 1) + '</td>' +
+        '<td class="kw">' + escapeHtml(r.keyword) + sub + '</td>' +
+        '<td class="num" data-label="총 검색">' + (r.total === null || r.total === undefined ? '—' : num(r.total)) + '</td>' +
+        '<td class="num" data-label="블로그">' + (r.blog === null || r.blog === undefined ? '—' : num(r.blog)) + '</td>' +
+        '<td class="opp" data-label="기회지수">' + oppHtml(r) + '</td>' +
+        '</tr>';
+    }
+    tbody.innerHTML = html;
+
+    var sub2 = '';
+    if (lastRunAt) {
+      sub2 = (demoMode ? '샘플 데이터 · ' : '마지막 조회 ' + hhmm(lastRunAt) + ' · ') +
+        list.length + '개 표시' + (list.length !== rows.length ? ' / 전체 ' + rows.length + '개' : '');
+    } else {
+      sub2 = '아직 조회한 결과가 없습니다';
+    }
+    $('resCount').textContent = list.length;
+    $('resSub').textContent = sub2;
+
+    var empty = $('emptyState');
+    if (!list.length) {
+      empty.hidden = false;
+      if (rows.length) {
+        empty.querySelector('h3').textContent = '필터에 맞는 결과가 없습니다';
+        empty.querySelector('p').innerHTML = '최소 검색량·최대 블로그·최소 기회지수·검색어 필터를 조금 풀어 보세요.';
+        empty.querySelector('.rows').innerHTML = '<button class="btn line" id="btnResetFilter" type="button">필터 초기화</button>';
+        var rb = $('btnResetFilter');
+        if (rb) rb.onclick = function () {
+          $('inpMinSearch').value = ''; $('inpMaxBlog').value = ''; $('inpMinOpp').value = ''; $('inpFilter').value = '';
+          readFilterInputs(); render();
+        };
+      } else {
+        empty.querySelector('h3').textContent = '아직 담긴 키워드가 없습니다';
+        empty.querySelector('p').innerHTML = '왼쪽에서 소스를 고르거나 키워드를 붙여넣고 <b>조회 시작</b>을 누르세요. API 키와 프록시가 없어도 예시 데이터로 표·필터·다운로드를 그대로 확인할 수 있습니다.';
+        empty.querySelector('.rows').innerHTML = '<button class="btn gold" id="btnSample2" type="button">샘플 데이터로 바로 체험</button>';
+        var sb = $('btnSample2');
+        if (sb) sb.onclick = loadSample;
+      }
+    } else {
+      empty.hidden = true;
+    }
+    updateCacheInfo();
+  }
+
+  /* ---------------- 샘플 ---------------- */
+  var SAMPLE = [
+    ['젠슨 황 폭언 파문', 34210, 107],
+    ['중국 여학생 순금 선물', 36210, 148],
+    ['송민규 곽민선 임신', 64510, 277],
+    ['박지윤 약물러 최동석', 149720, 660],
+    ['공기중 사격 행인 사망', 26610, 122],
+    ['이진우 나무위키', 148300, 1049],
+    ['알케마이즈드', 39660, 371],
+    ['설인아 문상민 MAMA', 44810, 454],
+    ['라이어 기본정보', 725440, 7678],
+    ['부안 온천탕 화상 사고', 13910, 160],
+    ['재혼 황후 기본정보', 584370, 6917],
+    ['라우텔 못', 41920, 552],
+    ['대구 아쿠아렌타일 페어', 4050, 62],
+    ['최미나수 레드카펫 추위', 48910, 754],
+    ['흄이 눈밀지', 6080, 96],
+    ['맛피아 감자스틱', 110700, 1788],
+    ['추성훈 은퇴전', 313900, 5153],
+    ['보검매직컬2 고경표 제외', 26610, 455],
+    ['포켓몬 레조넌스', 35800, 617],
+    ['카광', 195800, 4075],
+    ['류효영', 227900, 5180],
+    ['정철원 임지열 트레이드', 41310, 958],
+    ['브레인악셀', 170700, 4143],
+    ['추성훈 은퇴전 중계', 46250, 1153],
+    ['머무르 가수', 83040, 2094],
+    ['개녹시 히죽이', 4040, 105],
+    ['파파존스 한고동', 17780, 493],
+    ['2026 아쿠아 렌타일페어', 2880, 88],
+    ['리트냥이 유서', 8980, 301],
+    ['그것이 알고 싶다 1512회', 46020, 1662],
+    ['머무르', 263000, 9511],
+    ['빡치와레', 480, 18],
+    ['라이어 엊부작', 126410, 4887],
+    ['김차차 울고 그름', 1150, 48],
+    ['폭설 평점', 206700, 9203],
+    ['라이어 원작 결말', 121990, 5600],
+    ['2026 포항 불꽃축제', 135630, 6300]
+  ];
+
+  function scrollToResults() {
+    if (window.innerWidth > 900) return;
+    var el = $('results');
+    if (el) { try { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { el.scrollIntoView(); } }
+  }
+
+  function loadSample() {
+    if (running) return;
+    rows = SAMPLE.map(function (s) {
+      return mkRow(s[0], null, null, s[1], s[2], 'sample');
+    });
+    demoMode = true;
+    lastRunAt = Date.now();
+    $('seedInput').value = SAMPLE.map(function (s) { return s[0]; }).join('\n');
+    updateSeedCount();
+    readFilterInputs();
+    render();
+    updateConn();
+    hideProgress();
+    toast('샘플 데이터 37개를 불러왔습니다. 필터·정렬·다운로드를 그대로 시험해 보세요.', 'good');
+    scrollToResults();
+  }
+
+  /* ---------------- 다운로드 ---------------- */
+  function downloadList() { return filteredRows(); }
+
+  function csvCell(v) {
+    var s = String(v === null || v === undefined ? '' : v);
+    if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+
+  function downloadCsv() {
+    var list = downloadList();
+    if (!list.length) { toast('내려받을 결과가 없습니다.', 'warn'); return; }
+    var lines = ['키워드,총 검색,블로그,기회지수'];
+    for (var i = 0; i < list.length; i++) {
+      var r = list[i];
+      var opp = r.err || r.opp === null || r.opp === undefined ? '' : (r.opp === Infinity ? '999999' : r.opp.toFixed(2));
+      lines.push([csvCell(r.keyword), r.total === null ? '' : r.total, r.blog === null ? '' : r.blog, opp].join(','));
+    }
+    var blob = new Blob(['\ufeff' + lines.join('\r\n') + '\r\n'], { type: 'text/csv;charset=utf-8' });
+    saveBlob(blob, '황금키워드_' + stamp() + '.csv');
+    toast(list.length + '개를 CSV로 내려받았습니다.', 'good');
+  }
+
+  function saveBlob(blob, filename) {
+    var a = document.createElement('a');
+    var url = URL.createObjectURL(blob);
+    a.href = url;
+    a.download = filename;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      URL.revokeObjectURL(url);
+      if (a.parentNode) a.parentNode.removeChild(a);
+    }, 1500);
+  }
+
+  var CRC_TABLE = null;
+  function crcTable() {
+    if (CRC_TABLE) return CRC_TABLE;
+    var t = new Uint32Array(256);
+    for (var n = 0; n < 256; n++) {
+      var c = n;
+      for (var k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      t[n] = c >>> 0;
+    }
+    CRC_TABLE = t;
+    return t;
+  }
+  function crc32(bytes) {
+    var t = crcTable(), c = 0xFFFFFFFF;
+    for (var i = 0; i < bytes.length; i++) c = t[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  function zipStore(entries) {
+    var enc = new TextEncoder();
+    var parts = [];
+    var central = [];
+    var offset = 0;
+    var d = new Date();
+    var dosTime = ((d.getHours() << 11) | (d.getMinutes() << 5) | (Math.floor(d.getSeconds() / 2))) & 0xFFFF;
+    var dosDate = (((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()) & 0xFFFF;
+
+    for (var i = 0; i < entries.length; i++) {
+      var e = entries[i];
+      var name = enc.encode(e.name);
+      var data = e.data;
+      var crc = crc32(data);
+
+      var lh = new Uint8Array(30 + name.length);
+      var dv = new DataView(lh.buffer);
+      dv.setUint32(0, 0x04034b50, true);
+      dv.setUint16(4, 20, true);
+      dv.setUint16(6, 0x0800, true);
+      dv.setUint16(8, 0, true);
+      dv.setUint16(10, dosTime, true);
+      dv.setUint16(12, dosDate, true);
+      dv.setUint32(14, crc, true);
+      dv.setUint32(18, data.length, true);
+      dv.setUint32(22, data.length, true);
+      dv.setUint16(26, name.length, true);
+      dv.setUint16(28, 0, true);
+      lh.set(name, 30);
+      parts.push(lh, data);
+
+      var cd = new Uint8Array(46 + name.length);
+      var cv = new DataView(cd.buffer);
+      cv.setUint32(0, 0x02014b50, true);
+      cv.setUint16(4, 20, true);
+      cv.setUint16(6, 20, true);
+      cv.setUint16(8, 0x0800, true);
+      cv.setUint16(10, 0, true);
+      cv.setUint16(12, dosTime, true);
+      cv.setUint16(14, dosDate, true);
+      cv.setUint32(16, crc, true);
+      cv.setUint32(20, data.length, true);
+      cv.setUint32(24, data.length, true);
+      cv.setUint16(28, name.length, true);
+      cv.setUint16(30, 0, true);
+      cv.setUint16(32, 0, true);
+      cv.setUint16(34, 0, true);
+      cv.setUint16(36, 0, true);
+      cv.setUint32(38, 0, true);
+      cv.setUint32(42, offset, true);
+      cd.set(name, 46);
+      central.push(cd);
+
+      offset += lh.length + data.length;
+    }
+
+    var centralSize = 0;
+    for (var j = 0; j < central.length; j++) centralSize += central[j].length;
+
+    var end = new Uint8Array(22);
+    var ev = new DataView(end.buffer);
+    ev.setUint32(0, 0x06054b50, true);
+    ev.setUint16(4, 0, true);
+    ev.setUint16(6, 0, true);
+    ev.setUint16(8, entries.length, true);
+    ev.setUint16(10, entries.length, true);
+    ev.setUint32(12, centralSize, true);
+    ev.setUint32(16, offset, true);
+    ev.setUint16(20, 0, true);
+
+    return new Blob(parts.concat(central, [end]), { type: 'application/zip' });
+  }
+
+  function xmlEsc(s) {
+    return String(s === null || s === undefined ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+  }
+
+  function colName(i) { return ['A', 'B', 'C', 'D', 'E'][i]; }
+
+  function buildXlsxBlob(list) {
+    var enc = new TextEncoder();
+    var header = ['키워드', '총 검색', '블로그', '기회지수'];
+    var dataRows = [header];
+    for (var i = 0; i < list.length; i++) {
+      var r = list[i];
+      dataRows.push([
+        r.keyword,
+        (r.total === null || r.total === undefined) ? '' : r.total,
+        (r.blog === null || r.blog === undefined) ? '' : r.blog,
+        (r.err || r.opp === null || r.opp === undefined) ? '' : (r.opp === Infinity ? 999999 : Number(r.opp.toFixed(2)))
+      ]);
+    }
+
+    var sheet = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+      '<sheetViews><sheetView tabSelected="1" workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>' +
+      '<sheetFormatPr defaultRowHeight="16"/>' +
+      '<cols><col min="1" max="1" width="40" customWidth="1"/><col min="2" max="3" width="14" customWidth="1"/><col min="4" max="4" width="12" customWidth="1"/></cols>' +
+      '<sheetData>';
+
+    for (var ri = 0; ri < dataRows.length; ri++) {
+      var row = dataRows[ri];
+      sheet += '<row r="' + (ri + 1) + '"' + (ri === 0 ? ' ht="24" customHeight="1"' : '') + '>';
+      for (var ci = 0; ci < row.length; ci++) {
+        var ref = colName(ci) + (ri + 1);
+        var val = row[ci];
+        if (ri === 0) {
+          sheet += '<c r="' + ref + '" s="1" t="inlineStr"><is><t>' + xmlEsc(val) + '</t></is></c>';
+        } else if (ci === 0) {
+          sheet += '<c r="' + ref + '" s="0" t="inlineStr"><is><t>' + xmlEsc(val) + '</t></is></c>';
+        } else if (val === '' || val === null || val === undefined) {
+          sheet += '<c r="' + ref + '" s="' + (ci === 3 ? 3 : 2) + '"/>';
+        } else if (ci === 3) {
+          sheet += '<c r="' + ref + '" s="3"><v>' + Number(val).toFixed(2) + '</v></c>';
+        } else {
+          sheet += '<c r="' + ref + '" s="2"><v>' + String(val) + '</v></c>';
+        }
+      }
+      sheet += '</row>';
+    }
+    sheet += '</sheetData><autoFilter ref="A1:D' + dataRows.length + '"/></worksheet>';
+
+    var styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+      '<fonts count="2">' +
+      '<font><sz val="11"/><color theme="1"/><name val="맑은 고딕"/><family val="2"/></font>' +
+      '<font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="맑은 고딕"/><family val="2"/></font>' +
+      '</fonts>' +
+      '<fills count="3">' +
+      '<fill><patternFill patternType="none"/></fill>' +
+      '<fill><patternFill patternType="gray125"/></fill>' +
+      '<fill><patternFill patternType="solid"><fgColor rgb="FF1C1E22"/><bgColor indexed="64"/></patternFill></fill>' +
+      '</fills>' +
+      '<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border>' +
+      '<border><left style="thin"><color rgb="FFE3DFD3"/></left><right style="thin"><color rgb="FFE3DFD3"/></right><top style="thin"><color rgb="FFE3DFD3"/></top><bottom style="thin"><color rgb="FFE3DFD3"/></bottom><diagonal/></border>' +
+      '</borders>' +
+      '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+      '<cellXfs count="4">' +
+      '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf>' +
+      '<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' +
+      '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center"/></xf>' +
+      '<xf numFmtId="2" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center"/></xf>' +
+      '</cellXfs>' +
+      '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>' +
+      '</styleSheet>';
+
+    var contentTypes = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+      '<Default Extension="xml" ContentType="application/xml"/>' +
+      '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+      '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
+      '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+      '</Types>';
+
+    var rels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
+      '</Relationships>';
+
+    var workbook = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+      '<sheets><sheet name="황금키워드" sheetId="1" r:id="rId1"/></sheets></workbook>';
+
+    var wbRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
+      '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
+      '</Relationships>';
+
+    return zipStore([
+      { name: '[Content_Types].xml', data: enc.encode(contentTypes) },
+      { name: '_rels/.rels', data: enc.encode(rels) },
+      { name: 'xl/workbook.xml', data: enc.encode(workbook) },
+      { name: 'xl/_rels/workbook.xml.rels', data: enc.encode(wbRels) },
+      { name: 'xl/styles.xml', data: enc.encode(styles) },
+      { name: 'xl/worksheets/sheet1.xml', data: enc.encode(sheet) }
+    ]);
+  }
+
+  function downloadXlsx() {
+    var list = downloadList();
+    if (!list.length) { toast('내려받을 결과가 없습니다.', 'warn'); return; }
+    try {
+      var blob = buildXlsxBlob(list);
+      saveBlob(blob, '황금키워드_' + stamp() + '.xlsx');
+      toast(list.length + '개를 엑셀(.xlsx)로 내려받았습니다.', 'good');
+    } catch (e) {
+      toast('엑셀 생성 실패: ' + (e && e.message ? e.message : e), 'warn');
+    }
+  }
+
+  /* ---------------- 모달 ---------------- */
+  function openModal(id) { $(id).classList.add('open'); document.documentElement.style.overflow = 'hidden'; }
+  function closeModal(id) { $(id).classList.remove('open'); document.documentElement.style.overflow = ''; }
+
+  function openSettings() {
+    applySettingsToUI();
+    $('setShowKeys').checked = false;
+    toggleKeyVisibility(false);
+    openModal('settingsModal');
+    setTimeout(function () { $('setProxy').focus({ preventScroll: true }); }, 120);
+  }
+
+  function toggleKeyVisibility(show) {
+    ['setAdLicense', 'setAdSecret', 'setAdCustomer', 'setClientId', 'setClientSecret'].forEach(function (id) {
+      var el = $(id);
+      if (el) el.type = show ? 'text' : 'password';
+    });
+  }
+
+  function saveSettingsFromUI() {
+    S.adLicense = $('setAdLicense').value.trim();
+    S.adSecret = $('setAdSecret').value.trim();
+    S.adCustomer = $('setAdCustomer').value.trim();
+    S.clientId = $('setClientId').value.trim();
+    S.clientSecret = $('setClientSecret').value.trim();
+    S.proxy = $('setProxy').value.trim().replace(/\/+$/, '');
+    S.proxyKey = $('setProxyKey').value.trim();
+    S.delay = Math.max(100, Math.min(3000, Math.round(toNum($('setDelay').value, 350))));
+    S.ttl = Math.max(1, Math.min(720, Math.round(toNum($('setTtl').value, 12))));
+    saveSettings();
+    applySettingsToUI();
+    updateCacheInfo();
+    demoMode = false;
+    closeModal('settingsModal');
+    if (proxyBase()) checkProxy(true).then(updateConn); else { proxyInfo = { checked: false, ok: false, ad: false, blog: false, message: '' }; updateConn(); }
+    toast('설정을 저장했습니다.', 'good');
+  }
+
+  function copyText(text, btn) {
+    function done(ok) {
+      if (btn) {
+        var old = btn.textContent;
+        btn.textContent = ok ? '복사됨 ✓' : '복사 실패';
+        setTimeout(function () { btn.textContent = old; }, 1600);
+      }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done(true); }, function () { fallback(); });
+    } else {
+      fallback();
+    }
+    function fallback() {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        done(ok);
+      } catch (e) { done(false); }
+    }
+  }
+
+  /* ---------------- init ---------------- */
+  function bind() {
+    var boxes = document.querySelectorAll('#sourceList input[type=checkbox]');
+    for (var i = 0; i < boxes.length; i++) {
+      (function (box) {
+        box.addEventListener('change', function () {
+          var lbl = box.parentNode;
+          if (box.checked) lbl.classList.add('on'); else lbl.classList.remove('on');
+        });
+      })(boxes[i]);
+    }
+
+    on($('seedInput'), 'input', function () {
+      var n = seedKeywords().length;
+      $('sourceHint').textContent = n ? n + '개 준비됨' : '소스 선택';
+      updateSeedCount();
+    });
+    on($('btnClearSeed'), 'click', function () {
+      $('seedInput').value = '';
+      updateSeedCount();
+      $('sourceHint').textContent = '소스 선택';
+    });
+
+    on($('btnCollect'), 'click', collectKeywords);
+    on($('btnRun'), 'click', runQuery);
+    on($('btnStop'), 'click', function () {
+      cancelFlag = true;
+      $('btnStop').disabled = true;
+      $('pbarLabel').textContent = '중단하는 중…';
+      setTimeout(function () { $('btnStop').disabled = false; }, 1200);
+    });
+    on($('btnSample'), 'click', loadSample);
+    on($('btnSampleM'), 'click', loadSample);
+
+    ['inpCount', 'inpExpand'].forEach(function (id) { on($(id), 'change', function () { readFilterInputs(); saveSettings(); }); });
+    ['inpMinSearch', 'inpMaxBlog', 'inpMinOpp', 'inpFilter', 'sortSelect'].forEach(function (id) {
+      on($(id), 'input', function () { readFilterInputs(); saveSettings(); render(); });
+      on($(id), 'change', function () { readFilterInputs(); saveSettings(); render(); });
+    });
+
+    on($('btnCsv'), 'click', downloadCsv);
+    on($('btnXlsx'), 'click', downloadXlsx);
+    on($('btnClearCache'), 'click', function () {
+      cache = {};
+      try { localStorage.removeItem(LS_CACHE); } catch (e) { /* 무시 */ }
+      updateCacheInfo();
+      toast('캐시를 비웠습니다. 다음 조회는 네이버 API를 다시 부릅니다.', 'good');
+    });
+
+    on($('btnSettings'), 'click', openSettings);
+    on($('settingsClose'), 'click', function () { closeModal('settingsModal'); });
+    on($('settingsCancel'), 'click', function () { closeModal('settingsModal'); });
+    on($('btnSaveSettings'), 'click', saveSettingsFromUI);
+    on($('setShowKeys'), 'change', function () { toggleKeyVisibility(this.checked); });
+    on($('btnTestProxy'), 'click', function () {
+      S.proxy = $('setProxy').value.trim().replace(/\/+$/, '');
+      S.proxyKey = $('setProxyKey').value.trim();
+      $('proxyTestResult').textContent = '확인 중…';
+      checkProxy(false);
+    });
+    on($('btnOpenGuide'), 'click', function () { openModal('guideModal'); });
+    on($('guideClose'), 'click', function () { closeModal('guideModal'); });
+    on($('guideOk'), 'click', function () { closeModal('guideModal'); });
+    on($('btnCopyWorker'), 'click', function () { copyText(workerSource(), this); });
+
+    document.querySelectorAll('.modal').forEach(function (m) {
+      m.addEventListener('mousedown', function (e) { if (e.target === m) closeModal(m.id); });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal.open').forEach(function (m) { closeModal(m.id); });
+      }
+    });
+  }
+
+  function workerSource() {
+    var el = $('workerCode');
+    return el ? el.textContent.replace(/^\n+/, '').replace(/\s+$/, '') : '';
+  }
+
+  function init() {
+    S = loadSettings();
+    loadCache();
+    restoreRows();
+    applySettingsToUI();
+    bind();
+    var view = $('workerCodeView');
+    if (view) view.textContent = workerSource();
+    var fd = $('filterDetails');
+    if (fd) fd.open = window.innerWidth > 900;
+    updateSeedCount();
+    render();
+    updateConn();
+    updateCacheInfo();
+    if (proxyBase()) checkProxy(true).then(function () { updateConn(); });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+
+  /* 자동 검증용 훅 (앱 동작에는 관여하지 않음) */
+  window.GK = {
+    state: function () { return { rows: rows.slice(), demo: demoMode, lastRunAt: lastRunAt, settings: S }; },
+    loadSample: loadSample,
+    run: runQuery,
+    render: render,
+    csv: downloadCsv,
+    xlsx: downloadXlsx,
+    buildXlsxBlob: buildXlsxBlob,
+    headlineToKeyword: headlineToKeyword,
+    setSettings: function (patch) {
+      for (var k in patch) if (Object.prototype.hasOwnProperty.call(patch, k)) S[k] = patch[k];
+      saveSettings(); applySettingsToUI(); updateConn(); render();
+    },
+    checkProxy: checkProxy,
+    workerSource: workerSource
+  };
+})();
+
+</script>
+</body>
+</html>
