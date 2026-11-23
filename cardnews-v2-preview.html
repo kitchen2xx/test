@@ -324,6 +324,13 @@ input[type=color]::-webkit-color-swatch{border:0;border-radius:4px}
   #mobileBar button svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
   #mobileBar button.on{background:var(--soft-2);color:var(--ink)}
 
+  /* 도구 막대가 줄바꿈되지 않게 */
+  #addBar{flex-wrap:nowrap}
+  .tool{white-space:nowrap;flex:0 0 auto}
+  .toolbar-hint{flex:0 0 auto;white-space:nowrap}
+  @media (max-width:1560px){ .toolbar-hint{display:none} }
+  #addBar{overflow:hidden}
+
   /* AI 패널 */
   .ai-field{display:block;margin-bottom:10px}
   .ai-field>span{display:block;font-size:11.5px;font-weight:600;color:var(--ink-2);margin-bottom:5px}

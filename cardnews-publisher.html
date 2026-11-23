@@ -305,6 +305,106 @@ input[type=color]::-webkit-color-swatch{border:0;border-radius:4px}
     .rp-lock-sub{margin-bottom:14px}
   }
 </style>
+<style id="cnV2Style">
+  /* ============================================================
+     v2 · AI 프롬프트/이미지 생성 패널 · 이미지 확대·이동 · 모바일 탭 레이아웃
+     기존 잠금 스타일(rpLockStyle)은 그대로 두고 여기서만 확장합니다.
+     ============================================================ */
+  #btnMore{display:none}
+  #mobileBar{
+    display:none;height:54px;flex:0 0 54px;background:var(--panel);
+    border-top:1px solid var(--line);align-items:stretch;
+    padding:0 4px env(safe-area-inset-bottom);z-index:30;
+  }
+  #mobileBar button{
+    flex:1;border:0;background:transparent;border-radius:11px;margin:5px 3px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    font-family:inherit;font-size:10.5px;font-weight:700;color:var(--ink-3);
+  }
+  #mobileBar button svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  #mobileBar button.on{background:var(--soft-2);color:var(--ink)}
+
+  /* 도구 막대가 줄바꿈되지 않게 */
+  #addBar{flex-wrap:nowrap}
+  .tool{white-space:nowrap;flex:0 0 auto}
+  .toolbar-hint{flex:0 0 auto;white-space:nowrap}
+  @media (max-width:1560px){ .toolbar-hint{display:none} }
+  #addBar{overflow:hidden}
+
+  /* AI 패널 */
+  .ai-field{display:block;margin-bottom:10px}
+  .ai-field>span{display:block;font-size:11.5px;font-weight:600;color:var(--ink-2);margin-bottom:5px}
+  .ai-prompt{
+    width:100%;min-height:158px;margin-top:2px;resize:vertical;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:11px;line-height:1.6;background:#FBFBFC;border:1px solid var(--line);
+    border-radius:9px;padding:9px 10px;color:var(--ink-2);
+  }
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{
+    border:1px solid var(--line);background:#fff;border-radius:20px;padding:5px 10px;
+    font-family:inherit;font-size:11px;font-weight:600;color:var(--ink-2);
+    display:inline-flex;align-items:center;gap:5px;
+  }
+  .chip i{width:9px;height:9px;border-radius:50%;display:inline-block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+  .chip:hover{border-color:var(--line-2);color:var(--ink)}
+  .chip.on{border-color:var(--ink);color:var(--ink);box-shadow:0 0 0 2px rgba(20,23,28,.07)}
+  .dz{
+    border:1.5px dashed var(--line-2);border-radius:11px;padding:15px 12px;text-align:center;
+    background:#FCFCFD;cursor:pointer;transition:.12s;
+  }
+  .dz:hover,.dz.over{border-color:var(--accent);background:#F6FBF8}
+  .dz b{display:block;font-size:12px;margin-bottom:3px;color:var(--ink)}
+  .dz span{font-size:10.5px;color:var(--ink-3);line-height:1.5}
+  .ai-status{
+    font-size:11px;line-height:1.6;border-radius:8px;padding:8px 9px;margin:8px 0 0;
+    background:var(--soft);color:var(--ink-2);white-space:pre-line;
+  }
+  .ai-status.ok{background:#EDF7F0;color:#1F7A55}
+  .ai-status.err{background:#FDEDEA;color:#A32B1B}
+  .keyrow{display:flex;gap:6px}
+  .keyrow input{flex:1;min-width:0}
+  .keyrow .btn{flex:0 0 auto;height:30px}
+  .badge-lbl.gray{background:#EEF0F3;color:var(--ink-2)}
+  .badge-lbl.blue{background:#E9EDF7;color:#3A4A7A}
+
+  /* ---------- 좁은 화면: 패널을 탭으로 전환 ---------- */
+  @media (max-width:1080px){
+    #topbar{height:52px;flex:0 0 52px;gap:8px;padding:0 10px}
+    .brand{min-width:0;gap:8px}
+    .brand .ptitle{display:none}
+    .bname{font-size:12.5px}
+    #btnUndo,#btnRedo,#btnHelp,#btnJson{display:none}
+    .topactions .vr{display:none}
+    #btnMore{display:inline-flex}
+    #mobileBar{display:flex}
+    #slidesPanel,#propsPanel{display:none}
+    body.mv-slides #slidesPanel{display:flex;width:auto;flex:1 1 auto;border-right:0}
+    body.mv-props #propsPanel{display:flex;width:auto;flex:1 1 auto;border-left:0}
+    body.mv-slides #stageCol,body.mv-props #stageCol{display:none}
+    #thumbs{
+      display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));
+      gap:12px;justify-items:center;align-content:start;padding:2px 12px 12px;
+    }
+    .thumb{width:100%;max-width:260px}
+    #addBar{overflow-x:auto;overflow-y:hidden;padding:0 10px;gap:2px;scrollbar-width:none}
+    #addBar::-webkit-scrollbar{display:none}
+    .toolbar-hint{display:none}
+    #stageScroll{padding:16px 12px 74px}
+    #zoomBar{bottom:10px;right:10px}
+    #propsBody{padding:12px 14px 40px;max-width:720px;width:100%;margin:0 auto}
+    .tabs{padding:8px 8px 0}
+    .tabs button{font-size:11.5px}
+  }
+  @media (max-width:520px){
+    .btext{display:none}
+    .seg button{padding:6px 9px}
+    .seg button small{display:none}
+    #btnExport{padding:0 9px;font-size:12px}
+    #propsBody{max-width:none}
+    .json-grid,.help-grid{grid-template-columns:1fr}
+  }
+</style>
 </head>
 <body>
 <div id="lockScreen" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
@@ -345,6 +445,7 @@ input[type=color]::-webkit-color-swatch{border:0;border-radius:4px}
       <span class="vr"></span>
       <button class="btn icon" id="btnHelp" title="도움말" aria-label="도움말">?</button>
       <button class="btn" id="btnJson">JSON</button>
+      <button class="btn icon" id="btnMore" title="더보기" aria-label="더보기">⋯</button>
       <div class="split">
         <button class="btn primary" id="btnExport">PNG 내보내기</button>
         <button class="btn primary caret" id="btnExportMenu" aria-label="내보내기 옵션">▾</button>
@@ -384,6 +485,9 @@ input[type=color]::-webkit-color-swatch{border:0;border-radius:4px}
           <svg viewBox="0 0 20 20"><path d="M3.5 10h13"/></svg>구분선</button>
         <button class="tool" data-add="badge" title="배지 (글자 배경)">
           <svg viewBox="0 0 20 20"><rect x="2.5" y="6" width="15" height="8" rx="4"/></svg>배지</button>
+        <span class="vr"></span>
+        <button class="tool" data-add="ai" title="AI 이미지 프롬프트 · 생성">
+          <svg viewBox="0 0 20 20"><path d="M10 3.2l1.6 3.6L15 8.4l-3.4 1.6L10 13.6 8.4 10 5 8.4l3.4-1.6z"/><path d="M15.2 13.4l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7z"/></svg>AI</button>
         <div class="toolbar-hint">드래그로 이동 · <kbd>Del</kbd> 삭제 · <kbd>Ctrl</kbd>+<kbd>Z</kbd> 실행취소</div>
       </div>
       <div id="stageScroll">
@@ -414,10 +518,23 @@ input[type=color]::-webkit-color-swatch{border:0;border-radius:4px}
         <button data-tab="el" class="on">요소</button>
         <button data-tab="bg">배경</button>
         <button data-tab="font">폰트</button>
+        <button data-tab="ai">AI</button>
       </div>
       <div id="propsBody"></div>
     </aside>
   </main>
+
+  <nav id="mobileBar" aria-label="화면 이동">
+    <button type="button" data-mv="slides">
+      <svg viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M7.5 3v14"/></svg>슬라이드
+    </button>
+    <button type="button" data-mv="canvas" class="on">
+      <svg viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="12" rx="2"/><path d="M3.6 14.2l4-3.8 3 2.8 2.6-1.9 3.2 2.9"/></svg>캔버스
+    </button>
+    <button type="button" data-mv="props">
+      <svg viewBox="0 0 20 20"><path d="M4 6h12M4 10h12M4 14h7"/><circle cx="14.5" cy="14" r="1.8"/></svg>편집
+    </button>
+  </nav>
 </div>
 
 <div id="modalRoot"><div class="modal-bg"></div><div class="modal" id="modal"></div></div>
@@ -531,7 +648,8 @@ function shapeEl(o) {
 function imageEl(o) {
   return Object.assign({
     id: uid('i'), type: 'image', x: 90, y: 90, w: 600, h: 420,
-    src: '', fit: 'cover', radius: 0, shadow: false, lock: true, opacity: 1
+    src: '', fit: 'cover', radius: 0, shadow: false, lock: true, opacity: 1,
+    zoom: 1, ox: 0, oy: 0
   }, o || {});
 }
 
@@ -608,7 +726,8 @@ function cacheDom() {
   ['projTitle', 'fmtSeg', 'btnUndo', 'btnRedo', 'btnJson', 'btnHelp', 'btnExport', 'btnExportMenu', 'btnAddSlide',
    'thumbs', 'slideCount', 'stageScroll', 'stageWrap', 'stageInner', 'bgLayer', 'elsLayer', 'guides',
    'selBox', 'zoomVal', 'zoomIn', 'zoomOut', 'zoomFit', 'propsBody', 'tabs', 'addBar', 'imgInput',
-   'fontInput', 'bgInput', 'modalRoot', 'modal', 'toast', 'busy', 'busyText', 'stageCol'
+   'fontInput', 'bgInput', 'modalRoot', 'modal', 'toast', 'busy', 'busyText', 'stageCol',
+   'btnMore', 'mobileBar'
   ].forEach(id => dom[id] = document.getElementById(id));
 }
 
@@ -690,6 +809,8 @@ function elNode(el, interactive) {
     im.alt = '';
     im.draggable = false;
     im.style.objectFit = el.fit === 'contain' ? 'contain' : 'cover';
+    im.style.transformOrigin = 'center center';
+    im.style.transform = 'translate(' + (el.ox || 0) + '%,' + (el.oy || 0) + '%) scale(' + (el.zoom == null ? 1 : el.zoom) + ')';
     n.appendChild(im);
   } else {
     n.classList.add('el-shape');
@@ -1201,6 +1322,7 @@ function selectSlide(i) {
   state.selId = null;
   state.editing = null;
   renderStage(); renderThumbs(); renderProps(); scheduleSave();
+  if (document.body.classList.contains('mv-slides')) setView('canvas');
 }
 function addSlide() {
   const f = fmt();
@@ -1283,6 +1405,7 @@ function renderProps() {
   $$('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === state.tab));
   if (state.tab === 'el') renderElTab();
   else if (state.tab === 'bg') renderBgTab();
+  else if (state.tab === 'ai') renderAiTab();
   else renderFontTab();
 }
 
@@ -1371,6 +1494,10 @@ function renderElTab() {
         <button data-action="fit-contain" class="${el.fit === 'contain' ? 'on' : ''}">맞추기</button>
       </div>
       ${ctrlToggle('비율 유지 (핸들 드래그 시)', 'el', 'lock', el.lock)}
+      ${ctrlRange('확대', 'el', 'zoom', 1, 3, .01, el.zoom == null ? 1 : el.zoom, '×')}
+      ${ctrlRange('좌우 이동', 'el', 'ox', -50, 50, 1, el.ox || 0, '%')}
+      ${ctrlRange('상하 이동', 'el', 'oy', -50, 50, 1, el.oy || 0, '%')}
+      <button class="btn small" data-action="img-reset" style="width:100%;justify-content:center">가운데 · 원래 크기로</button>
       ${ctrlRange('모서리 둥글기', 'el', 'radius', 0, 540, 1, el.radius || 0, 'px')}
       ${ctrlToggle('그림자', 'el', 'shadow', !!el.shadow)}
     </div>`;
@@ -1532,18 +1659,10 @@ function onPropsClick(e) {
     case 'fit-cover': if (el) { el.fit = 'cover'; pushHistory(); renderAll(); } return;
     case 'fit-contain': if (el) { el.fit = 'contain'; pushHistory(); renderAll(); } return;
     case 'replace-image':
-      if (el) {
-        dom.imgInput.onchange = async () => {
-          const f = dom.imgInput.files[0];
-          if (!f) return;
-          const src = await readDataURL(f);
-          el.src = src; imgCache.delete(src);
-          pushHistory(); renderStage(); renderThumbsSoon(); renderProps();
-          dom.imgInput.value = '';
-          toast('이미지를 교체했습니다.');
-        };
-        dom.imgInput.click();
-      }
+      if (el) { state.fileIntent = { kind: 'replace' }; dom.imgInput.click(); }
+      return;
+    case 'img-reset':
+      if (el && el.type === 'image') { el.zoom = 1; el.ox = 0; el.oy = 0; pushHistory(); renderAll(); }
       return;
     case 'bg-solid': curSlide().bg.type = 'solid'; pushHistory(); renderStage(); renderThumbsSoon(); renderProps(); return;
     case 'bg-gradient': {
@@ -1583,6 +1702,37 @@ function onPropsClick(e) {
       renderProps(); toast('폰트를 목록에서 제거했습니다.');
       return;
     }
+    case 'ai-style':
+      state.ai.style = b.dataset.v; aiSave(); renderProps(); return;
+    case 'ai-comp':
+      state.ai.comp = b.dataset.v; aiSave(); renderProps(); return;
+    case 'ai-copy':
+      aiCopyPrompt(); return;
+    case 'ai-shuffle':
+      aiShuffle(); return;
+    case 'ai-pick':
+      state.fileIntent = { kind: 'insert', target: state.ai.target };
+      dom.imgInput.click(); return;
+    case 'ai-target':
+      state.ai.target = b.dataset.v === 'bg' ? 'bg' : 'img'; aiSave(); renderProps(); return;
+    case 'ai-prov':
+      state.ai.provider = b.dataset.v === 'gemini' ? 'gemini' : 'openai'; aiSave(); renderProps(); return;
+    case 'ai-key-save': {
+      const kv = document.getElementById('aiKey');
+      const v = ((kv && kv.value) || '').trim();
+      if (!v) { aiStatusSet('붙여 넣을 키가 비어 있습니다.', 'err'); return; }
+      aiKeySet(state.ai.provider, v);
+      renderProps();
+      aiStatusSet('키를 이 브라우저에만 저장했습니다. 외부 서버로 보내지 않습니다.', 'ok');
+      return;
+    }
+    case 'ai-key-clear':
+      aiKeySet(state.ai.provider, '');
+      renderProps();
+      aiStatusSet('저장한 키를 지웠습니다.', 'ok');
+      return;
+    case 'ai-generate':
+      aiGenerate(); return;
   }
 }
 
@@ -1733,15 +1883,12 @@ async function drawImageEl(ctx, el) {
   roundPath(t, 0, 0, w, h, el.radius || 0);
   t.clip();
   const iw = im.naturalWidth || w, ih = im.naturalHeight || h;
-  if (el.fit === 'contain') {
-    const sc = Math.min(w / iw, h / ih);
-    const dw = iw * sc, dh = ih * sc;
-    t.drawImage(im, (w - dw) / 2, (h - dh) / 2, dw, dh);
-  } else {
-    const sc = Math.max(w / iw, h / ih);
-    const dw = iw * sc, dh = ih * sc;
-    t.drawImage(im, (w - dw) / 2, (h - dh) / 2, dw, dh);
-  }
+  const zoom = clamp(el.zoom == null ? 1 : el.zoom, .2, 5);
+  const offX = (el.ox || 0) / 100 * w, offY = (el.oy || 0) / 100 * h;
+  const base = el.fit === 'contain' ? Math.min(w / iw, h / ih) : Math.max(w / iw, h / ih);
+  const sc = base * zoom;
+  const dw = iw * sc, dh = ih * sc;
+  t.drawImage(im, (w - dw) / 2 + offX, (h - dh) / 2 + offY, dw, dh);
   ctx.save();
   ctx.globalAlpha = el.opacity == null ? 1 : el.opacity;
   if (el.shadow) { ctx.shadowColor = 'rgba(12,18,28,.30)'; ctx.shadowBlur = 36; ctx.shadowOffsetY = 16; }
@@ -1961,7 +2108,10 @@ function normalizeElement(raw, f) {
       radius: raw.radius || raw.borderRadius || 0,
       shadow: !!raw.shadow,
       opacity: raw.opacity == null ? 1 : raw.opacity,
-      lock: raw.lock !== false
+      lock: raw.lock !== false,
+      zoom: Number(raw.zoom) || 1,
+      ox: Number(raw.ox) || 0,
+      oy: Number(raw.oy) || 0
     });
   }
   if (type === 'shape') {
@@ -2177,6 +2327,438 @@ function openHelp() {
 }
 
 /* =========================================================================
+   v2 · AI 프롬프트 조합 · 브라우저 이미지 생성 · 이미지 배치 도구
+   키는 사용자가 넣을 때만 브라우저 localStorage에 남고, 생성 요청은
+   OpenAI/Google로 브라우저에서 바로 갑니다(외부 서버 경유 없음).
+   ========================================================================= */
+const AI_STYLES = {
+  halftone: {
+    name: '하프톤 블루',
+    sw: ['#EAEAE6', '#1E3FA3', '#131A2B', '#C4562A'],
+    en: 'Screen-print editorial collage: the subject rendered as a cobalt-blue halftone duotone with deep navy shadows, cut out and set on a flat warm-grey #EAEAE6 paper background, one small burnt-orange #C4562A accent, visible halftone dot screen and paper grain, crisp cut-out edges, high contrast'
+  },
+  dark: {
+    name: '다크 에디토리얼',
+    sw: ['#0E1116', '#6E7F8C', '#E0B27A', '#F2F4F6'],
+    en: 'Moody dark editorial photograph, low-key lighting with one hard side key light, deep charcoal background, cinematic contrast, muted amber and steel-blue tones, fine film grain, shallow depth of field'
+  },
+  warm: {
+    name: '웜그레이 미니멀',
+    sw: ['#EAEAE6', '#D8D4CB', '#C4562A', '#22262B'],
+    en: 'Minimal warm-grey editorial photograph on a seamless #EAEAE6 studio backdrop, soft diffused daylight, matte natural textures, generous empty space, a single burnt-orange object as the only colour accent'
+  },
+  blueprint: {
+    name: '블루프린트 라인',
+    sw: ['#F4F5F2', '#1E3FA3', '#131A2B', '#C4562A'],
+    en: 'Technical blueprint-style line illustration, thin deep-navy strokes over off-white paper, isometric construction lines, cobalt-blue hatching for shadow, one burnt-orange annotation mark, precise and graphic'
+  }
+};
+const AI_COMPS = {
+  right:  { name: '오른쪽 인물', en: 'the subject is cropped by the right edge of the frame and occupies the right third, leaving a large clean area of empty background on the left for a Korean headline' },
+  center: { name: '가운데',     en: 'the subject sits centred with generous breathing room on every side' },
+  full:   { name: '가득 차게',   en: 'tight full-bleed close-up, the subject fills the frame edge to edge and runs off the frame' },
+  life:   { name: '스틸라이프',  en: 'a top-down flat-lay still life arranged on paper, objects evenly spaced with clear gaps between them' }
+};
+const AI_PROVIDERS = {
+  openai: { name: 'OpenAI', models: ['gpt-image-1', 'dall-e-3'], ph: 'sk-...' },
+  gemini: { name: 'Gemini', models: ['gemini-2.5-flash-image', 'imagen-4.0-generate-001'], ph: 'AIza...' }
+};
+const AI_DEFAULT = {
+  topic: '', subject: '', keyword: '', style: 'halftone', comp: 'right',
+  noText: true, target: 'img', provider: 'openai',
+  model: { openai: 'gpt-image-1', gemini: 'gemini-2.5-flash-image' },
+  status: '', statusKind: ''
+};
+state.ai = clone(AI_DEFAULT);
+
+function aiLoad() {
+  try {
+    const raw = localStorage.getItem('cardnews.ai.v1');
+    if (raw) {
+      const d = JSON.parse(raw);
+      if (d && typeof d === 'object') {
+        ['topic', 'subject', 'keyword', 'style', 'comp', 'target', 'provider'].forEach(k => {
+          if (typeof d[k] === 'string') state.ai[k] = d[k];
+        });
+        if (typeof d.noText === 'boolean') state.ai.noText = d.noText;
+        if (d.model && typeof d.model === 'object') Object.assign(state.ai.model, d.model);
+      }
+    }
+  } catch (e) { /* 저장값이 깨졌으면 기본값 유지 */ }
+  if (!AI_STYLES[state.ai.style]) state.ai.style = 'halftone';
+  if (!AI_COMPS[state.ai.comp]) state.ai.comp = 'right';
+  if (!AI_PROVIDERS[state.ai.provider]) state.ai.provider = 'openai';
+}
+function aiSave() {
+  try {
+    localStorage.setItem('cardnews.ai.v1', JSON.stringify({
+      topic: state.ai.topic, subject: state.ai.subject, keyword: state.ai.keyword,
+      style: state.ai.style, comp: state.ai.comp, noText: state.ai.noText,
+      target: state.ai.target, provider: state.ai.provider, model: state.ai.model
+    }));
+  } catch (e) { /* 용량 초과·차단 시 무시 */ }
+}
+function aiKeyGet(prov) {
+  try { return (localStorage.getItem('cardnews.key.' + prov) || '').trim(); } catch (e) { return ''; }
+}
+function aiKeySet(prov, v) {
+  try {
+    if (v) localStorage.setItem('cardnews.key.' + prov, v);
+    else localStorage.removeItem('cardnews.key.' + prov);
+  } catch (e) { /* 저장 실패 시 이번 입력값으로만 사용 */ }
+}
+
+/* ---------------- 프롬프트 조합 ---------------- */
+function aiPromptText() {
+  const a = state.ai, f = fmt();
+  const st = AI_STYLES[a.style] || AI_STYLES.halftone;
+  const cp = AI_COMPS[a.comp] || AI_COMPS.right;
+  const subject = (a.subject || a.topic || 'a striking editorial subject for a Korean news card').trim();
+  const out = [];
+  out.push(st.en + '.');
+  out.push('Subject: ' + subject + (a.topic && a.subject ? ' — ' + a.topic : '') + '.');
+  out.push('Composition: ' + cp.en + '.');
+  if (a.keyword) out.push('Mood: evoke the Korean headline "' + a.keyword + '" through pose, light and props; do not render it as text.');
+  out.push('Format: ' + (f.key === '1:1' ? 'square 1:1' : f.key === '9:16' ? 'vertical 9:16 story' : 'vertical 4:5 portrait') +
+    ' (' + f.w + '\u00d7' + f.h + '), one single image, sharp focus, high detail, readable at thumbnail size, suitable as a card-news cover.');
+  if (a.noText) out.push('No text, no letters, no numbers, no logos, no watermark, no UI elements.');
+  return out.join('\n');
+}
+function aiRefreshPrompt() {
+  const t = document.getElementById('aiPromptBox');
+  if (t) t.value = aiPromptText();
+}
+function aiStatusSet(msg, kind) {
+  state.ai.status = msg || '';
+  state.ai.statusKind = kind || '';
+  const el2 = document.getElementById('aiStatus');
+  if (el2) {
+    el2.textContent = state.ai.status || '키 없이도 프롬프트 복사 \u2192 외부 생성 \u2192 업로드로 쓸 수 있습니다.';
+    el2.className = 'ai-status' + (kind ? ' ' + kind : '');
+  }
+}
+
+/* ---------------- AI 탭 ---------------- */
+function renderAiTab() {
+  const a = state.ai;
+  const prov = AI_PROVIDERS[a.provider];
+  const saved = !!aiKeyGet(a.provider);
+  const modelVal = a.model[a.provider] || prov.models[0];
+  const styles = Object.keys(AI_STYLES).map(k =>
+    `<button type="button" class="chip ${a.style === k ? 'on' : ''}" data-action="ai-style" data-v="${k}"><i style="background:${AI_STYLES[k].sw[1]}"></i>${AI_STYLES[k].name}</button>`
+  ).join('');
+  const comps = Object.keys(AI_COMPS).map(k =>
+    `<button type="button" class="chip ${a.comp === k ? 'on' : ''}" data-action="ai-comp" data-v="${k}">${AI_COMPS[k].name}</button>`
+  ).join('');
+  const defaultStatus = '키 없이도 프롬프트 복사 \u2192 외부 생성 \u2192 업로드로 쓸 수 있습니다.';
+
+  let h = `<div class="sect">
+    <div class="sect-h">이미지 프롬프트 <span class="badge-lbl gray">무료</span></div>
+    <label class="ai-field"><span>주제</span>
+      <input type="text" data-ai="topic" value="${esc(a.topic)}" placeholder="예: 트럼프의 젠슨 황 발언 파문" autocomplete="off" spellcheck="false"></label>
+    <label class="ai-field"><span>인물 · 소재</span>
+      <input type="text" data-ai="subject" value="${esc(a.subject)}" placeholder="예: 트럼프와 젠슨 황, 나란히 선 상반신" autocomplete="off" spellcheck="false"></label>
+    <label class="ai-field"><span>강조 문구 (선택)</span>
+      <input type="text" data-ai="keyword" value="${esc(a.keyword)}" placeholder="예: 홀로그램 같은 사람" autocomplete="off" spellcheck="false"></label>
+    <div class="ai-field"><span>스타일</span><div class="chips">${styles}</div></div>
+    <div class="ai-field"><span>구도</span><div class="chips">${comps}</div></div>
+    <label class="row" style="margin-bottom:8px"><span class="lbl">글자 넣지 않기 (권장)</span>
+      <input type="checkbox" id="aiNoText" ${a.noText ? 'checked' : ''} style="width:16px;height:16px;accent-color:#15181D"></label>
+    <textarea class="ai-prompt" id="aiPromptBox" readonly spellcheck="false">${esc(aiPromptText())}</textarea>
+    <div class="actrow" style="margin-top:8px">
+      <button class="btn small primary" data-action="ai-copy" style="flex:2">프롬프트 복사</button>
+      <button class="btn small" data-action="ai-shuffle">새 조합</button>
+    </div>
+    <p class="mini">복사해서 ChatGPT·Gemini·Midjourney에 붙여 넣고, 나온 이미지를 아래 2번으로 올리면 됩니다.</p>
+  </div>`;
+
+  h += `<div class="sect">
+    <div class="sect-h">만든 이미지 올리기 <span class="badge-lbl gray">무료</span></div>
+    <div class="dz" data-action="ai-pick" id="aiDrop">
+      <b>이미지를 끌어다 놓거나 눌러서 선택</b>
+      <span>PNG · JPG · WEBP · SVG</span>
+    </div>
+    <div class="segbtns" style="margin-top:8px">
+      <button data-action="ai-target" data-v="img" class="${a.target === 'img' ? 'on' : ''}">일러스트로</button>
+      <button data-action="ai-target" data-v="bg" class="${a.target === 'bg' ? 'on' : ''}">배경으로</button>
+    </div>
+    <p class="mini">캔버스에 바로 끌어다 놓거나 <kbd>Ctrl</kbd>+<kbd>V</kbd>로 붙여 넣어도 됩니다. 올린 뒤 요소 탭의 <b>확대·이동</b>으로 잘라 보세요.</p>
+  </div>`;
+
+  h += `<div class="sect">
+    <div class="sect-h">AI로 바로 생성 <span class="badge-lbl blue">선택 · 내 키</span></div>
+    <div class="segbtns" style="margin-bottom:9px">
+      <button data-action="ai-prov" data-v="openai" class="${a.provider === 'openai' ? 'on' : ''}">OpenAI</button>
+      <button data-action="ai-prov" data-v="gemini" class="${a.provider === 'gemini' ? 'on' : ''}">Gemini</button>
+    </div>
+    <div class="ai-field"><span>${esc(prov.name)} API 키</span>
+      <div class="keyrow">
+        <input type="password" id="aiKey" placeholder="${saved ? '저장된 키 사용 중 \u00b7 새 키를 넣으면 교체' : prov.ph}" autocomplete="off" spellcheck="false">
+        <button class="btn small" data-action="ai-key-save">저장</button>
+        ${saved ? '<button class="btn small danger" data-action="ai-key-clear">삭제</button>' : ''}
+      </div>
+    </div>
+    <div class="ai-field"><span>모델</span>
+      <input type="text" id="aiModel" list="aiModelOpts" value="${esc(modelVal)}" autocomplete="off" spellcheck="false">
+      <datalist id="aiModelOpts">${prov.models.map(m => `<option value="${esc(m)}"></option>`).join('')}</datalist>
+    </div>
+    <button class="btn small primary" data-action="ai-generate" style="width:100%;justify-content:center">${a.target === 'bg' ? '배경 이미지 생성' : '이미지 생성'}</button>
+    <p class="ai-status ${a.statusKind || ''}" id="aiStatus">${esc(a.status || defaultStatus)}</p>
+    <p class="mini">키는 이 브라우저에만 저장되고(저장을 누를 때) 코드에 적히지 않습니다. 생성 요청은 ${esc(prov.name)}로 브라우저에서 바로 가며, 호출 요금은 본인 계정에 청구됩니다.</p>
+  </div>`;
+
+  dom.propsBody.innerHTML = h;
+}
+
+/* ---------------- 클립보드 ---------------- */
+async function copyText(t) {
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(t);
+      return true;
+    }
+  } catch (e) { /* 권한 없음 → 아래 폴백 */ }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = t;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove();
+    return ok;
+  } catch (e2) { return false; }
+}
+async function aiCopyPrompt() {
+  const ok = await copyText(aiPromptText());
+  if (ok) {
+    aiStatusSet('프롬프트를 복사했습니다. 외부 도구에 붙여 넣어 이미지를 만든 뒤 2번으로 올리세요.', 'ok');
+    toast('프롬프트를 복사했습니다.');
+  } else {
+    aiStatusSet('브라우저가 복사를 막았습니다. 위 프롬프트 상자에서 직접 선택해 복사해 주세요.', 'err');
+    toast('복사 실패 · 프롬프트 상자에서 직접 복사하세요', true);
+  }
+}
+function aiShuffle() {
+  const sk = Object.keys(AI_STYLES), ck = Object.keys(AI_COMPS);
+  state.ai.style = sk[(sk.indexOf(state.ai.style) + 1) % sk.length];
+  state.ai.comp = ck[(ck.indexOf(state.ai.comp) + 1) % ck.length];
+  aiSave();
+  renderProps();
+  toast('스타일 · ' + AI_STYLES[state.ai.style].name + ' / 구도 · ' + AI_COMPS[state.ai.comp].name);
+}
+
+/* ---------------- 이미지 넣기 ---------------- */
+async function progressImageFile(file, target) {
+  if (!file) return;
+  if (!/^image\//.test(file.type) && !/\.(png|jpe?g|webp|svg)$/i.test(file.name)) {
+    toast('이미지 파일만 넣을 수 있습니다.', true);
+    return;
+  }
+  if (target === 'bg') {
+    const src = await readDataURL(file);
+    if (!src) { toast('이미지를 읽지 못했습니다.', true); return; }
+    const bg = curSlide().bg;
+    bg.type = 'image'; bg.src = src;
+    imgCache.delete(src);
+    pushHistory(); renderStage(); renderThumbsSoon(); renderProps();
+    toast('배경으로 넣었습니다. 오버레이로 글자 대비를 조절하세요.');
+    return;
+  }
+  await insertImageFile(file);
+}
+
+async function shrinkDataUrl(src, maxSide, quality) {
+  try {
+    const im = await getImage(src);
+    if (!im) return src;
+    const W = im.naturalWidth || 0, H = im.naturalHeight || 0;
+    if (!W || !H) return src;
+    const limit = maxSide || 1600;
+    if (src.length < 900000 && Math.max(W, H) <= limit) return src;
+    const sc = Math.min(1, limit / Math.max(W, H));
+    const cv = document.createElement('canvas');
+    cv.width = Math.max(1, Math.round(W * sc));
+    cv.height = Math.max(1, Math.round(H * sc));
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.drawImage(im, 0, 0, cv.width, cv.height);
+    return cv.toDataURL('image/jpeg', quality || 0.9);
+  } catch (e) { return src; }
+}
+
+async function applyAiImage(src) {
+  const a = state.ai, f = fmt();
+  const small = await shrinkDataUrl(src, 1600, 0.9);
+  if (a.target === 'bg') {
+    const bg = curSlide().bg;
+    bg.type = 'image'; bg.src = small;
+    imgCache.delete(small);
+    pushHistory(); renderStage(); renderThumbsSoon(); renderProps();
+    return;
+  }
+  const im = await getImage(small);
+  const boxW = f.w * .72, boxH = f.h * .64;
+  const ar = im && im.naturalWidth ? im.naturalWidth / im.naturalHeight : boxW / boxH;
+  let w = boxW, h = boxW / ar;
+  if (h > boxH) { h = boxH; w = boxH * ar; }
+  w = Math.round(w); h = Math.round(h);
+  const el = imageEl({
+    src: small, w, h,
+    x: Math.round(f.w * .26 + (boxW - w) / 2),
+    y: Math.round(f.h * .08 + (boxH - h) / 2)
+  });
+  curSlide().els.push(el);
+  state.selId = el.id;
+  pushHistory(); renderStage(); renderThumbsSoon(); renderProps();
+}
+
+/* ---------------- API 호출 ---------------- */
+async function apiFetch(url, opts, ms) {
+  const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timer = ctrl ? setTimeout(() => ctrl.abort(), ms || 180000) : 0;
+  try {
+    return await fetch(url, Object.assign({}, opts, ctrl ? { signal: ctrl.signal } : {}));
+  } catch (e) {
+    if (e && e.name === 'AbortError') throw new Error('응답이 없습니다(시간 초과). 잠시 뒤 다시 시도해 주세요.');
+    throw new Error('요청이 브라우저에서 차단되었습니다. 네트워크·CORS 설정을 확인해 주세요.');
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+async function apiErr(res, name) {
+  let msg = '';
+  try {
+    const j = await res.json();
+    msg = (j && j.error && (j.error.message || j.error.status)) || (j && j.message) || '';
+  } catch (e) { /* 본문 없음 */ }
+  if (!msg) { try { msg = (await res.text()).slice(0, 180); } catch (e2) {} }
+  const code = res.status;
+  if (code === 401 || code === 403) return name + ' 키가 올바르지 않거나 권한이 없습니다.' + (msg ? ' (' + msg + ')' : '');
+  if (code === 429) return name + ' 사용 한도·결제 설정을 확인해 주세요.' + (msg ? ' (' + msg + ')' : '');
+  return name + ' 오류 ' + code + (msg ? ': ' + msg : '');
+}
+async function urlToDataUrl(url) {
+  try {
+    const res = await apiFetch(url, { mode: 'cors' }, 60000);
+    if (!res.ok) throw new Error('status ' + res.status);
+    const blob = await res.blob();
+    return await new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(String(fr.result || ''));
+      fr.onerror = () => reject(new Error('read fail'));
+      fr.readAsDataURL(blob);
+    });
+  } catch (e) {
+    throw new Error('이미지 주소를 읽지 못했습니다. 모델을 gpt-image-1로 바꿔 다시 시도해 주세요.');
+  }
+}
+function aiSizeFor(f, model) {
+  if (/^dall-e/i.test(model || '')) return f.key === '1:1' ? '1024x1024' : '1024x1792';
+  return f.key === '1:1' ? '1024x1024' : '1024x1536';
+}
+async function genOpenAI(key, prompt, model) {
+  model = model || 'gpt-image-1';
+  const body = { model: model, prompt: prompt, n: 1, size: aiSizeFor(fmt(), model) };
+  if (/^dall-e/i.test(model)) { body.quality = 'standard'; body.response_format = 'b64_json'; }
+  const res = await apiFetch('https://api.openai.com/v1/images/generations', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(await apiErr(res, 'OpenAI'));
+  const j = await res.json();
+  const d = (j && j.data && j.data[0]) || {};
+  if (d.b64_json) return 'data:image/png;base64,' + d.b64_json;
+  if (d.url) return await urlToDataUrl(d.url);
+  if (j && j.error && j.error.message) throw new Error('OpenAI: ' + j.error.message);
+  throw new Error('OpenAI 응답에 이미지가 없습니다.');
+}
+function gAspect(f) {
+  return f.key === '1:1' ? '1:1' : f.key === '9:16' ? '9:16' : '3:4';
+}
+async function genGemini(key, prompt, model) {
+  model = model || 'gemini-2.5-flash-image';
+  const base = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model);
+  const k = encodeURIComponent(key);
+  if (/imagen/i.test(model)) {
+    const res = await apiFetch(base + ':predict?key=' + k, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ instances: [{ prompt: prompt }], parameters: { sampleCount: 1, aspectRatio: gAspect(fmt()) } })
+    });
+    if (!res.ok) throw new Error(await apiErr(res, 'Gemini'));
+    const j = await res.json();
+    const p = (j && j.predictions && j.predictions[0]) || {};
+    const b64 = p.bytesBase64Encoded || (p.image && p.image.imageBytes);
+    if (b64) return 'data:image/png;base64,' + b64;
+    throw new Error('Gemini 응답에 이미지가 없습니다.');
+  }
+  const res = await apiFetch(base + ':generateContent?key=' + k, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { responseModalities: ['IMAGE'] }
+    })
+  });
+  if (!res.ok) throw new Error(await apiErr(res, 'Gemini'));
+  const j = await res.json();
+  const parts = (((j.candidates || [])[0] || {}).content || {}).parts || [];
+  const withImg = parts.find(p => p && (p.inlineData || p.inline_data));
+  if (!withImg) {
+    const txt = parts.map(p => p && p.text).filter(Boolean).join(' ').trim();
+    if (j && j.promptFeedback && j.promptFeedback.blockReason) throw new Error('요청이 차단되었습니다(' + j.promptFeedback.blockReason + '). 문구를 바꿔 보세요.');
+    throw new Error('이미지가 만들어지지 않았습니다.' + (txt ? ' 모델 응답: ' + txt.slice(0, 140) : ''));
+  }
+  const d = withImg.inlineData || withImg.inline_data;
+  return 'data:' + (d.mimeType || d.mime_type || 'image/png') + ';base64,' + d.data;
+}
+async function aiGenerate() {
+  const a = state.ai;
+  const keyInput = document.getElementById('aiKey');
+  const key = ((keyInput && keyInput.value) || '').trim() || aiKeyGet(a.provider);
+  if (!key) {
+    aiStatusSet('API 키가 비어 있습니다. 무료로 쓰려면 위 프롬프트를 복사해 외부 도구에서 만든 뒤 2번 칸으로 올리세요.', 'err');
+    if (keyInput) keyInput.focus();
+    return;
+  }
+  const modelInput = document.getElementById('aiModel');
+  const model = ((modelInput && modelInput.value) || '').trim() || AI_PROVIDERS[a.provider].models[0];
+  const prompt = aiPromptText();
+  busy(true, 'AI가 이미지를 만드는 중…');
+  aiStatusSet('생성 중… 보통 10~40초 걸립니다.');
+  try {
+    const src = a.provider === 'openai'
+      ? await genOpenAI(key, prompt, model)
+      : await genGemini(key, prompt, model);
+    busy(false);
+    await applyAiImage(src);
+    aiStatusSet('이미지를 만들어 ' + (a.target === 'bg' ? '배경' : '현재 슬라이드') + '에 넣었습니다. 요소 탭에서 확대·이동으로 다듬어 보세요.', 'ok');
+    toast('이미지를 생성했습니다.');
+  } catch (err) {
+    busy(false);
+    aiStatusSet(String((err && err.message) || err), 'err');
+    console.warn('[cardnews] image generation failed:', err);
+  }
+}
+
+/* ---------------- 모바일 화면 전환 ---------------- */
+function setView(v) {
+  const narrow = window.matchMedia('(max-width:1080px)').matches;
+  const view = v || 'canvas';
+  document.body.classList.toggle('mv-slides', narrow && view === 'slides');
+  document.body.classList.toggle('mv-props', narrow && view === 'props');
+  $$('#mobileBar button').forEach(b => b.classList.toggle('on', b.dataset.mv === view));
+  requestAnimationFrame(() => {
+    if (view === 'props') renderProps();
+    renderStage();
+    if (state.autoFit) setZoom(fitZoom(), true);
+  });
+}
+
+/* =========================================================================
    저장 (localStorage 자동 저장)
    ========================================================================= */
 function scheduleSave() {
@@ -2241,7 +2823,12 @@ function wire() {
     const b = e.target.closest('[data-add]'); if (!b) return;
     const k = b.dataset.add;
     if (k === 'text' || k === 'title' || k === 'badge') addText(k);
-    else if (k === 'image') dom.imgInput.click();
+    else if (k === 'image') { state.fileIntent = { kind: 'insert', target: state.ai.target }; dom.imgInput.click(); }
+    else if (k === 'ai') {
+      state.tab = 'ai';
+      if (window.matchMedia('(max-width:1080px)').matches) setView('props');
+      else renderProps();
+    }
     else addShape(k);
   });
 
@@ -2282,8 +2869,21 @@ function wire() {
   // 파일 입력
   dom.imgInput.addEventListener('change', async () => {
     const file = dom.imgInput.files[0];
-    if (file) await insertImageFile(file);
+    const intent = state.fileIntent || { kind: 'insert' };
+    state.fileIntent = null;
     dom.imgInput.value = '';
+    if (!file) return;
+    if (intent.kind === 'replace') {
+      const el = selEl();
+      if (!el) return;
+      const src = await readDataURL(file);
+      if (!src) return;
+      el.src = src; imgCache.delete(src);
+      pushHistory(); renderStage(); renderThumbsSoon(); renderProps();
+      toast('이미지를 교체했습니다.');
+      return;
+    }
+    await progressImageFile(file, intent.target || state.ai.target);
   });
   dom.bgInput.addEventListener('change', async () => {
     const file = dom.bgInput.files[0];
@@ -2403,6 +3003,72 @@ function wire() {
   dom.modalRoot.addEventListener('click', e => {
     if (e.target.classList.contains('modal-bg')) closeModal();
   });
+
+  /* ---------- v2: 모바일 화면 전환 ---------- */
+  if (dom.mobileBar) {
+    dom.mobileBar.addEventListener('click', e => {
+      const b = e.target.closest('[data-mv]');
+      if (b) setView(b.dataset.mv);
+    });
+  }
+  if (dom.btnMore) {
+    dom.btnMore.addEventListener('click', e => {
+      const r = e.currentTarget.getBoundingClientRect();
+      showMenu(Math.max(8, r.right - 212), r.bottom + 6, [
+        { label: '실행취소', hint: 'Ctrl+Z', fn: undo },
+        { label: '다시실행', hint: 'Ctrl+Shift+Z', fn: redo },
+        { label: 'JSON 불러오기 · 내보내기', fn: openJsonModal },
+        { label: '도움말', fn: openHelp }
+      ]);
+    });
+  }
+  window.addEventListener('resize', () => {
+    const narrow = window.matchMedia('(max-width:1080px)').matches;
+    if (narrow !== wire._narrow) {
+      wire._narrow = narrow;
+      setView('canvas');
+    }
+  });
+  wire._narrow = window.matchMedia('(max-width:1080px)').matches;
+
+  /* ---------- v2: AI 탭 입력·드롭·붙여넣기 ---------- */
+  dom.propsBody.addEventListener('input', e => {
+    const t = e.target;
+    const k = t.dataset && t.dataset.ai;
+    if (k) { state.ai[k] = t.value; aiSave(); aiRefreshPrompt(); return; }
+    if (t.id === 'aiNoText') { state.ai.noText = !!t.checked; aiSave(); aiRefreshPrompt(); return; }
+    if (t.id === 'aiModel') { state.ai.model[state.ai.provider] = t.value.trim(); aiSave(); }
+  });
+  ['dragenter', 'dragover'].forEach(tp => dom.propsBody.addEventListener(tp, e => {
+    if (!e.dataTransfer || Array.from(e.dataTransfer.types || []).indexOf('Files') < 0) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    const dz = e.target.closest && e.target.closest('#aiDrop');
+    if (dz) dz.classList.add('over');
+  }));
+  dom.propsBody.addEventListener('dragleave', e => {
+    const dz = e.target.closest && e.target.closest('#aiDrop');
+    if (dz) dz.classList.remove('over');
+  });
+  dom.propsBody.addEventListener('drop', async e => {
+    const files = Array.from((e.dataTransfer && e.dataTransfer.files) || []);
+    if (!files.length) return;
+    const img = files.find(f => /^image\//.test(f.type) || /\.(png|jpe?g|webp|svg)$/i.test(f.name));
+    if (!img) return;
+    e.preventDefault();
+    const dz = e.target.closest && e.target.closest('#aiDrop');
+    if (dz) dz.classList.remove('over');
+    await progressImageFile(img, state.ai.target);
+  });
+  document.addEventListener('paste', async e => {
+    const items = (e.clipboardData && e.clipboardData.items) || [];
+    for (const it of items) {
+      if (it.type && it.type.indexOf('image/') === 0) {
+        const f = it.getAsFile();
+        if (f) { e.preventDefault(); await progressImageFile(f, state.ai.target); return; }
+      }
+    }
+  });
 }
 
 /* ---------------- 팝오버 메뉴 ---------------- */
@@ -2430,6 +3096,7 @@ function showMenu(x, y, items) {
    ========================================================================= */
 function boot() {
   cacheDom();
+  aiLoad();
   const stored = loadStored();
   state.project = stored || sampleProject();
   state.theme = 'editorial';
@@ -2449,6 +3116,7 @@ function boot() {
   wire();
   renderStage(); renderThumbs(); renderProps(); updateTop();
   state.tab = 'el';
+  if (window.matchMedia('(max-width:1080px)').matches) setView('canvas');
 
   requestAnimationFrame(() => {
     setZoom(fitZoom(), true);
@@ -2461,10 +3129,12 @@ function boot() {
   // 디버그/검증용 (읽기 전용 정보)
   window.__CN = {
     state,
-    version: '1.0',
+    version: '2.0',
     exportShape,
     normalizeProject,
     renderSlideCanvas,
+    ai: { prompt: aiPromptText, generate: aiGenerate, key: aiKeyGet },
+    setView,
     get project() { return state.project; }
   };
 }
