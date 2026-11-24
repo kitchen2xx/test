@@ -87,8 +87,17 @@
   .time { font-variant-numeric: tabular-nums; font-size: 12.5px; color: var(--dim); white-space: nowrap; }
   .time b { color: var(--txt); font-weight: 700; }
   .viewctl {
-    display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; margin-top: 10px;
+    display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px 10px; margin-top: 10px;
   }
+  @media (max-width: 470px) { .viewctl { grid-template-columns: minmax(0, 1fr); } }
+  .zoomRow { display: flex; gap: 6px; align-items: center; }
+  .zoomRow input[type=range] { flex: 1; min-width: 0; }
+  .zoomRow input[type=number] { width: 68px; flex: 0 0 auto; text-align: right; padding: 6px 8px; }
+  input[type=color] {
+    width: 42px; height: 33px; padding: 2px; flex: 0 0 auto;
+    background: var(--panel2); border: 1px solid var(--line); border-radius: 9px;
+  }
+  input[type=color]:disabled { opacity: .4; }
   .field { display: flex; flex-direction: column; gap: 4px; }
   .field > label { font-size: 11px; color: var(--dim); font-weight: 700; }
   select, input[type=number], input[type=text], textarea, input[type=range] { width: 100%; }
@@ -124,7 +133,55 @@
   .tl .ticks i { position: absolute; bottom: 0; width: 1px; height: 5px; background: rgba(255,255,255,.18); }
   .tl .ticks i b { position: absolute; bottom: 6px; left: 2px; font-size: 9px; color: rgba(255,255,255,.35); font-weight: 600; }
   .tlBtns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-  .tlInfo { font-size: 11.5px; color: var(--dim); margin-left: auto; align-self: center; }
+  .tlInfo { font-size: 11.5px; color: var(--dim); margin-left: auto; align-self: center; text-align: right; }
+
+  /* ---------- clips (다중 영상) ---------- */
+  .secHead { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+  .secHead .t { font-size: 12px; font-weight: 800; color: var(--dim); letter-spacing: .02em; }
+  .secHead .cnt { color: var(--txt); font-weight: 700; font-size: 11px; margin-left: 4px; }
+  .secHead .grow { flex: 1; }
+  .clips { margin-top: 14px; }
+  .allBar {
+    position: relative; display: flex; height: 30px; border-radius: 9px; overflow: hidden;
+    border: 1px solid var(--line); background: #0B0F14; cursor: pointer; touch-action: none;
+  }
+  .allBar .blk {
+    flex: 0 0 auto; height: 100%; min-width: 3px; pointer-events: none;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+    font-size: 10.5px; font-weight: 800; color: #E7D2A6;
+    background: rgba(240,182,90,.16); border-right: 1px solid rgba(0,0,0,.55);
+  }
+  .allBar .blk.on { background: rgba(240,182,90,.44); color: #1A1206; }
+  .allBar .phAll {
+    position: absolute; top: 0; bottom: 0; width: 2px; background: #fff; z-index: 3;
+    box-shadow: 0 0 6px rgba(255,255,255,.8); pointer-events: none;
+  }
+  .clipList {
+    max-height: 196px; overflow: auto; border: 1px solid var(--line);
+    border-radius: 10px; background: #0D1219;
+  }
+  .clipRow {
+    display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 8px;
+    align-items: center; padding: 7px 8px; font-size: 12px;
+    border-bottom: 1px solid rgba(255,255,255,.05); cursor: pointer;
+  }
+  .clipRow:last-child { border-bottom: 0; }
+  .clipRow.on { background: rgba(240,182,90,.12); box-shadow: inset 3px 0 0 var(--accent); }
+  .clipRow .no {
+    width: 22px; height: 22px; border-radius: 6px; background: var(--panel2); color: var(--dim);
+    display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px;
+  }
+  .clipRow.on .no { background: var(--accent); color: #1A1206; }
+  .clipRow .nm { min-width: 0; }
+  .clipRow .nm b { display: block; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .clipRow .nm span { display: block; font-size: 10.5px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .clipRow .ops { display: flex; gap: 2px; }
+  .clipRow .ops button {
+    border: 0; background: transparent; color: var(--dim); padding: 4px 6px;
+    border-radius: 6px; font-size: 12px; line-height: 1;
+  }
+  .clipRow .ops button:hover { color: var(--txt); background: rgba(255,255,255,.08); }
+  .clipRow .ops button.del:hover { color: var(--danger); }
 
   /* ---------- side panel ---------- */
   .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
@@ -287,7 +344,7 @@
 
 <div class="app">
   <header class="top">
-    <div class="brand">🎬 쇼츠 편집기<span class="ver">웹 버전</span></div>
+    <div class="brand">🎬 쇼츠 편집기<span class="ver">웹 v3</span></div>
     <span class="grow"></span>
     <span class="hint stat" id="engineHint"></span>
     <button class="btn small ghost" id="btnHelp">도움말</button>
@@ -301,7 +358,7 @@
           <canvas id="cv" width="1080" height="1920"></canvas>
           <div class="drop" id="drop">
             <b>영상을 여기에 끌어다 놓으세요</b>
-            <span>mp4 · mov · webm · m4v (휴대폰 영상 그대로)</span>
+            <span>여러 개를 한꺼번에 올려도 됩니다<br>mp4 · mov · webm · m4v</span>
             <button class="btn primary" id="btnPick">영상 파일 선택</button>
             <span>설치 없이 브라우저에서 바로 편집합니다.</span>
           </div>
@@ -319,16 +376,31 @@
 
       <div class="viewctl">
         <div class="field">
-          <label>세로 채우기</label>
+          <label>영상 크기 <span id="zoomV">100%</span></label>
+          <div class="zoomRow">
+            <input type="range" id="zoom" min="20" max="200" step="1" value="100">
+            <input type="number" id="zoomNum" min="20" max="200" step="1" value="100" inputmode="numeric" aria-label="영상 크기 퍼센트">
+          </div>
+        </div>
+        <div class="field">
+          <label>화면 맞춤</label>
           <select id="fit">
             <option value="cover">꽉 채우기 (가운데 크롭)</option>
-            <option value="blur">배경 흐림</option>
-            <option value="contain">여백 (검정)</option>
+            <option value="contain">비율 유지 (여백 생김)</option>
           </select>
         </div>
         <div class="field">
-          <label>확대 <span id="zoomV">1.00×</span></label>
-          <input type="range" id="zoom" min="100" max="200" value="100">
+          <label>배경 (축소할 때 남는 곳)</label>
+          <div class="zoomRow">
+            <select id="bg" style="flex:1;min-width:0">
+              <option value="black">검정</option>
+              <option value="white">흰색</option>
+              <option value="gray">진회색</option>
+              <option value="blur">흐림 (영상 흐리게)</option>
+              <option value="custom">직접 색</option>
+            </select>
+            <input type="color" id="bgColor" value="#000000" disabled aria-label="배경 색">
+          </div>
         </div>
         <div class="field">
           <label>위·아래 <span id="posV">가운데</span></label>
@@ -336,9 +408,29 @@
         </div>
       </div>
 
+      <div class="clips">
+        <div class="secHead">
+          <span class="t">전체 타임라인</span>
+          <span class="tlInfo" id="allInfo">영상을 불러오면 클립이 순서대로 이어집니다</span>
+        </div>
+        <div class="allBar" id="tlAll">
+          <div class="phAll" id="phAll" style="left:0"></div>
+        </div>
+      </div>
+
+      <div class="clips">
+        <div class="secHead">
+          <span class="t">클립<span class="cnt" id="clipCount">0개</span></span>
+          <span class="grow"></span>
+          <button class="btn small" id="btnAddClip">＋ 영상 추가</button>
+          <button class="btn small ghost" id="btnClearClips" disabled>전부 지우기</button>
+        </div>
+        <div class="clipList" id="clipList"><div class="empty">영상을 불러오면 여기에 클립이 쌓입니다.</div></div>
+      </div>
+
       <div class="tlWrap">
         <div class="tlHead">
-          <span class="t">타임라인</span>
+          <span class="t">클립 타임라인<span class="cnt" id="tlClipName">—</span></span>
           <span class="tlInfo" id="tlInfo">영상을 불러오면 여기에 컷 구간이 표시됩니다</span>
         </div>
         <div class="tl" id="tl">
@@ -383,7 +475,7 @@
             <button class="btn primary" id="btnSilence" disabled>무음 찾아서 자르기</button>
             <span class="stat" id="silStat"></span>
           </div>
-          <p class="note">말이 멈춘 구간을 찾아 잘라냅니다. 자동 결과는 타임라인에서 손으로 더 고칠 수 있습니다.</p>
+          <p class="note">지금 클립에서 말이 멈춘 구간을 찾아 잘라냅니다. 자동 결과는 타임라인에서 손으로 더 고칠 수 있습니다.</p>
         </div>
 
         <div class="card">
@@ -444,14 +536,14 @@
           <h4>기획안(edit_plan.json) 불러오기</h4>
           <div class="row"><button class="btn" id="btnPlanImport">기획안 열기</button>
             <span class="stat" id="planStat"></span></div>
-          <p class="note">기획 봇에서 저장한 <span class="kbd">edit_plan.json</span>의 컷 구간을 그대로 가져옵니다.
-            구간 표기(start/end, in/out, source.in …)를 자동으로 알아봅니다.</p>
+          <p class="note">기획 봇·이 편집기에서 저장한 <span class="kbd">edit_plan.json</span>의 클립·컷·크기·배경을 그대로 가져옵니다.
+            파일 이름이 같은 영상이 목록에 있으면 그 클립에 적용합니다.</p>
         </div>
         <div class="card">
           <h4>기획안 내려받기</h4>
           <div class="row"><button class="btn" id="btnPlanExport" disabled>edit_plan.json 저장</button>
             <button class="btn ghost small" id="btnNudge" disabled>파이썬으로 정확 출력</button></div>
-          <p class="note">지금 편집한 컷을 <b>shorts-auto-editor.py</b>가 그대로 읽는 형식으로 저장합니다.
+          <p class="note">지금 편집한 컷(클립·순서·크기·배경)을 <b>shorts-auto-editor.py</b>가 그대로 읽는 형식으로 저장합니다.
             로컬 파이썬 버전에 넘기면 프레임 단위로 정확한 MP4가 나옵니다.</p>
         </div>
       </div>
@@ -505,17 +597,19 @@
   </main>
 </div>
 
-<input type="file" id="fileVideo" accept="video/*,.mp4,.mov,.webm,.m4v" hidden>
+<input type="file" id="fileVideo" accept="video/*,.mp4,.mov,.webm,.m4v" multiple hidden>
 <input type="file" id="fileSrt" accept=".srt,.vtt,text/plain" hidden>
 <input type="file" id="filePlan" accept=".json,application/json" hidden>
 
 <dialog id="helpDlg"><div class="dlg">
   <h3>쇼츠 편집기 · 웹 버전</h3>
   <ol>
-    <li><b>영상 불러오기</b> — 휴대폰·카메라 영상을 그대로 끌어다 놓으세요. 파일은 내 컴퓨터 밖으로 나가지 않습니다.</li>
-    <li><b>컷</b> — 타임라인을 끌어 구간을 잡고 <b>자르기</b>/<b>그 구간만 남기기</b>. <b>무음 자동 컷</b>은 말이 끊긴 곳을 찾아 한 번에 잘라 줍니다.</li>
+    <li><b>영상 불러오기</b> — 휴대폰·카메라 영상을 그대로 끌어다 놓으세요. <b>여러 개를 한 번에</b> 넣으면 목록에 쌓이고 순서대로 이어 붙습니다. 파일은 내 컴퓨터 밖으로 나가지 않습니다.</li>
+    <li><b>클립</b> — 목록에서 ↑↓ 로 순서를 바꾸고 ✕ 로 빼고 <b>＋ 영상 추가</b>로 더 넣습니다. 클립을 누르면 그 클립을 편집합니다.</li>
+    <li><b>컷</b> — 클립 타임라인을 끌어 구간을 잡고 <b>자르기</b>/<b>그 구간만 남기기</b>. <b>무음 자동 컷</b>은 지금 클립의 말이 끊긴 곳을 찾아 한 번에 잘라 줍니다.</li>
+    <li><b>크기·배경</b> — <b>영상 크기</b>를 20~200% 로 조절합니다. 100% 아래로 줄이면 남는 곳에 고른 배경(검정·흰색·회색·흐림·직접 색)이 들어갑니다. 슬라이더 옆 칸에 % 를 직접 써도 됩니다.</li>
     <li><b>자막</b> — SRT를 넣으면 컷에 맞춰 자동 재계산되어 화면에 그려집니다.</li>
-    <li><b>내보내기</b> — 9:16 세로 영상으로 녹화합니다. 브라우저에 따라 MP4 또는 WebM으로 저장됩니다.</li>
+    <li><b>내보내기</b> — 9:16 세로 영상으로 녹화합니다. 브라우저에 따라 MP4 또는 WebM으로 저장됩니다. 클립이 바뀌는 지점의 아주 짧은 끊김은 브라우저 녹화 방식의 한계입니다.</li>
   </ol>
   <table>
     <tr><th>웹 버전</th><td>설치 없음 · 브라우저 녹화 방식 · 컷 지점에서 아주 짧은 끊김 · 형식은 브라우저에 따름</td></tr>
@@ -529,12 +623,11 @@
 
 <script>
 /* ======================================================================
-   쇼츠 편집기 · 웹 버전 (단일 파일)
-   - 영상: <video> 디코딩 + canvas 9:16 렌더
-   - 컷: 남길 구간 목록(segments)을 원본 시간 기준으로 관리
-   - 무음: WebAudio 분석(오프라인 디코딩 → 실패 시 실시간 캡처)
-   - 자막: SRT 파싱 → 원본 시각 → 결과 시각 매핑 후 canvas에 직접 그림
-   - 내보내기: canvas.captureStream + <video> 오디오 → MediaRecorder
+   쇼츠 편집기 · 웹 버전 v3 (단일 파일)
+   - 영상 여러 개(클립)를 목록으로 받아 순서대로 이어 붙입니다
+   - 클립마다 남길 구간(컷)을 따로 관리합니다
+   - 영상 크기 20~200% (축소·확대), 배경 검정·흰색·회색·흐림·직접 색
+   - 미리보기 · 내보내기 · edit_plan.json 이 같은 값을 씁니다
    ====================================================================== */
 (function () {
   'use strict';
@@ -543,26 +636,20 @@
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
   var S = {
-    file: null, url: '', duration: 0, vw: 0, vh: 0, hasAudio: false,
-    segments: [],           // [{in, out, tag}]
-    cues: [],               // [{start, end, text}]  (원본 시간)
-    fit: 'cover', zoom: 1, posY: 0,
-    sub: { on: true, size: 64, margin: 150, box: true, bold: true },
+    clips: [],              // [{uid,name,file,url,el,srcNode,dur,vw,vh,hasAudio,segs}]
+    active: -1,
+    P: [], total: 0, curOut: 0,
+    fit: 'cover', zoom: 1, posY: 0, bg: 'black', bgHex: '#000000',
+    cues: [],               // [{ci,start,end,text}]  ci>=0 → 그 클립 원본 시각 / ci<0 → 완성 영상 시각
     srtMode: 'raw',
+    sub: { on: true, size: 64, margin: 150, box: true, bold: true },
     res: 1080, fps: 30, br: 8,
-    playing: false, playIdx: 0, raf: 0,
-    sel: null, history: [], exporting: false, outUrl: ''
+    playing: false, pi: 0, raf: 0,
+    sel: null, history: [], exporting: false, outUrl: '', uid: 0
   };
 
-  var V = document.createElement('video');
-  V.playsInline = true;
-  V.preload = 'auto';
-  V.setAttribute('playsinline', '');
-  V.style.cssText = 'position:absolute;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;';
-  document.body.appendChild(V);
-
   var cv = $('#cv'), ctx = cv.getContext('2d');
-  var tl = $('#tl');
+  var tl = $('#tl'), tlAll = $('#tlAll');
 
   /* canvas filter(흐림) 지원 여부를 한 번만 실제로 확인합니다 (Safari 구버전 대응) */
   var BLUR_OK = (function () {
@@ -574,23 +661,8 @@
     } catch (e) { return false; }
   })();
 
-  /* Safari 처럼 <video>.captureStream() 이 없는 브라우저용 오디오 경로 */
-  var AG = { ctx: null, src: null, dest: null };
-  function graphAudioTrack() {
-    try {
-      var AC = window.AudioContext || window.webkitAudioContext;
-      if (!AC) return null;
-      if (!AG.ctx) AG.ctx = new AC();
-      if (!AG.src) {
-        AG.src = AG.ctx.createMediaElementSource(V);
-        AG.dest = AG.ctx.createMediaStreamDestination();
-        AG.src.connect(AG.dest);
-        AG.src.connect(AG.ctx.destination);
-      }
-      if (AG.ctx.state === 'suspended' && AG.ctx.resume) AG.ctx.resume();
-      return AG.dest.stream.getAudioTracks()[0] || null;
-    } catch (e) { return null; }
-  }
+  /* 여러 클립의 소리를 하나의 오디오 트랙으로 모읍니다 (내보내기) */
+  var AG = { ctx: null, dest: null };
 
   /* ---------------------------------------------------------------- util */
   function fmt(t) {
@@ -604,11 +676,12 @@
     return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
   }
   function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
   function toast(msg) {
     var el = $('#toast');
     el.textContent = msg; el.classList.add('on');
     clearTimeout(toast._t);
-    toast._t = setTimeout(function () { el.classList.remove('on'); }, 2600);
+    toast._t = setTimeout(function () { el.classList.remove('on'); }, 2800);
   }
   function download(blob, name) {
     var a = document.createElement('a');
@@ -618,12 +691,26 @@
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
   }
 
-  /* ------------------------------------------------------- segment model */
-  function tidy(segs) {
+  /* ------------------------------------------------------- clip / piece model */
+  function activeClip() { return S.clips[S.active] || null; }
+
+  function clipOutDur(ci) {
+    var c = S.clips[ci];
+    if (!c) return 0;
+    var t = 0;
+    for (var i = 0; i < c.segs.length; i++) t += Math.max(0, c.segs[i].out - c.segs[i].in);
+    return t;
+  }
+  function clipStart(ci) {
+    var t = 0;
+    for (var i = 0; i < ci && i < S.clips.length; i++) t += clipOutDur(i);
+    return t;
+  }
+  function tidy(segs, dur) {
     var out = [], i, s;
     for (i = 0; i < segs.length; i++) {
       s = segs[i];
-      var a = clamp(s.in, 0, S.duration), b = clamp(s.out, 0, S.duration);
+      var a = clamp(s.in, 0, dur), b = clamp(s.out, 0, dur);
       if (b - a > 0.04) out.push({ in: +a.toFixed(3), out: +b.toFixed(3) });
     }
     out.sort(function (x, y) { return x.in - y.in; });
@@ -635,119 +722,156 @@
     }
     return merged;
   }
-  function outDur() {
-    var t = 0;
-    for (var i = 0; i < S.segments.length; i++) t += S.segments[i].out - S.segments[i].in;
-    return t;
-  }
-  function srcToOut(t) {
-    var acc = 0;
-    for (var i = 0; i < S.segments.length; i++) {
-      var s = S.segments[i];
+  function srcToOut(ci, t) {
+    var acc = clipStart(ci), segs = S.clips[ci] ? S.clips[ci].segs : [];
+    for (var i = 0; i < segs.length; i++) {
+      var s = segs[i];
       if (t < s.in) return acc;
       if (t <= s.out) return acc + (t - s.in);
       acc += s.out - s.in;
     }
     return acc;
   }
+  function buildPieces() {
+    var P = [], acc = 0;
+    S.clips.forEach(function (c, ci) {
+      c.segs.forEach(function (s) {
+        var d = s.out - s.in;
+        if (d <= 0.001) return;
+        P.push({ ci: ci, in: s.in, out: s.out, t0: acc, t1: acc + d });
+        acc += d;
+      });
+    });
+    S.P = P;
+    S.total = acc;
+    if (!P.length) { S.pi = 0; S.curOut = 0; return; }
+    S.curOut = clamp(S.curOut, 0, Math.max(0, acc - 0.02));
+    S.pi = pieceIndex(S.curOut);
+  }
+  function pieceIndex(T) {
+    var P = S.P;
+    for (var i = 0; i < P.length; i++) {
+      if (T < P[i].t1 - 0.0005) return i;
+    }
+    return P.length ? P.length - 1 : 0;
+  }
+  function outToPiece(T) {
+    if (!S.P.length) return null;
+    var i = pieceIndex(T), p = S.P[i];
+    return { i: i, ci: p.ci, src: p.in + clamp(T - p.t0, 0, p.out - p.in), p: p };
+  }
+
   function pushHistory() {
-    S.history.push(JSON.stringify(S.segments));
+    var c = activeClip();
+    if (!c) return;
+    S.history.push({ ci: S.active, segs: JSON.stringify(c.segs) });
     if (S.history.length > 40) S.history.shift();
     $('#btnUndo').disabled = false;
   }
   function undo() {
     if (!S.history.length) return;
-    S.segments = JSON.parse(S.history.pop());
+    var h = S.history.pop();
+    if (S.clips[h.ci]) { S.clips[h.ci].segs = JSON.parse(h.segs); S.active = h.ci; }
     $('#btnUndo').disabled = !S.history.length;
-    renderAll();
+    renderAll(); drawNow();
   }
   function cutRange(a, b) {
+    var c = activeClip(); if (!c) return;
     pushHistory();
     var out = [];
-    S.segments.forEach(function (s) {
+    c.segs.forEach(function (s) {
       if (s.out <= a || s.in >= b) { out.push(s); return; }
       if (s.in < a) out.push({ in: s.in, out: a });
       if (s.out > b) out.push({ in: b, out: s.out });
     });
-    S.segments = tidy(out);
-    renderAll();
+    c.segs = tidy(out, c.dur);
+    renderAll(); drawNow();
   }
   function keepRange(a, b) {
+    var c = activeClip(); if (!c) return;
     pushHistory();
     var out = [];
-    S.segments.forEach(function (s) {
+    c.segs.forEach(function (s) {
       var i = Math.max(s.in, a), o = Math.min(s.out, b);
       if (o - i > 0.04) out.push({ in: i, out: o });
     });
-    S.segments = tidy(out);
-    renderAll();
+    c.segs = tidy(out, c.dur);
+    renderAll(); drawNow();
   }
   function segAt(t) {
-    for (var i = 0; i < S.segments.length; i++) {
-      var s = S.segments[i];
+    var c = activeClip(); if (!c) return -1;
+    for (var i = 0; i < c.segs.length; i++) {
+      var s = c.segs[i];
       if (t >= s.in - 0.02 && t < s.out) return i;
     }
     return -1;
   }
   function nextBoundary(t, dir) {
-    var best = dir > 0 ? S.duration : 0, seen = false;
+    var c = activeClip();
+    if (!c) return 0;
+    var best = dir > 0 ? c.dur : 0, seen = false;
     function take(v) {
       if (dir > 0 ? (v > t + 0.05) : (v < t - 0.05)) {
         if (!seen || (dir > 0 ? v < best : v > best)) { best = v; seen = true; }
       }
     }
-    S.segments.forEach(function (s) { take(s.in); take(s.out); });
+    c.segs.forEach(function (s) { take(s.in); take(s.out); });
     return best;
   }
 
   /* ------------------------------------------------------------- drawing */
-  function drawFrame(tSrc) {
+  function bgFill() {
+    if (S.bg === 'white') return '#FFFFFF';
+    if (S.bg === 'gray') return '#1E1E1E';
+    if (S.bg === 'custom') return S.bgHex || '#000000';
+    return '#000000';
+  }
+
+  function drawFrame(ci, tSrc, outT) {
     var W = cv.width, H = cv.height;
     ctx.save();
-    ctx.fillStyle = '#000';
+    ctx.fillStyle = bgFill();
     ctx.fillRect(0, 0, W, H);
 
-    if (S.file && S.vw && S.vh) {
-      var vw = S.vw, vh = S.vh;
-      var scale, dw, dh, dx, dy;
+    var clip = (ci >= 0 && ci < S.clips.length) ? S.clips[ci] : null;
+    if (clip && clip.vw && clip.vh) {
+      var vw = clip.vw, vh = clip.vh;
+      var base = (S.fit === 'contain') ? Math.min(W / vw, H / vh) : Math.max(W / vw, H / vh);
+      var sc = base * S.zoom;
+      var dw = vw * sc, dh = vh * sc;
+      var dx = (W - dw) / 2;
+      var dy = (H - dh) / 2 + S.posY * (H - dh) / 2;
 
-      function coverRect() {
-        var sc = Math.max(W / vw, H / vh) * S.zoom;
-        return { w: vw * sc, h: vh * sc };
-      }
-      function containRect() {
-        var sc = Math.min(W / vw, H / vh) * S.zoom;
-        return { w: vw * sc, h: vh * sc };
-      }
-
-      if (S.fit === 'blur') {
-        var c = coverRect();
-        if (BLUR_OK) { ctx.filter = 'blur(38px)'; }
-        try {
-          ctx.drawImage(V, (W - c.w) / 2, (H - c.h) / 2 + S.posY * H * 0.35, c.w, c.h);
-        } catch (e) {}
-        if (BLUR_OK) { ctx.filter = 'none'; }
-        ctx.fillStyle = 'rgba(0,0,0,.25)';
+      if (S.bg === 'blur') {
+        var bc = Math.max(W / vw, H / vh) * 1.06;
+        var bw = vw * bc, bh = vh * bc;
+        if (BLUR_OK) ctx.filter = 'blur(36px)';
+        try { ctx.drawImage(clip.el, (W - bw) / 2, (H - bh) / 2, bw, bh); } catch (e) {}
+        if (BLUR_OK) ctx.filter = 'none';
+        ctx.fillStyle = 'rgba(0,0,0,.30)';
         ctx.fillRect(0, 0, W, H);
-        var f = containRect();
-        safeDraw(f);
-      } else if (S.fit === 'contain') {
-        safeDraw(containRect());
-      } else {
-        safeDraw(coverRect());
       }
-
-      function safeDraw(r) {
-        var x = (W - r.w) / 2, y = (H - r.h) / 2 + S.posY * (H - r.h) / 2;
-        try { ctx.drawImage(V, x, y, r.w, r.h); } catch (e) {}
-      }
+      try { ctx.drawImage(clip.el, dx, dy, dw, dh); } catch (e) {}
     } else {
       ctx.fillStyle = '#10151B';
       ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#5C6B7E';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = '600 ' + Math.round(W * 0.042) + 'px -apple-system, "Apple SD Gothic Neo", system-ui, sans-serif';
+      ctx.fillText(S.clips.length ? '이 클립에는 남긴 구간이 없습니다' : '영상을 불러오세요', W / 2, H / 2);
     }
-
-    drawSubs(tSrc);
+    drawSubs(ci, tSrc, outT);
     ctx.restore();
+  }
+
+  function drawNow() {
+    var p = S.P[S.pi];
+    if (!p) { drawFrame(-1, 0, 0); updateHead(0); return; }
+    var c = S.clips[p.ci];
+    var t = c && c.el ? c.el.currentTime : p.in;
+    drawFrame(p.ci, t, S.curOut);
+    updateHead(S.curOut);
   }
 
   function wrapLines(text, maxW) {
@@ -764,19 +888,23 @@
     return out;
   }
 
-  function activeCue(t) {
-    var key = S.srtMode === 'final' ? srcToOut(t) : t;
+  function activeCue(ci, tSrc, outT) {
     for (var i = 0; i < S.cues.length; i++) {
       var c = S.cues[i];
-      if (key >= c.start - 0.001 && key <= c.end + 0.001) return c;
+      if (c.ci >= 0) {
+        if (c.ci !== ci) continue;
+        if (tSrc >= c.start - 0.001 && tSrc <= c.end + 0.001) return c;
+      } else {
+        if (outT >= c.start - 0.001 && outT <= c.end + 0.001) return c;
+      }
     }
     return null;
   }
 
-  function drawSubs(tSrc) {
-    if (!S.sub.on || !S.cues.length || !S.segments.length) return;
-    var cue = activeCue(tSrc);
-    if (!cue || !cue.text.trim()) return;
+  function drawSubs(ci, tSrc, outT) {
+    if (!S.sub.on || !S.cues.length) return;
+    var cue = activeCue(ci, tSrc, outT);
+    if (!cue || !String(cue.text).trim()) return;
     var W = cv.width, H = cv.height;
     var size = S.sub.size * (W / 1080);
     ctx.save();
@@ -814,170 +942,367 @@
   /* ------------------------------------------------------------- playback */
   function stopPlay() {
     S.playing = false;
-    try { V.pause(); } catch (e) {}
-    $('#btnPlay').textContent = '▶ 재생';
     cancelAnimationFrame(S.raf);
+    S.clips.forEach(function (c) { try { c.el.pause(); } catch (e) {} });
+    $('#btnPlay').textContent = '▶ 재생';
+  }
+  function pauseOthers(ci) {
+    S.clips.forEach(function (c, i) { if (i !== ci) { try { c.el.pause(); } catch (e) {} } });
   }
 
-  function seek(t, then) {
-    t = clamp(t, 0, Math.max(0, S.duration - 0.02));
+  function setActive(ci) {
+    if (ci === S.active || !S.clips[ci]) return;
+    S.active = ci;
+    S.sel = null;
+    $('#sel').hidden = true;
+    renderClips(); renderTimeline(); renderSegList(); renderAllBar(); syncButtons();
+    var c = S.clips[ci];
+    $('#tlClipName').textContent = '클립 ' + (ci + 1) + '/' + S.clips.length + ' · ' + c.name;
+  }
+
+  function seekOut(T) {
+    T = clamp(T || 0, 0, Math.max(0, S.total - 0.02));
+    S.curOut = T;
+    var q = outToPiece(T);
+    if (!q) { S.pi = 0; drawFrame(-1, 0, 0); updateHead(0); return; }
+    S.pi = q.i;
+    if (q.ci !== S.active) setActive(q.ci);
+    var clip = S.clips[q.ci], el = clip.el;
+    pauseOthers(q.ci);
+    drawFrame(q.ci, el.currentTime || q.src, T);
+    updateHead(T);
     var done = false;
     function fin() {
       if (done) return; done = true;
-      V.removeEventListener('seeked', fin);
-      drawFrame(V.currentTime);
-      updateHead(V.currentTime);
-      if (then) then();
+      el.removeEventListener('seeked', fin);
+      if (S.playing) return;
+      drawFrame(q.ci, el.currentTime, S.curOut);
+      updateHead(S.curOut);
     }
-    V.addEventListener('seeked', fin);
-    try { V.currentTime = t; } catch (e) { fin(); }
-    setTimeout(fin, 700);
+    el.addEventListener('seeked', fin);
+    try { el.currentTime = clamp(q.src, 0, Math.max(0, clip.dur - 0.02)); } catch (e) { fin(); }
+    setTimeout(fin, 900);
   }
 
-  function playFrom(t) {
-    if (!S.duration || !S.segments.length) return;
-    var idx = segAt(t);
-    if (idx < 0) {
-      for (var i = 0; i < S.segments.length; i++) {
-        if (S.segments[i].in > t) { idx = i; break; }
-      }
-      if (idx < 0) idx = 0;
-    }
-    S.playIdx = idx;
-    var start = (segAt(t) === idx && t > S.segments[idx].in) ? t : S.segments[idx].in;
-    seek(start, function () {
-      S.playing = true;
-      $('#btnPlay').textContent = '⏸ 일시정지';
-      var p = V.play();
-      if (p && p.catch) p.catch(function () { stopPlay(); toast('재생을 시작할 수 없습니다. 다시 눌러 주세요.'); });
-      loop();
-    });
+  function seekSrc(ci, t) {
+    var c = S.clips[ci];
+    if (!c) return;
+    var inside = null;
+    c.segs.forEach(function (s) { if (!inside && t >= s.in - 0.01 && t <= s.out + 0.01) inside = s; });
+    if (inside) { seekOut(srcToOut(ci, clamp(t, inside.in, inside.out))); return; }
+    var next = null;
+    c.segs.forEach(function (s) { if (!next && s.in > t) next = s; });
+    if (next) seekOut(srcToOut(ci, next.in));
+    else seekOut(clipStart(ci) + clipOutDur(ci) - 0.02);
+  }
+
+  function playFrom(T) {
+    if (!S.P.length) return;
+    if (T >= S.total - 0.05) T = 0;
+    seekOut(T);
+    var p = S.P[S.pi];
+    var el = S.clips[p.ci].el;
+    pauseOthers(p.ci);
+    S.playing = true;
+    $('#btnPlay').textContent = '⏸ 일시정지';
+    var pr = el.play();
+    if (pr && pr.catch) pr.catch(function () { stopPlay(); toast('재생을 시작할 수 없습니다. 다시 눌러 주세요.'); });
+    S.raf = requestAnimationFrame(loop);
   }
 
   function loop() {
     if (!S.playing) return;
-    var t = V.currentTime;
-    var seg = S.segments[S.playIdx];
-    if (!seg) { stopPlay(); return; }
-    if (t >= seg.out - 0.02 || t < seg.in - 0.25) {
-      if (t < seg.in - 0.25) {              // 사용자가 타임라인을 건드린 경우
-        S.playIdx = Math.max(0, segAt(t));
-      } else if (S.playIdx + 1 < S.segments.length) {
-        S.playIdx++;
-        try { V.currentTime = S.segments[S.playIdx].in + 0.001; } catch (e) {}
-      } else {
-        stopPlay();
-        drawFrame(seg.out);
-        updateHead(seg.out);
+    var p = S.P[S.pi];
+    if (!p) { stopPlay(); return; }
+    var clip = S.clips[p.ci], el = clip.el;
+    var t = el.currentTime;
+    if (t >= p.out - 0.02) {
+      if (S.pi + 1 < S.P.length) {
+        var np = S.P[S.pi + 1];
+        S.pi++;
+        if (np.ci === p.ci) {
+          try { el.currentTime = np.in + 0.001; } catch (e) {}
+          S.raf = requestAnimationFrame(loop);
+          return;
+        }
+        switchPlay(np);
         return;
       }
+      stopPlay();
+      S.curOut = S.total;
+      drawFrame(p.ci, p.out, S.total);
+      updateHead(S.total);
+      return;
     }
-    drawFrame(V.currentTime);
-    updateHead(V.currentTime);
+    var T = p.t0 + Math.max(0, t - p.in);
+    S.curOut = clamp(T, 0, S.total);
+    if (S.active !== p.ci) setActive(p.ci);
+    drawFrame(p.ci, t, S.curOut);
+    updateHead(S.curOut);
     S.raf = requestAnimationFrame(loop);
   }
 
-  function updateHead(t) {
-    $('#tNow').textContent = fmt(t);
-    var pct = S.duration ? (t / S.duration) * 100 : 0;
-    $('#ph').style.left = pct + '%';
+  function switchPlay(np) {
+    var clip = S.clips[np.ci], el = clip.el;
+    pauseOthers(np.ci);
+    if (S.active !== np.ci) setActive(np.ci);
+    var go = function () {
+      if (!S.playing) return;
+      var pr = el.play();
+      if (pr && pr.catch) pr.catch(function () { stopPlay(); });
+    };
+    if (Math.abs(el.currentTime - np.in) > 0.06) {
+      try { el.currentTime = np.in + 0.001; } catch (e) {}
+      setTimeout(go, 90);
+      setTimeout(go, 260);
+    } else { go(); }
+    S.raf = requestAnimationFrame(loop);
+  }
+
+  function updateHead(T) {
+    S.curOut = clamp(T || 0, 0, S.total);
+    $('#tNow').textContent = fmt(S.curOut);
+    var phAll = $('#phAll');
+    if (phAll) phAll.style.left = (S.total ? S.curOut / S.total * 100 : 0) + '%';
+    var p = S.P[S.pi];
+    if (p) {
+      var c = S.clips[p.ci];
+      var srcT = p.in + clamp(S.curOut - p.t0, 0, p.out - p.in);
+      var pct = (c && c.dur) ? (srcT / c.dur) * 100 : 0;
+      $('#ph').style.left = clamp(pct, 0, 100) + '%';
+    } else {
+      $('#ph').style.left = '0%';
+    }
   }
 
   /* -------------------------------------------------------------- timeline */
   function renderTimeline() {
-    if (!S.duration) {
-      $$('#tl .seg').forEach(function (n) { n.remove(); });
-      $('#ticks').innerHTML = '';
-      return;
-    }
+    var c = activeClip();
+    var d = c ? c.dur : 0;
     $$('#tl .seg').forEach(function (n) { n.remove(); });
-    S.segments.forEach(function (s, i) {
-      var d = document.createElement('div');
-      d.className = 'seg';
-      d.style.left = (s.in / S.duration * 100) + '%';
-      d.style.width = ((s.out - s.in) / S.duration * 100) + '%';
-      if ((s.out - s.in) > S.duration * 0.06) {
-        d.innerHTML = '<span>' + fmt(s.in) + '–' + fmt(s.out) + '</span>';
+    var ticks = $('#ticks');
+    ticks.innerHTML = '';
+    if (!c || !d) return;
+    c.segs.forEach(function (s) {
+      var el = document.createElement('div');
+      el.className = 'seg';
+      el.style.left = (s.in / d * 100) + '%';
+      el.style.width = ((s.out - s.in) / d * 100) + '%';
+      if ((s.out - s.in) > d * 0.06) {
+        el.innerHTML = '<span>' + fmt(s.in) + '–' + fmt(s.out) + '</span>';
       }
-      tl.appendChild(d);
+      tl.appendChild(el);
     });
-    // 시각 눈금
-    var ticks = $('#ticks'); ticks.innerHTML = '';
-    var step = S.duration <= 20 ? 2 : S.duration <= 60 ? 5 : S.duration <= 180 ? 15 : 30;
-    for (var t = 0; t <= S.duration; t += step) {
+    var step = d <= 20 ? 2 : d <= 60 ? 5 : d <= 180 ? 15 : 30;
+    for (var t = 0; t <= d; t += step) {
       var i = document.createElement('i');
-      i.style.left = (t / S.duration * 100) + '%';
+      i.style.left = (t / d * 100) + '%';
       var b = document.createElement('b'); b.textContent = fmtClock(t);
       i.appendChild(b); ticks.appendChild(i);
     }
+    $('#tlInfo').textContent = '남긴 구간 ' + c.segs.length + '개 · 이 클립 결과 ' + clipOutDur(S.active).toFixed(1) + '초';
+    syncSelButtons();
   }
 
   var drag = null;
   function tlTime(e) {
+    var c = activeClip();
+    if (!c || !c.dur) return 0;
     var r = tl.getBoundingClientRect();
-    return clamp((e.clientX - r.left) / r.width, 0, 1) * S.duration;
+    return clamp((e.clientX - r.left) / r.width, 0, 1) * c.dur;
   }
-  tl.addEventListener('pointerdown', function (e) {
-    if (!S.duration) return;
-    tl.setPointerCapture(e.pointerId);
-    var t = tlTime(e);
-    drag = { t0: t, t1: t, moved: false };
-    seek(t);
-  });
-  tl.addEventListener('pointermove', function (e) {
-    if (!drag) return;
-    var t = tlTime(e);
-    if (Math.abs(t - drag.t0) > 0.02) drag.moved = true;
-    drag.t1 = t;
-    if (drag.moved) showSel(Math.min(drag.t0, drag.t1), Math.max(drag.t0, drag.t1));
-  });
-  tl.addEventListener('pointerup', function (e) {
-    if (!drag) return;
-    var a = Math.min(drag.t0, drag.t1), b = Math.max(drag.t0, drag.t1);
-    var moved = drag.moved && (b - a) > 0.1;
-    drag = null;
-    if (moved) { S.sel = { a: a, b: b }; showSel(a, b); }
-    else { S.sel = null; $('#sel').hidden = true; }
-    syncSelButtons();
-  });
+  if (tl) {
+    tl.addEventListener('pointerdown', function (e) {
+      var c = activeClip();
+      if (!c) return;
+      try { tl.setPointerCapture(e.pointerId); } catch (x) {}
+      var t = tlTime(e);
+      drag = { t0: t, t1: t, moved: false };
+      seekSrc(S.active, t);
+    });
+    tl.addEventListener('pointermove', function (e) {
+      if (!drag) return;
+      var t = tlTime(e);
+      if (Math.abs(t - drag.t0) > 0.02) drag.moved = true;
+      drag.t1 = t;
+      if (drag.moved) showSel(Math.min(drag.t0, drag.t1), Math.max(drag.t0, drag.t1));
+    });
+    tl.addEventListener('pointerup', function () {
+      if (!drag) return;
+      var a = Math.min(drag.t0, drag.t1), b = Math.max(drag.t0, drag.t1);
+      var moved = drag.moved && (b - a) > 0.1;
+      drag = null;
+      if (moved) { S.sel = { a: a, b: b }; showSel(a, b); }
+      else { S.sel = null; $('#sel').hidden = true; }
+      syncSelButtons();
+    });
+    tl.addEventListener('pointercancel', function () { drag = null; });
+  }
 
   function showSel(a, b) {
+    var c = activeClip();
     var el = $('#sel');
+    if (!c || !c.dur) return;
     el.hidden = false;
-    el.style.left = (a / S.duration * 100) + '%';
-    el.style.width = ((b - a) / S.duration * 100) + '%';
+    el.style.left = (a / c.dur * 100) + '%';
+    el.style.width = ((b - a) / c.dur * 100) + '%';
     $('#tlInfo').textContent = '선택 ' + fmt(a) + ' – ' + fmt(b) + '  (' + (b - a).toFixed(1) + '초)';
     syncSelButtons();
   }
-  function syncSelButtons() {
-    var ok = !!(S.sel && S.sel.b - S.sel.a > 0.1);
-    $('#btnCutSel').disabled = !ok;
-    $('#btnKeepSel').disabled = !ok;
-    $('#btnAddCut').disabled = !S.duration;
-    $('#btnUndo').disabled = !S.history.length;
+
+  function renderAllBar() {
+    if (!tlAll) return;
+    $$('#tlAll .blk').forEach(function (b) { b.remove(); });
+    var ph = $('#phAll');
+    if (!S.clips.length) { if (ph) ph.style.left = '0%'; return; }
+    S.clips.forEach(function (c, ci) {
+      var d = clipOutDur(ci);
+      var b = document.createElement('div');
+      b.className = 'blk' + (ci === S.active ? ' on' : '');
+      b.style.width = (S.total > 0 ? (d / S.total * 100) : 0) + '%';
+      b.textContent = d >= 1.2 ? String(ci + 1) : '';
+      b.title = c.name + ' · ' + d.toFixed(1) + '초';
+      tlAll.insertBefore(b, ph);
+    });
+  }
+
+  var dragAll = false, allMoved = false, allDown = 0;
+  function allTime(e) {
+    var r = tlAll.getBoundingClientRect();
+    return clamp((e.clientX - r.left) / r.width, 0, 1) * S.total;
+  }
+  if (tlAll) {
+    tlAll.addEventListener('pointerdown', function (e) {
+      if (!S.total) return;
+      try { tlAll.setPointerCapture(e.pointerId); } catch (x) {}
+      dragAll = true; allMoved = false; allDown = performance.now();
+      seekOut(allTime(e));
+    });
+    tlAll.addEventListener('pointermove', function (e) {
+      if (!dragAll) return;
+      allMoved = true;
+      seekOut(allTime(e));
+    });
+    tlAll.addEventListener('pointerup', function (e) {
+      if (!dragAll) return;
+      dragAll = false;
+      if (!allMoved) {
+        var q = outToPiece(allTime(e));
+        if (q) { setActive(q.ci); seekOut(clipStart(q.ci)); }
+      }
+    });
+    tlAll.addEventListener('pointercancel', function () { dragAll = false; });
   }
 
   /* ----------------------------------------------------------- list views */
+  function renderClips() {
+    var box = $('#clipList');
+    $('#clipCount').textContent = S.clips.length + '개 · ' + S.total.toFixed(1) + '초';
+    if (!S.clips.length) {
+      box.innerHTML = '<div class="empty">영상을 불러오면 여기에 클립이 쌓입니다.</div>';
+      return;
+    }
+    box.innerHTML = '';
+    S.clips.forEach(function (c, ci) {
+      var row = document.createElement('div');
+      row.className = 'clipRow' + (ci === S.active ? ' on' : '');
+
+      var no = document.createElement('div');
+      no.className = 'no'; no.textContent = ci + 1;
+
+      var nm = document.createElement('div');
+      nm.className = 'nm';
+      var b = document.createElement('b'); b.textContent = c.name;
+      var sp = document.createElement('span');
+      sp.textContent = c.dur.toFixed(1) + '초 원본 · ' + c.segs.length + '구간 · 결과 ' + clipOutDur(ci).toFixed(1) + '초';
+      nm.appendChild(b); nm.appendChild(sp);
+
+      var ops = document.createElement('div');
+      ops.className = 'ops';
+      function mk(txt, title, fn, cls) {
+        var x = document.createElement('button');
+        x.type = 'button'; x.textContent = txt; x.title = title;
+        if (cls) x.className = cls;
+        x.addEventListener('click', function (ev) { ev.stopPropagation(); fn(); });
+        return x;
+      }
+      ops.appendChild(mk('↑', '위로', function () { moveClip(ci, -1); }));
+      ops.appendChild(mk('↓', '아래로', function () { moveClip(ci, 1); }));
+      ops.appendChild(mk('✕', '이 클립 빼기', function () { removeClip(ci); }, 'del'));
+
+      row.appendChild(no); row.appendChild(nm); row.appendChild(ops);
+      row.addEventListener('click', function () {
+        setActive(ci);
+        seekOut(clipStart(ci));
+      });
+      box.appendChild(row);
+    });
+  }
+
+  function moveClip(ci, dir) {
+    var j = ci + dir;
+    if (j < 0 || j >= S.clips.length) return;
+    var moved = S.clips.splice(ci, 1)[0];
+    S.clips.splice(j, 0, moved);
+    if (S.active === ci) S.active = j;
+    else if (S.active === j) S.active = ci;
+    renderAll();
+    seekOut(clipStart(S.active));
+    toast('클립 순서를 바꿨습니다');
+  }
+
+  function removeClip(ci) {
+    var c = S.clips[ci];
+    if (!c) return;
+    stopPlay();
+    try { c.el.pause(); } catch (e) {}
+    if (c.el && c.el.parentNode) c.el.parentNode.removeChild(c.el);
+    try { URL.revokeObjectURL(c.url); } catch (e) {}
+    S.clips.splice(ci, 1);
+    S.cues = S.cues
+      .filter(function (q) { return q.ci !== ci; })
+      .map(function (q) { return q.ci > ci ? { ci: q.ci - 1, start: q.start, end: q.end, text: q.text } : q; });
+    S.history = [];
+    if (S.clips.length) S.active = clamp(S.active > ci ? S.active - 1 : S.active, 0, S.clips.length - 1);
+    else S.active = -1;
+    S.curOut = 0;
+    renderAll();
+    seekOut(0);
+    drawNow();
+    toast('클립을 뺐습니다');
+  }
+
+  function clearClips() {
+    if (!S.clips.length) return;
+    if (!window.confirm('불러온 클립 ' + S.clips.length + '개와 컷을 모두 지웁니다. 계속할까요?')) return;
+    stopPlay();
+    S.clips.slice().forEach(function (c, i) { removeClip(0); });
+    S.cues = [];
+    renderAll();
+    drawNow();
+  }
+
   function renderSegList() {
     var box = $('#segList');
-    $('#segCount').textContent = S.segments.length + '개 · ' + outDur().toFixed(1) + '초';
-    if (!S.segments.length) {
+    var c = activeClip();
+    $('#segCount').textContent = c ? (c.segs.length + '개 · ' + clipOutDur(S.active).toFixed(1) + '초') : '0개';
+    if (!c || !c.segs.length) {
       box.innerHTML = '<div class="empty">남은 구간이 없습니다. 되돌리기를 눌러 주세요.</div>';
       return;
     }
     box.innerHTML = '';
-    S.segments.forEach(function (s, i) {
+    c.segs.forEach(function (s, i) {
       var row = document.createElement('div');
       row.className = 'segRow';
       row.innerHTML = '<span class="idx">' + (i + 1) + '</span>' +
         '<span class="t">' + fmt(s.in) + ' – ' + fmt(s.out) + '</span>' +
         '<span class="stat">' + (s.out - s.in).toFixed(1) + '초</span>' +
         '<button title="이 구간 빼기">✕</button>';
-      row.querySelector('.t').addEventListener('click', function () { seek(s.in); });
+      row.querySelector('.t').addEventListener('click', function () { seekSrc(S.active, s.in); });
       row.querySelector('button').addEventListener('click', function () {
         pushHistory();
-        S.segments = S.segments.filter(function (x) { return x !== s; });
-        renderAll();
+        c.segs = c.segs.filter(function (x) { return x !== s; });
+        renderAll(); drawNow();
       });
       box.appendChild(row);
     });
@@ -996,35 +1321,61 @@
       d.className = 'cue';
       var tm = document.createElement('div');
       tm.className = 'tm';
-      tm.innerHTML = (S.srtMode === 'final' ? '완성 ' : '원본 ') + fmt(c.start) + '–' + fmt(c.end) +
-        (S.srtMode === 'final' ? '' : ' <span style="opacity:.7">→ 결과 ' + fmt(srcToOut(c.start)) + '</span> ') + ' ';
+      var who = c.ci >= 0 ? ('클립 ' + (c.ci + 1) + ' 원본 ') : '완성 ';
+      var goOut = c.ci >= 0 ? srcToOut(c.ci, c.start) : c.start;
+      tm.innerHTML = who + fmt(c.start) + '–' + fmt(c.end) +
+        (c.ci >= 0 ? ' <span style="opacity:.7">→ 결과 ' + fmt(goOut) + '</span> ' : ' ');
       var go = document.createElement('button'); go.textContent = '▸이동';
-      go.addEventListener('click', function () { seek(c.start); });
+      go.addEventListener('click', function () { seekOut(goOut); });
       var del = document.createElement('button'); del.textContent = '✕';
       del.addEventListener('click', function () {
-        S.cues.splice(i, 1); renderCues(); drawFrame(V.currentTime);
+        S.cues.splice(i, 1); renderCues(); drawNow();
       });
       tm.appendChild(go); tm.appendChild(del);
       var ta = document.createElement('textarea');
       ta.value = c.text;
-      ta.addEventListener('input', function () { c.text = ta.value; drawFrame(V.currentTime); });
+      ta.addEventListener('input', function () { c.text = ta.value; drawNow(); });
       d.appendChild(tm); d.appendChild(ta);
       box.appendChild(d);
     });
   }
 
+  function syncSelButtons() {
+    var ok = !!(S.sel && S.sel.b - S.sel.a > 0.1);
+    $('#btnCutSel').disabled = !ok;
+    $('#btnKeepSel').disabled = !ok;
+  }
+
+  function syncButtons() {
+    var has = S.P.length > 0;
+    var c = activeClip();
+    $('#btnExport').disabled = !has || S.exporting;
+    $('#btnPlanExport').disabled = !has;
+    $('#btnNudge').disabled = !has;
+    $('#btnSilence').disabled = !c;
+    $('#btnCueAdd').disabled = !c;
+    $('#btnReset').disabled = !c;
+    $('#btnAddCut').disabled = !c;
+    $('#btnUndo').disabled = !S.history.length;
+    $('#btnClearClips').disabled = !S.clips.length;
+    syncSelButtons();
+  }
+
   function renderAll() {
-    renderTimeline(); renderSegList(); renderCues(); syncSelButtons();
-    $('#tAll').textContent = fmt(S.duration);
-    $('#btnExport').disabled = !S.duration || !S.segments.length;
-    $('#btnPlanExport').disabled = !S.duration || !S.segments.length;
-    $('#btnNudge').disabled = !S.duration;
-    $('#btnSilence').disabled = !S.duration;
-    $('#btnCueAdd').disabled = !S.duration;
-    if (S.duration) {
-      $('#tlInfo').textContent = '남긴 구간 ' + S.segments.length + '개 · 결과 ' + outDur().toFixed(1) + '초';
-      $('#drop').classList.add('hide');
-    }
+    buildPieces();
+    renderClips();
+    renderTimeline();
+    renderSegList();
+    renderCues();
+    renderAllBar();
+    syncButtons();
+    $('#tAll').textContent = fmt(S.total);
+    $('#drop').classList.toggle('hide', S.clips.length > 0);
+    var c = activeClip();
+    $('#tlClipName').textContent = c ? ('클립 ' + (S.active + 1) + '/' + S.clips.length + ' · ' + c.name) : '—';
+    $('#allInfo').textContent = S.clips.length
+      ? ('클립 ' + S.clips.length + '개 · 결과 ' + S.total.toFixed(1) + '초 · ' + Math.round(S.zoom * 100) + '%')
+      : '영상을 불러오면 클립이 순서대로 이어집니다';
   }
 
   /* ------------------------------------------------------------- SRT codec */
@@ -1057,27 +1408,19 @@
     return p(h, 2) + ':' + p(m, 2) + ':' + p(s, 2) + ',' + p(ms, 3);
   }
 
-  /* 결과 영상 시각 기준 SRT — 남긴 구간 안에 들어오는 자막만 옮깁니다 */
+  /* 결과 영상 시각 기준 SRT */
   function buildOutSrt() {
-    var rows = [], n = 0;
-    if (S.srtMode === 'final') {
-      var lim = outDur();
-      S.cues.forEach(function (c) {
-        var a = Math.max(0, c.start), b = Math.min(lim, c.end);
-        if (b - a > 0.15) { n++; rows.push({ a: a, b: b, text: c.text }); }
-      });
-      rows.sort(function (x, y) { return x.a - y.a; });
-      return rows.map(function (r, i) {
-        return (i + 1) + '\n' + srtTime(r.a) + ' --> ' + srtTime(r.b) + '\n' + r.text + '\n';
-      }).join('\n');
-    }
+    var rows = [];
     S.cues.forEach(function (c) {
-      S.segments.forEach(function (s) {
-        var a = Math.max(c.start, s.in), b = Math.min(c.end, s.out);
-        if (b - a > 0.15) {
-          n++;
-          rows.push({ i: n, a: srcToOut(a), b: srcToOut(b), text: c.text });
-        }
+      if (c.ci < 0) {
+        var a = Math.max(0, c.start), b = Math.min(S.total, c.end);
+        if (b - a > 0.15) rows.push({ a: a, b: b, text: c.text });
+        return;
+      }
+      var segs = S.clips[c.ci] ? S.clips[c.ci].segs : [];
+      segs.forEach(function (s) {
+        var x = Math.max(c.start, s.in), y = Math.min(c.end, s.out);
+        if (y - x > 0.15) rows.push({ a: srcToOut(c.ci, x), b: srcToOut(c.ci, y), text: c.text });
       });
     });
     rows.sort(function (x, y) { return x.a - y.a; });
@@ -1087,17 +1430,17 @@
   }
 
   /* ------------------------------------------------------- silence detect */
-  function buildSegmentsFromSilences(dur, silences) {
+  function segmentsFromSilences(dur, silences) {
     var keep = [], cur = 0;
     silences.forEach(function (s) {
       if (s.a - cur > 0.12) keep.push({ in: cur, out: s.a });
       cur = Math.max(cur, s.b);
     });
     if (dur - cur > 0.12) keep.push({ in: cur, out: dur });
-    return tidy(keep);
+    return tidy(keep, dur);
   }
 
-  async function detectSilence(file, thDb, minSil) {
+  async function detectSilence(file, thDb, minSil, dur) {
     var ab = await file.arrayBuffer();
     var AC = window.AudioContext || window.webkitAudioContext;
     var ac = new AC();
@@ -1107,12 +1450,10 @@
         var p = ac.decodeAudioData(ab.slice(0), res, rej);
         if (p && p.then) p.then(res, rej);
       });
-    } catch (e) {
-      buf = null;
-    }
+    } catch (e) { buf = null; }
     if (!buf) { try { ac.close(); } catch (e2) {} return null; }
     var ch = buf.getChannelData(0);
-    if (buf.numberOfChannels > 1) {                     // 두 채널 평균
+    if (buf.numberOfChannels > 1) {
       var c2 = buf.getChannelData(1);
       var mix = new Float32Array(ch.length);
       for (var i = 0; i < ch.length; i++) mix[i] = (ch[i] + c2[i]) / 2;
@@ -1141,54 +1482,50 @@
     if (runStart >= 0 && (db.length * 0.02 - runStart) >= minSil) {
       silent.push({ a: runStart, b: db.length * 0.02 });
     }
-    // 앞뒤 여유
     var pad = 0.05;
-    var padded = silent.map(function (s) { return { a: Math.max(0, s.a + pad), b: Math.min(S.duration, s.b - pad) }; })
+    var padded = silent.map(function (s) { return { a: Math.max(0, s.a + pad), b: Math.min(dur, s.b - pad) }; })
                         .filter(function (s) { return s.b - s.a > 0.1; });
     return { silences: padded, from: 'decode' };
   }
 
   /* 실시간 캡처 방식(오프라인 디코딩 실패 시) — 4배속으로 훑습니다 */
-  async function detectSilenceRealtime(thDb, minSil, onProgress) {
+  async function detectSilenceRealtime(clip, thDb, minSil, onProgress) {
     var AC = window.AudioContext || window.webkitAudioContext;
     var ac = new AC();
-    var src = null, stream = null;
-    try {
-      stream = V.captureStream ? V.captureStream() : (V.mozCaptureStream ? V.mozCaptureStream() : null);
-    } catch (e) { stream = null; }
+    var el = clip.el;
+    var stream = null;
+    try { stream = el.captureStream ? el.captureStream() : (el.mozCaptureStream ? el.mozCaptureStream() : null); } catch (e) { stream = null; }
     var track = stream && stream.getAudioTracks && stream.getAudioTracks()[0];
     if (!track) { try { ac.close(); } catch (e2) {} return null; }
-    src = ac.createMediaStreamSource(new MediaStream([track]));
+    var src = ac.createMediaStreamSource(new MediaStream([track]));
     var an = ac.createAnalyser();
     an.fftSize = 1024;
     src.connect(an);
     var arr = new Float32Array(an.fftSize);
     var db = [], lastT = 0;
-    var wasMuted = V.muted, wasRate = V.playbackRate;
-    V.muted = false; V.playbackRate = 4;
+    var wasMuted = el.muted, wasRate = el.playbackRate;
+    el.muted = false; el.playbackRate = 4;
     S.playing = false;
-    S.playIdx = 0;
-    try { V.currentTime = 0; } catch (e3) {}
-    await V.play();
-    var thr = thDb;
+    try { el.currentTime = 0; } catch (e3) {}
+    await el.play();
     return await new Promise(function (resolve) {
       var timer = setInterval(function () {
         an.getFloatTimeDomainData(arr);
         var sum = 0;
         for (var i = 0; i < arr.length; i++) sum += arr[i] * arr[i];
-        var t = V.currentTime;
+        var t = el.currentTime;
         var rms = Math.sqrt(sum / arr.length);
-        // 20ms 간격으로 밀어 넣기
         while (lastT + 0.02 <= t) { db.push(20 * Math.log10(rms + 1e-9)); lastT += 0.02; }
-        if (onProgress) onProgress(t / S.duration);
-        if (V.ended || t >= S.duration - 0.05) {
+        if (onProgress) onProgress(t / clip.dur);
+        if (el.ended || t >= clip.dur - 0.05) {
           clearInterval(timer);
-          V.pause(); V.playbackRate = wasRate; V.muted = wasMuted;
-          try { ac.close(); } catch (e4) {}
+          try { el.pause(); } catch (e4) {}
+          el.playbackRate = wasRate; el.muted = wasMuted;
+          try { ac.close(); } catch (e5) {}
           var silent = [], runStart = -1;
           for (var k = 0; k < db.length; k++) {
             var tt = k * 0.02;
-            if (db[k] < thr) { if (runStart < 0) runStart = tt; }
+            if (db[k] < thDb) { if (runStart < 0) runStart = tt; }
             else if (runStart >= 0) {
               if (tt - runStart >= minSil) silent.push({ a: runStart, b: tt });
               runStart = -1;
@@ -1203,34 +1540,87 @@
   }
 
   /* --------------------------------------------------------------- loading */
-  function loadVideo(file) {
-    stopPlay();
-    if (S.url) { try { URL.revokeObjectURL(S.url); } catch (e) {} }
-    S.file = file;
-    S.url = URL.createObjectURL(file);
-    S.cues = []; S.history = []; S.sel = null; $('#sel').hidden = true;
-    V.src = S.url;
-    V.load();
-    V.addEventListener('loadedmetadata', onMeta, { once: true });
-    V.addEventListener('error', function () {
-      toast('이 브라우저에서 읽을 수 없는 영상입니다. mp4(H.264) 또는 webm으로 바꿔 보세요.');
-    }, { once: true });
+  var VIDEO_RE = /\.(mp4|mov|webm|m4v|avi|mkv|3gp|mpe?g|ts|mts|m2ts|wmv)$/i;
+
+  function addClip(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var clip = {
+        uid: ++S.uid, name: file.name, file: file, url: url,
+        el: null, srcNode: null, dur: 0, vw: 0, vh: 0, hasAudio: false, segs: []
+      };
+      var v = document.createElement('video');
+      v.playsInline = true;
+      v.preload = 'auto';
+      v.setAttribute('playsinline', '');
+      v.muted = false;
+      v.style.cssText = 'position:fixed;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none;';
+      document.body.appendChild(v);
+      clip.el = v;
+      var done = false;
+      function finish() {
+        if (done) return;
+        done = true;
+        clip.dur = v.duration || 0;
+        clip.vw = v.videoWidth;
+        clip.vh = v.videoHeight;
+        if (!clip.dur || !clip.vw || !clip.vh) {
+          try { v.pause(); } catch (e) {}
+          if (v.parentNode) v.parentNode.removeChild(v);
+          try { URL.revokeObjectURL(url); } catch (e) {}
+          reject(new Error('영상을 읽지 못했습니다: ' + file.name));
+          return;
+        }
+        clip.segs = [{ in: 0, out: +clip.dur.toFixed(3) }];
+        try {
+          var st = v.captureStream ? v.captureStream() : (v.mozCaptureStream ? v.mozCaptureStream() : null);
+          clip.hasAudio = !!(st && st.getAudioTracks && st.getAudioTracks().length);
+          if (st) st.getTracks().forEach(function (t) { t.stop(); });
+        } catch (e) { clip.hasAudio = false; }
+        S.clips.push(clip);
+        resolve(clip);
+      }
+      v.addEventListener('loadedmetadata', finish, { once: true });
+      v.addEventListener('error', function () {
+        if (done) return;
+        done = true;
+        if (v.parentNode) v.parentNode.removeChild(v);
+        try { URL.revokeObjectURL(url); } catch (e) {}
+        reject(new Error('이 브라우저에서 읽을 수 없는 영상입니다: ' + file.name));
+      }, { once: true });
+      setTimeout(finish, 12000);
+      v.src = url;
+      try { v.load(); } catch (e) {}
+    });
   }
 
-  function onMeta() {
-    S.duration = V.duration || 0;
-    S.vw = V.videoWidth; S.vh = V.videoHeight;
-    S.segments = S.duration ? [{ in: 0, out: +S.duration.toFixed(3) }] : [];
-    $('#drop').classList.add('hide');
+  async function addFiles(list) {
+    var files = [], i;
+    for (i = 0; i < (list ? list.length : 0); i++) {
+      var f = list[i];
+      if (!f) continue;
+      var n = String(f.name || '').toLowerCase();
+      if (/\.(srt|vtt)$/.test(n)) { loadSrtFile(f); continue; }
+      if (/\.json$/.test(n)) { loadPlanFile(f); continue; }
+      if (f.type && f.type.indexOf('video') !== 0 && !VIDEO_RE.test(n)) continue;
+      files.push(f);
+    }
+    if (!files.length) return;
+    var firstNew = S.clips.length;
+    var added = 0, failed = 0;
+    for (i = 0; i < files.length; i++) {
+      try { await addClip(files[i]); added++; }
+      catch (e) { failed++; toast(String(e && e.message ? e.message : e)); }
+    }
+    if (!added) return;
+    S.active = firstNew;
+    S.curOut = clipStart(firstNew);
     renderAll();
-    seek(0);
-    // 오디오 트랙 유무
-    try {
-      var st = V.captureStream ? V.captureStream() : (V.mozCaptureStream ? V.mozCaptureStream() : null);
-      S.hasAudio = !!(st && st.getAudioTracks && st.getAudioTracks().length);
-      if (st) st.getTracks().forEach(function (t) { t.stop(); });
-    } catch (e) { S.hasAudio = false; }
-    toast('영상을 불러왔습니다 · ' + fmt(S.duration) + ' · ' + S.vw + '×' + S.vh);
+    seekOut(S.curOut);
+    var last = S.clips[S.clips.length - 1];
+    toast(added === 1
+      ? ('영상 1개를 불러왔습니다 · ' + last.dur.toFixed(1) + '초 · ' + last.vw + '×' + last.vh)
+      : ('영상 ' + added + '개를 불러왔습니다' + (failed ? (' (' + failed + '개 실패)') : '') + ' · 전체 ' + S.total.toFixed(1) + '초'));
   }
 
   /* -------------------------------------------------------------- exporting */
@@ -1248,7 +1638,6 @@
     return '';
   }
 
-  /* 브라우저가 알려준 형식과 실제 파일이 다를 수 있어, 앞부분 바이트로 확인합니다 */
   async function sniffKind(blob) {
     try {
       var h = new Uint8Array(await blob.slice(0, 16).arrayBuffer());
@@ -1263,8 +1652,56 @@
     return { w: w, h: Math.round(w * 16 / 9) };
   }
 
+  /* 모든 클립의 소리를 하나의 트랙으로 (클립이 바뀌어도 소리가 끊기지 않게) */
+  function graphAudio() {
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      if (!AG.ctx) AG.ctx = new AC();
+      if (!AG.dest) AG.dest = AG.ctx.createMediaStreamDestination();
+      S.clips.forEach(function (c) {
+        if (c.srcNode) return;
+        try {
+          c.el.muted = false;
+          c.srcNode = AG.ctx.createMediaElementSource(c.el);
+          c.srcNode.connect(AG.dest);
+          c.srcNode.connect(AG.ctx.destination);
+        } catch (e) { c.srcNode = null; }
+      });
+      if (AG.ctx.state === 'suspended' && AG.ctx.resume) AG.ctx.resume();
+      var st = AG.dest.stream;
+      return (st && st.getAudioTracks && st.getAudioTracks()[0]) || null;
+    } catch (e) { return null; }
+  }
+
+  async function prepClipEl(ci, srcT) {
+    var c = S.clips[ci];
+    if (!c) return null;
+    var el = c.el;
+    if (el.readyState < 1) {
+      await new Promise(function (r) {
+        var done = false;
+        var fin = function () { if (done) return; done = true; el.removeEventListener('loadedmetadata', fin); r(); };
+        el.addEventListener('loadedmetadata', fin);
+        setTimeout(fin, 5000);
+        try { el.load(); } catch (e) { fin(); }
+      });
+    }
+    if (Math.abs(el.currentTime - srcT) > 0.04) {
+      await new Promise(function (r) {
+        var done = false;
+        var fin = function () { if (done) return; done = true; el.removeEventListener('seeked', fin); r(); };
+        el.addEventListener('seeked', fin);
+        setTimeout(fin, 1200);
+        try { el.currentTime = srcT; } catch (e) { fin(); }
+      });
+    }
+    return el;
+  }
+
   async function doExport() {
     if (S.exporting) return;
+    if (!S.P.length) { toast('남긴 구간이 없습니다.'); return; }
     if (!window.MediaRecorder) { toast('이 브라우저는 영상 녹화(MediaRecorder)를 지원하지 않습니다.'); return; }
     var mime = pickMime();
     if (!mime) { toast('이 브라우저에서는 녹화 형식을 찾지 못했습니다. Chrome·Safari 최신 버전을 써 주세요.'); return; }
@@ -1277,87 +1714,104 @@
     var size = outSize();
     var oldW = cv.width, oldH = cv.height;
     cv.width = size.w; cv.height = size.h;
-    var total = outDur();
+    var total = S.total;
     $('#expStat').textContent = '준비 중…';
-    $('#expNote').textContent = '실시간 녹화 중입니다. 창을 닫거나 탭을 바꾸지 마세요. ' +
-      '(' + total.toFixed(1) + '초 예상)';
+    $('#expNote').textContent = '실시간 녹화 중입니다. 창을 닫거나 탭을 바꾸지 마세요. (' + total.toFixed(1) + '초 예상)';
 
-    var stream, vTrack, aTrack = null, reqFrame = null;
+    var stream = null, rec = null, aTrack = null, reqFrame = null, i;
     try {
-      stream = cv.captureStream(S.fps);
-      vTrack = stream.getVideoTracks()[0];
-      if (vTrack && vTrack.requestFrame) reqFrame = function () { try { vTrack.requestFrame(); } catch (e) {} };
-      try {
-        var vs = V.captureStream ? V.captureStream() : (V.mozCaptureStream ? V.mozCaptureStream() : null);
-        if (vs && vs.getAudioTracks().length) aTrack = vs.getAudioTracks()[0];
-      } catch (e) {}
-      if (!aTrack) aTrack = graphAudioTrack();      /* Safari 등 */
-      if (aTrack) {
-        try { stream.addTrack(aTrack); } catch (e2) {}
-      } else {
-        toast('소리 없이 녹화합니다 (이 브라우저의 오디오 캡처 미지원)');
+      S.clips.forEach(function (c) { try { c.el.pause(); } catch (e) {} });
+      for (i = 0; i < S.clips.length; i++) {
+        await prepClipEl(i, S.clips[i].segs.length ? S.clips[i].segs[0].in : 0);
       }
-      var rec = new MediaRecorder(stream, {
+
+      stream = cv.captureStream(S.fps);
+      var vTrack = stream.getVideoTracks()[0];
+      if (vTrack && vTrack.requestFrame) reqFrame = function () { try { vTrack.requestFrame(); } catch (e) {} };
+
+      aTrack = S.clips.length > 1 ? graphAudio() : null;
+      if (!aTrack) {
+        try {
+          var el0 = S.clips[S.P[0].ci].el;
+          var vs = el0.captureStream ? el0.captureStream() : (el0.mozCaptureStream ? el0.mozCaptureStream() : null);
+          if (vs && vs.getAudioTracks().length) aTrack = vs.getAudioTracks()[0];
+        } catch (e) {}
+      }
+      if (aTrack) { try { stream.addTrack(aTrack); } catch (e) {} }
+      else toast('소리 없이 녹화합니다 (이 브라우저의 오디오 캡처 미지원)');
+
+      rec = new MediaRecorder(stream, {
         mimeType: mime,
         videoBitsPerSecond: S.br * 1000000,
         audioBitsPerSecond: 128000
       });
       var chunks = [];
       rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
-
       var finished = new Promise(function (res) { rec.onstop = res; });
-      var started = performance.now();
 
-      // 첫 프레임을 그린 뒤 녹화 시작
-      V.currentTime = S.segments[0].in;
-      await new Promise(function (r) { setTimeout(r, 260); });
-      drawFrame(V.currentTime);
+      var p0 = S.P[0];
+      await prepClipEl(p0.ci, p0.in + 0.001);
+      drawFrame(p0.ci, S.clips[p0.ci].el.currentTime, 0);
       if (reqFrame) reqFrame();
-      await new Promise(function (r) { setTimeout(r, 120); });
-      drawFrame(V.currentTime);
+      await sleep(220);
+      drawFrame(p0.ci, S.clips[p0.ci].el.currentTime, 0);
       if (reqFrame) reqFrame();
+      await sleep(100);
+
       rec.start(250);
+      var started = performance.now();
+      var guard = started + (total + 30) * 1000;
 
-      S.playing = true;
-      S.playIdx = 0;
-      V.currentTime = S.segments[0].in + 0.001;
-      await V.play();
-
-      await new Promise(function (resolve) {
-        var tick = setInterval(function () {
-          var seg = S.segments[S.playIdx];
-          var t = V.currentTime;
-          if (!seg) { clearInterval(tick); resolve(); return; }
-          if (t >= seg.out - 0.02) {
-            if (S.playIdx + 1 < S.segments.length) {
-              S.playIdx++;
-              V.currentTime = S.segments[S.playIdx].in + 0.001;
-            } else {
-              clearInterval(tick); resolve(); return;
+      for (var k = 0; k < S.P.length; k++) {
+        S.pi = k;
+        var p = S.P[k];
+        var clip = S.clips[p.ci];
+        var el = clip.el;
+        if (k === 0 || S.P[k - 1].ci !== p.ci) pauseOthers(p.ci);
+        try { el.currentTime = clamp(p.in + 0.001, 0, Math.max(0, clip.dur - 0.02)); } catch (e) {}
+        if (el.paused) { try { await el.play(); } catch (e) {} }
+        var stallT = -1, stallN = 0;
+        while (true) {
+          if (!S.exporting || performance.now() > guard) break;
+          var t = el.currentTime;
+          if (t >= p.out - 0.02) break;
+          if (Math.abs(t - stallT) < 0.004) { stallN++; if (stallN > 90) break; } else { stallN = 0; stallT = t; }
+          var T = p.t0 + Math.max(0, t - p.in);
+          drawFrame(p.ci, t, T);
+          if (reqFrame) reqFrame();
+          var wall = Math.max(T, (performance.now() - started) / 1000);
+          $('#expBar').style.width = Math.min(99, wall / total * 100) + '%';
+          $('#expStat').textContent = '녹화 중… ' + Math.min(total, wall).toFixed(1) + ' / ' + total.toFixed(1) + '초';
+          updateHead(T);
+          if (p.t1 - T < 1.5 && k + 1 < S.P.length && S.P[k + 1].ci !== p.ci) {
+            var nx = S.clips[S.P[k + 1].ci];
+            if (nx && Math.abs(nx.el.currentTime - S.P[k + 1].in) > 0.2) {
+              try { nx.el.currentTime = S.P[k + 1].in + 0.001; } catch (e) {}
             }
           }
-          drawFrame(V.currentTime);
-          if (reqFrame) reqFrame();        /* 합성 타이밍과 무관하게 프레임을 밀어 넣습니다 */
-          updateHead(V.currentTime);
-          var done = Math.min(total, (performance.now() - started) / 1000);
-          $('#expBar').style.width = Math.min(99, done / total * 100) + '%';
-          $('#expStat').textContent = '녹화 중… ' + done.toFixed(1) + ' / ' + total.toFixed(1) + '초';
-        }, 60);
-      });
+          await sleep(32);
+        }
+        if (k + 1 >= S.P.length) { try { el.pause(); } catch (e) {} }
+        if (k + 1 < S.P.length && S.P[k + 1].ci !== p.ci) {
+          var np = S.P[k + 1];
+          try { el.pause(); } catch (e) {}
+          await prepClipEl(np.ci, np.in + 0.001);
+          drawFrame(np.ci, np.in, np.t0);
+          if (reqFrame) reqFrame();
+        }
+      }
 
-      V.pause();
-      await new Promise(function (r) { setTimeout(r, 420); });
+      S.exporting = false;
+      await sleep(420);
       rec.stop();
       await finished;
-      S.playing = false;
 
       var blob = new Blob(chunks, { type: mime.split(';')[0] });
       var kind = await sniffKind(blob);
       blob = new Blob([blob], { type: kind === 'mp4' ? 'video/mp4' : 'video/webm' });
       if (S.outUrl) { try { URL.revokeObjectURL(S.outUrl); } catch (e2) {} }
       S.outUrl = URL.createObjectURL(blob);
-      var ext = kind;
-      var name = 'shorts-' + new Date().toISOString().slice(0, 10) + '.' + ext;
+      var name = 'shorts-' + new Date().toISOString().slice(0, 10) + '.' + kind;
       var ov = $('#outVideo');
       ov.src = S.outUrl;
       ov.load();
@@ -1369,68 +1823,219 @@
       $('#outDl').download = name;
       $('#outCard').hidden = false;
       $('#outInfo').textContent = size.w + '×' + size.h + ' · ' + (blob.size / 1048576).toFixed(1) + 'MB · ' +
-        total.toFixed(1) + '초 · ' + ext.toUpperCase();
-      $('#outTags').innerHTML = '<span>' + (ext === 'mp4' ? 'MP4' : 'WebM') + '</span>' +
+        total.toFixed(1) + '초 · ' + kind.toUpperCase();
+      $('#outTags').innerHTML = '<span>' + (kind === 'mp4' ? 'MP4' : 'WebM') + '</span>' +
         '<span>9:16 세로</span><span>' + S.fps + 'fps</span>' +
-        (ext === 'webm' ? '<span>인스타 업로드는 MP4가 필요합니다</span>' : '');
+        '<span>크기 ' + Math.round(S.zoom * 100) + '%</span><span>클립 ' + S.clips.length + '개</span>' +
+        (kind === 'webm' ? '<span>인스타 업로드는 MP4가 필요합니다</span>' : '');
       $('#expBar').style.width = '100%';
       $('#expStat').textContent = '완성 · ' + (blob.size / 1048576).toFixed(1) + 'MB';
-      $('#expNote').textContent = '결과는 아래 결과 칸에서 바로 볼 수 있습니다. ' +
-        '“파일 저장”을 누르면 내려받아집니다. 컷 지점에서 아주 짧은 끊김은 브라우저 녹화 방식의 한계입니다 ' +
-        '(정확한 MP4는 파이썬 버전 사용).';
+      $('#expNote').textContent = '결과는 아래 결과 칸에서 바로 볼 수 있습니다. “파일 저장”을 누르면 내려받아집니다. ' +
+        '컷·클립이 바뀌는 지점의 아주 짧은 끊김은 브라우저 녹화 방식의 한계입니다 (정확한 MP4는 파이썬 버전 사용).';
       toast('내보내기 완료 · ' + name);
-      seek(S.segments[0].in);          /* 미리보기를 편집 시작 지점으로 되돌립니다 */
+      seekOut(clipStart(S.active));
     } catch (err) {
       toast('내보내기 실패: ' + (err && err.message ? err.message : err));
       $('#expStat').textContent = '실패';
     } finally {
       S.exporting = false;
-      $('#btnExport').disabled = !S.segments.length;
+      $('#btnExport').disabled = !S.P.length;
       cv.width = oldW; cv.height = oldH;
-      drawFrame(V.currentTime);
+      var back = S.P[S.pi];
+      if (back) drawFrame(back.ci, S.clips[back.ci].el.currentTime, S.curOut);
+      else drawFrame(-1, 0, 0);
     }
   }
 
   /* --------------------------------------------------------------- plan */
-  function readPlan(obj) {
-    var list = obj.segments || obj.cuts || obj.shots || obj.timeline || obj.plan || [];
-    if (!Array.isArray(list) && list && Array.isArray(list.segments)) list = list.segments;
-    if (!Array.isArray(list)) return { segs: [], cues: [] };
-    var out = [], cues = [];
-    list.forEach(function (it) {
+  function numOrNull(v) { var x = parseFloat(v); return isFinite(x) ? x : null; }
+  function firstOf(o, keys) { for (var i = 0; i < keys.length; i++) if (o && o[keys[i]] != null) return o[keys[i]]; return null; }
+
+  function readSegments(list) {
+    var out = [];
+    (list || []).forEach(function (it) {
       if (!it || typeof it !== 'object') return;
       var src = it.source || it.src || it.trim || {};
-      var a = num(first(it, ['start', 'begin', 'from', 't0', 'startTime', 'in'])) ;
-      var b = num(first(it, ['end', 'finish', 'to', 't1', 'endTime', 'out']));
-      var sa = num(first(src, ['in', 'start', 'from']));
-      var sb = num(first(src, ['out', 'end', 'to']));
+      var a = numOrNull(firstOf(it, ['start', 'begin', 'from', 't0', 'startTime', 'in']));
+      var b = numOrNull(firstOf(it, ['end', 'finish', 'to', 't1', 'endTime', 'out']));
+      var sa = numOrNull(firstOf(src, ['in', 'start', 'from']));
+      var sb = numOrNull(firstOf(src, ['out', 'end', 'to']));
       var start = sa != null ? sa : a;
       var end = sb != null ? sb : b;
-      var dur = num(first(it, ['duration', 'dur', 'length']));
+      var dur = numOrNull(firstOf(it, ['duration', 'dur', 'length']));
       if (start == null && end == null && dur != null) { start = 0; end = dur; }
       if (start == null) return;
       if (end == null) end = start + (dur || 0);
-      if (end > start + 0.04) out.push({ in: start, out: end });
-      // 기획안의 자막 문구는 완성 영상 시각(start/end) 기준입니다
-      var text = it.text || it.subtitle || it.caption || it.line || '';
-      if (typeof text === 'string' && text.trim() && a != null && b != null && b > a) {
-        cues.push({ start: a, end: b, text: String(text).trim() });
-      }
+      if (end > start + 0.02) out.push({ in: start, out: end, start: a, end2: b, text: it.text || it.subtitle || it.caption || it.line || '' });
     });
-    cues.sort(function (x, y) { return x.start - y.start; });
-    return { segs: out, cues: cues };
+    return out;
   }
-  function first(o, keys) { for (var i = 0; i < keys.length; i++) if (o && o[keys[i]] != null) return o[keys[i]]; return null; }
-  function num(v) { var x = parseFloat(v); return isFinite(x) ? x : null; }
+
+  function applyView(v) {
+    if (!v) return;
+    var z = numOrNull(v.zoom);
+    var pct = numOrNull(v.size);
+    if (z != null) S.zoom = clamp(z > 2.5 ? z / 100 : z, 0.2, 2);
+    else if (pct != null) S.zoom = clamp(pct / 100, 0.2, 2);
+    if (v.fit === 'cover' || v.fit === 'contain') S.fit = v.fit;
+    if (typeof v.posY === 'number') S.posY = clamp(v.posY, -1, 1);
+    else if (typeof v.pos_y === 'number') S.posY = clamp(v.pos_y, -1, 1);
+    var bg = v.background || v.bg;
+    if (bg === 'black' || bg === 'white' || bg === 'gray' || bg === 'blur') S.bg = bg;
+    else if (typeof bg === 'string' && /^#[0-9a-f]{3,8}$/i.test(bg)) { S.bg = 'custom'; S.bgHex = bg; }
+    syncViewInputs();
+  }
+
+  function applyPlan(obj) {
+    if (!S.clips.length) { toast('영상을 먼저 불러온 뒤 기획안을 여세요.'); return null; }
+    var applied = 0, cueCount = 0, missed = 0;
+    var byName = {};
+    S.clips.forEach(function (c, ci) { byName[String(c.name).toLowerCase()] = ci; });
+
+    if (Array.isArray(obj.clips) && obj.clips.length) {
+      obj.clips.forEach(function (pc, idx) {
+        if (!pc || typeof pc !== 'object') return;
+        var fname = String(pc.file || pc.source || pc.name || '').toLowerCase();
+        var ci = byName[fname];
+        if (ci === undefined && obj.clips.length === S.clips.length) ci = idx;
+        if (ci === undefined || !S.clips[ci]) { missed++; return; }
+        var clip = S.clips[ci];
+        var segs = readSegments(pc.segments || pc.cuts || []);
+        segs = segs.map(function (s) { return { in: clamp(s.in, 0, clip.dur), out: clamp(s.out, 0, clip.dur) }; });
+        segs = tidy(segs, clip.dur);
+        if (!segs.length) return;
+        clip.segs = segs;
+        applied++;
+        (pc.segments || []).forEach(function (s) {
+          if (s && typeof s.text === 'string' && s.text.trim()) {
+            var a = numOrNull(s.start), b = numOrNull(s.end);
+            if (a != null && b != null && b > a) { S.cues.push({ ci: -1, start: a, end: b, text: s.text.trim() }); cueCount++; }
+          }
+        });
+      });
+    } else {
+      var flat = obj.segments || obj.cuts || obj.shots || obj.timeline || obj.plan || [];
+      var got = readSegments(flat);
+      if (got.length) {
+        var c0 = activeClip();
+        c0.segs = tidy(got.map(function (s) { return { in: clamp(s.in, 0, c0.dur), out: clamp(s.out, 0, c0.dur) }; }), c0.dur);
+        applied = c0.segs.length ? 1 : 0;
+        got.forEach(function (s) {
+          if (typeof s.text === 'string' && s.text.trim() && s.start != null && s.end2 != null && s.end2 > s.start) {
+            S.cues.push({ ci: -1, start: s.start, end: s.end2, text: s.text.trim() }); cueCount++;
+          }
+        });
+      }
+    }
+    applyView(obj.view || { fit: obj.fit, size: obj.size, background: obj.background, pos_y: obj.pos_y, zoom: obj.zoom });
+    if (!applied) { toast('기획안의 클립과 불러온 영상 파일 이름이 맞지 않습니다.'); return null; }
+    S.history = [];
+    renderAll(); drawNow();
+    var msg = '기획안에서 클립 ' + applied + '개' + (cueCount ? (' · 자막 ' + cueCount + '줄') : '') + '을 가져왔습니다';
+    $('#planStat').textContent = '클립 ' + applied + '개 · ' + S.total.toFixed(1) + '초' + (cueCount ? ' · 자막 ' + cueCount + '줄' : '');
+    toast(msg + (missed ? (' (맞지 않는 클립 ' + missed + '개)') : ''));
+    return { applied: applied, cues: cueCount };
+  }
+
+  function planObject() {
+    var clips = S.clips.map(function (c, ci) {
+      var t0 = clipStart(ci);
+      return {
+        index: ci + 1,
+        file: c.name,
+        source: c.name,
+        duration: +c.dur.toFixed(3),
+        width: c.vw,
+        height: c.vh,
+        out_start: +t0.toFixed(3),
+        out_duration: +clipOutDur(ci).toFixed(3),
+        segments: c.segs.map(function (s, si) {
+          return {
+            id: si + 1,
+            start: +srcToOut(ci, s.in).toFixed(3),
+            end: +srcToOut(ci, s.out).toFixed(3),
+            in: +s.in.toFixed(3),
+            out: +s.out.toFixed(3),
+            source: { in: +s.in.toFixed(3), out: +s.out.toFixed(3) },
+            text: cueTextFor(ci, s)
+          };
+        })
+      };
+    });
+    var flat = [];
+    clips.forEach(function (c) {
+      c.segments.forEach(function (s) {
+        flat.push({ id: flat.length + 1, clip: c.index, file: c.file,
+                    start: s.start, end: s.end, in: s.in, out: s.out, text: s.text });
+      });
+    });
+    var size = outSize();
+    var title = S.clips.length ? S.clips[0].name.replace(/\.[^.]+$/, '') : 'shorts';
+    return {
+      app: 'shorts-editor-web',
+      version: 3,
+      title: title,
+      width: size.w, height: size.h, fps: S.fps,
+      duration: +S.total.toFixed(3),
+      fit: S.fit,
+      size: Math.round(S.zoom * 100),
+      pos_y: +(+S.posY).toFixed(3),
+      background: S.bg === 'custom' ? S.bgHex : S.bg,
+      view: {
+        fit: S.fit,
+        zoom: +S.zoom.toFixed(3),
+        size: Math.round(S.zoom * 100),
+        posY: +(+S.posY).toFixed(3),
+        background: S.bg === 'custom' ? S.bgHex : S.bg
+      },
+      clips: clips,
+      segments: flat
+    };
+  }
+
+  function cueTextFor(ci, s) {
+    var oa = srcToOut(ci, s.in), ob = srcToOut(ci, s.out), out = [];
+    S.cues.forEach(function (c) {
+      if (c.ci === ci) { if (c.start < s.out && c.end > s.in) out.push(c.text); }
+      else if (c.ci < 0) { if (c.start < ob && c.end > oa) out.push(c.text); }
+    });
+    return out.join(' ').trim();
+  }
+
+  /* ------------------------------------------------------------- view UI */
+  function syncViewInputs() {
+    var pct = Math.round(S.zoom * 100);
+    $('#zoom').value = clamp(pct, 20, 200);
+    $('#zoomNum').value = pct;
+    $('#zoomV').textContent = pct + '%';
+    $('#fit').value = S.fit;
+    $('#bg').value = S.bg;
+    $('#bgColor').value = (S.bg === 'custom' ? S.bgHex : (S.bg === 'white' ? '#FFFFFF' : (S.bg === 'gray' ? '#1E1E1E' : '#000000')));
+    $('#bgColor').disabled = S.bg !== 'custom';
+    $('#posY').value = Math.round(S.posY * 100);
+    $('#posV').textContent = S.posY < -0.02 ? '위로' : (S.posY > 0.02 ? '아래로' : '가운데');
+    var info = $('#allInfo');
+    if (info && S.clips.length) info.textContent = '클립 ' + S.clips.length + '개 · 결과 ' + S.total.toFixed(1) + '초 · ' + pct + '%';
+  }
+  function setZoom(pct) {
+    pct = Math.round(clamp(+pct || 100, 20, 200));
+    S.zoom = pct / 100;
+    syncViewInputs();
+    drawNow();
+  }
 
   /* ------------------------------------------------------------- wiring */
   function bind(id, ev, fn) { var el = $(id); if (el) el.addEventListener(ev, fn); }
+  function bindEl(el, ev, fn) { if (el) el.addEventListener(ev, fn); }
 
   bind('#btnPick', 'click', function () { $('#fileVideo').click(); });
+  bind('#btnAddClip', 'click', function () { $('#fileVideo').click(); });
   bind('#fileVideo', 'change', function (e) {
-    if (e.target.files && e.target.files[0]) loadVideo(e.target.files[0]);
+    if (e.target.files && e.target.files.length) addFiles(e.target.files);
     e.target.value = '';
   });
+  bind('#btnClearClips', 'click', clearClips);
+
   ['dragenter', 'dragover'].forEach(function (ev) {
     document.addEventListener(ev, function (e) { e.preventDefault(); $('#phone').style.outline = '2px solid #F0B65A'; });
   });
@@ -1438,83 +2043,120 @@
     document.addEventListener(ev, function (e) { e.preventDefault(); $('#phone').style.outline = 'none'; });
   });
   document.addEventListener('drop', function (e) {
-    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-    if (!f) return;
-    if (f.name.toLowerCase().endsWith('.srt')) return loadSrtFile(f);
-    if (f.name.toLowerCase().endsWith('.json')) return loadPlanFile(f);
-    loadVideo(f);
+    var fl = e.dataTransfer && e.dataTransfer.files;
+    if (!fl || !fl.length) return;
+    addFiles(fl);
   });
 
   bind('#btnPlay', 'click', function () {
     if (S.playing) stopPlay();
-    else playFrom(V.currentTime);
+    else playFrom(S.curOut);
   });
-  bind('#btnPrevCut', 'click', function () { seek(nextBoundary(V.currentTime, -1)); });
-  bind('#btnNextCut', 'click', function () { seek(nextBoundary(V.currentTime, 1)); });
+  bind('#btnPrevCut', 'click', function () {
+    var c = activeClip();
+    if (!c) return;
+    var p = S.P[S.pi];
+    var t = p && p.ci === S.active ? (p.in + (S.curOut - p.t0)) : c.el.currentTime;
+    seekSrc(S.active, nextBoundary(t, -1));
+  });
+  bind('#btnNextCut', 'click', function () {
+    var c = activeClip();
+    if (!c) return;
+    var p = S.P[S.pi];
+    var t = p && p.ci === S.active ? (p.in + (S.curOut - p.t0)) : c.el.currentTime;
+    seekSrc(S.active, nextBoundary(t, 1));
+  });
   bind('#btnReset', 'click', function () {
-    if (!S.duration) return;
-    pushHistory(); S.segments = [{ in: 0, out: +S.duration.toFixed(3) }]; renderAll();
-    toast('컷을 처음 상태로 되돌렸습니다');
+    var c = activeClip();
+    if (!c) return;
+    pushHistory();
+    c.segs = [{ in: 0, out: +c.dur.toFixed(3) }];
+    renderAll(); drawNow();
+    toast('이 클립의 컷을 처음 상태로 되돌렸습니다');
   });
   bind('#btnUndo', 'click', undo);
 
   bind('#btnCutSel', 'click', function () {
     if (!S.sel) return;
-    cutRange(S.sel.a, S.sel.b); S.sel = null; $('#sel').hidden = true;
+    cutRange(S.sel.a, S.sel.b);
+    S.sel = null; $('#sel').hidden = true;
     toast('선택 구간을 잘라냈습니다');
   });
   bind('#btnKeepSel', 'click', function () {
     if (!S.sel) return;
-    keepRange(S.sel.a, S.sel.b); S.sel = null; $('#sel').hidden = true;
+    keepRange(S.sel.a, S.sel.b);
+    S.sel = null; $('#sel').hidden = true;
     toast('선택 구간만 남겼습니다');
   });
   bind('#btnAddCut', 'click', function () {
-    var t = V.currentTime;
-    var i = segAt(t);
+    var c = activeClip();
+    if (!c) return;
+    var q = outToPiece(S.curOut);
+    if (!q || q.ci !== S.active) { toast('이 클립 위에서 재생 위치를 먼저 잡아 주세요.'); return; }
+    var t = q.src;
+    var i = -1, s = null;
+    for (var k = 0; k < c.segs.length; k++) {
+      if (t >= c.segs[k].in && t <= c.segs[k].out) { i = k; s = c.segs[k]; break; }
+    }
     if (i < 0) { toast('컷 구간(이미 잘린 곳)에는 나눌 수 없습니다.'); return; }
-    var s = S.segments[i];
     if (t - s.in < 0.2 || s.out - t < 0.2) { toast('재생 위치가 구간 끝에 너무 가깝습니다.'); return; }
     pushHistory();
-    S.segments.splice(i, 1, { in: s.in, out: +t.toFixed(3) }, { in: +t.toFixed(3), out: s.out });
-    renderAll();
+    c.segs.splice(i, 1, { in: s.in, out: +t.toFixed(3) }, { in: +t.toFixed(3), out: s.out });
+    renderAll(); drawNow();
     toast('재생 위치에서 구간을 둘로 나눴습니다');
   });
 
-  bind('#fit', 'change', function (e) { S.fit = e.target.value; drawFrame(V.currentTime); });
-  bind('#zoom', 'input', function (e) {
-    S.zoom = (+e.target.value) / 100; $('#zoomV').textContent = S.zoom.toFixed(2) + '×';
-    drawFrame(V.currentTime);
+  bind('#fit', 'change', function (e) { S.fit = e.target.value; syncViewInputs(); drawNow(); });
+  bind('#zoom', 'input', function (e) { setZoom(e.target.value); });
+  bind('#zoomNum', 'input', function (e) {
+    var v = +e.target.value;
+    if (!isFinite(v) || v < 20 || v > 200) return;   /* 타이핑 중간값(1, 15 …)은 무시 */
+    S.zoom = v / 100;
+    $('#zoom').value = v;
+    $('#zoomV').textContent = v + '%';
+    drawNow();
+  });
+  bind('#zoomNum', 'change', function (e) { setZoom(e.target.value); });
+  bind('#bg', 'change', function (e) { S.bg = e.target.value; syncViewInputs(); drawNow(); });
+  bind('#bgColor', 'change', function (e) { S.bgHex = e.target.value; S.bg = 'custom'; syncViewInputs(); drawNow(); });
+  bind('#bgColor', 'input', function (e) {
+    S.bgHex = e.target.value; S.bg = 'custom';
+    $('#bg').value = 'custom';
+    drawNow();
   });
   bind('#posY', 'input', function (e) {
     S.posY = (+e.target.value) / 100;
-    $('#posV').textContent = S.posY < -0.02 ? '위로' : (S.posY > 0.02 ? '아래로' : '가운데');
-    drawFrame(V.currentTime);
+    syncViewInputs();
+    drawNow();
   });
 
   bind('#th', 'input', function (e) { $('#thV').textContent = e.target.value + ' dB'; });
   bind('#ms', 'input', function (e) { $('#msV').textContent = ((+e.target.value) / 100).toFixed(2) + '초'; });
 
   bind('#btnSilence', 'click', async function () {
-    if (!S.file) return;
+    var c = activeClip();
+    if (!c) return;
     var th = +$('#th').value, ms = (+$('#ms').value) / 100;
     var btn = $('#btnSilence');
-    btn.disabled = true; $('#silStat').textContent = '음성 분석 중…';
+    btn.disabled = true;
+    $('#silStat').textContent = '음성 분석 중…';
+    stopPlay();
     try {
-      var res = await detectSilence(S.file, th, ms);
+      var res = await detectSilence(c.file, th, ms, c.dur);
       if (!res) {
         $('#silStat').textContent = '오프라인 분석 불가 → 실시간 분석';
-        res = await detectSilenceRealtime(th, ms, function (p) {
+        res = await detectSilenceRealtime(c, th, ms, function (p) {
           $('#silStat').textContent = '실시간 분석 ' + Math.round(p * 100) + '%';
         });
       }
       if (!res) { $('#silStat').textContent = '이 영상의 소리를 읽지 못했습니다'; return; }
-      var keep = buildSegmentsFromSilences(S.duration, res.silences);
+      var keep = segmentsFromSilences(c.dur, res.silences);
       if (!keep.length) { $('#silStat').textContent = '자를 무음이 없습니다'; return; }
       pushHistory();
-      S.segments = keep;
-      var removed = S.duration - outDur();
-      renderAll();
-      $('#silStat').textContent = '무음 ' + res.silences.length + '곳 · ' + removed.toFixed(1) + '초 제거';
+      c.segs = keep;
+      var removed = c.dur - clipOutDur(S.active);
+      renderAll(); drawNow();
+      $('#silStat').textContent = '클립 ' + (S.active + 1) + ' · 무음 ' + res.silences.length + '곳 · ' + removed.toFixed(1) + '초 제거';
       toast('무음 ' + res.silences.length + '곳을 잘라냈습니다 (' + removed.toFixed(1) + '초)');
     } catch (err) {
       $('#silStat').textContent = '분석 실패';
@@ -1533,9 +2175,13 @@
     r.onload = function () {
       var cues = parseSrt(r.result);
       if (!cues.length) { toast('SRT에서 자막을 찾지 못했습니다. 형식을 확인해 주세요.'); return; }
-      S.cues = cues.slice(0, 400);
-      renderCues(); drawFrame(V.currentTime);
-      toast('자막 ' + S.cues.length + '줄을 불러왔습니다');
+      var asOut = S.srtMode === 'final';
+      cues.slice(0, 400).forEach(function (c) {
+        S.cues.push({ ci: asOut ? -1 : S.active, start: c.start, end: c.end, text: c.text });
+      });
+      S.cues.sort(function (a, b) { return a.start - b.start; });
+      renderCues(); drawNow();
+      toast('자막 ' + cues.length + '줄을 ' + (asOut ? '완성 영상 시각' : ('클립 ' + (S.active + 1) + ' 원본 시각')) + ' 기준으로 넣었습니다');
       switchTab('subs');
     };
     r.readAsText(file, 'utf-8');
@@ -1546,18 +2192,19 @@
     if (!txt) { toast('남긴 구간에 들어오는 자막이 없습니다'); return; }
     download(new Blob(['\ufeff' + txt], { type: 'text/plain;charset=utf-8' }), 'shorts-자막.srt');
   });
-  bind('#ss', 'input', function (e) { S.sub.size = +e.target.value; $('#ssV').textContent = e.target.value; drawFrame(V.currentTime); });
-  bind('#sm', 'input', function (e) { S.sub.margin = +e.target.value; $('#smV').textContent = e.target.value; drawFrame(V.currentTime); });
-  bind('#subOn', 'change', function (e) { S.sub.on = e.target.checked; drawFrame(V.currentTime); });
-  bind('#srtMode', 'change', function (e) {
-    S.srtMode = e.target.value;
-    renderCues(); drawFrame(V.currentTime);
-  });
-  bind('#subBox', 'change', function (e) { S.sub.box = e.target.checked; drawFrame(V.currentTime); });
-  bind('#subBold', 'change', function (e) { S.sub.bold = e.target.checked; drawFrame(V.currentTime); });
+  bind('#ss', 'input', function (e) { S.sub.size = +e.target.value; $('#ssV').textContent = e.target.value; drawNow(); });
+  bind('#sm', 'input', function (e) { S.sub.margin = +e.target.value; $('#smV').textContent = e.target.value; drawNow(); });
+  bind('#subOn', 'change', function (e) { S.sub.on = e.target.checked; drawNow(); });
+  bind('#srtMode', 'change', function (e) { S.srtMode = e.target.value; });
+  bind('#subBox', 'change', function (e) { S.sub.box = e.target.checked; drawNow(); });
+  bind('#subBold', 'change', function (e) { S.sub.bold = e.target.checked; drawNow(); });
   bind('#btnCueAdd', 'click', function () {
-    var t = V.currentTime;
-    S.cues.push({ start: +t.toFixed(2), end: +(t + 2).toFixed(2), text: '' });
+    var c = activeClip();
+    if (!c) return;
+    var q = outToPiece(S.curOut);
+    var src = q && q.ci === S.active ? q.src : (c.el.currentTime || 0);
+    if (S.srtMode === 'final') S.cues.push({ ci: -1, start: +S.curOut.toFixed(2), end: +(S.curOut + 2).toFixed(2), text: '' });
+    else S.cues.push({ ci: S.active, start: +src.toFixed(2), end: +(src + 2).toFixed(2), text: '' });
     S.cues.sort(function (a, b) { return a.start - b.start; });
     renderCues(); switchTab('subs');
     var tas = $$('#cueList textarea');
@@ -1575,49 +2222,16 @@
     r.onload = function () {
       try {
         var obj = JSON.parse(r.result);
-        var got = readPlan(obj);
-        var segs = got.segs;
-        if (!segs.length) { toast('기획안에서 컷 구간을 찾지 못했습니다.'); return; }
-        pushHistory();
-        S.segments = tidy(segs);
-        if (got.cues.length) {                    /* 기획안에 들어 있는 자막 문구까지 */
-          S.cues = got.cues.slice(0, 400);
-          S.srtMode = 'final';
-          var sm = $('#srtMode'); if (sm) sm.value = 'final';
-        }
-        renderAll();
-        $('#planStat').textContent = '컷 ' + S.segments.length + '개 · ' + outDur().toFixed(1) + '초' +
-          (got.cues.length ? ' · 자막 ' + got.cues.length + '줄' : '');
-        toast('기획안에서 컷 ' + S.segments.length + '개' +
-              (got.cues.length ? ' · 자막 ' + got.cues.length + '줄' : '') + '을 가져왔습니다');
+        applyPlan(obj);
       } catch (err) { toast('JSON을 읽지 못했습니다: ' + err.message); }
     };
     r.readAsText(file, 'utf-8');
   }
   bind('#btnPlanExport', 'click', function () {
-    var obj = {
-      title: S.file ? S.file.name.replace(/\.[^.]+$/, '') : 'shorts',
-      source: S.file ? S.file.name : '',
-      width: outSize().w, height: outSize().h, fps: S.fps,
-      duration: +outDur().toFixed(3),
-      segments: S.segments.map(function (s, i) {
-        var oa = srcToOut(s.in), ob = srcToOut(s.out);
-        var cue = S.cues.filter(function (c) {
-          return S.srtMode === 'final' ? (c.start < ob && c.end > oa) : (c.start < s.out && c.end > s.in);
-        });
-        return {
-          id: i + 1,
-          start: +srcToOut(s.in).toFixed(3),
-          end: +srcToOut(s.out).toFixed(3),
-          in: s.in, out: s.out,
-          source: { in: s.in, out: s.out },
-          text: cue.map(function (c) { return c.text; }).join(' ')
-        };
-      })
-    };
+    var obj = planObject();
     download(new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' }),
       (obj.title || 'edit_plan') + '-edit_plan.json');
-    toast('edit_plan.json 을 저장했습니다');
+    toast('edit_plan.json 을 저장했습니다 (클립 ' + obj.clips.length + '개 · 크기 ' + obj.size + '%)');
   });
   bind('#btnNudge', 'click', function () {
     var lines = [
@@ -1625,8 +2239,8 @@
       '# 1) 쇼츠편집기-실행.bat 실행 → 웹 화면(127.0.0.1:8765)',
       '# 2) [기획안] 칸에 방금 저장한 edit_plan.json 을 올리고 [편집 시작]',
       '',
-      '# 또는 명령어로:',
-      'python shorts-auto-editor.py --input "원본영상.mp4" --plan "edit_plan.json" --out "결과.mp4"'
+      '# 또는 명령어로 (클립 영상은 -i 로 여러 개):',
+      'python shorts-auto-editor.py -i "첫영상.mp4" -i "둘째영상.mp4" --plan "edit_plan.json" --out "결과.mp4"'
     ];
     download(new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' }), '파이썬-실행-메모.txt');
   });
@@ -1655,20 +2269,37 @@
   document.addEventListener('keydown', function (e) {
     if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
     if (e.code === 'Space') { e.preventDefault(); $('#btnPlay').click(); }
-    if (e.code === 'ArrowRight') { e.preventDefault(); seek(V.currentTime + (e.shiftKey ? 1 : 5 / 30)); }
-    if (e.code === 'ArrowLeft') { e.preventDefault(); seek(V.currentTime - (e.shiftKey ? 1 : 5 / 30) + 0.0001); }
+    if (e.code === 'ArrowRight') { e.preventDefault(); seekOut(S.curOut + (e.shiftKey ? 1 : 5 / 30)); }
+    if (e.code === 'ArrowLeft') { e.preventDefault(); seekOut(S.curOut - (e.shiftKey ? 1 : 5 / 30) + 0.0001); }
   });
 
   /* 시작 상태 */
+  syncViewInputs();
   renderAll();
-  drawFrame(0);
+  drawFrame(-1, 0, 0);
   $('#engineHint').textContent = pickMime().indexOf('mp4') >= 0 ? 'MP4 녹화 지원' :
     (pickMime() ? 'WebM 녹화 지원' : '녹화 미지원 브라우저');
 
-  window.SHORTS = { S: S, loadVideo: loadVideo, loadSrtFile: loadSrtFile, loadPlanFile: loadPlanFile,
-                    doExport: doExport, drawFrame: drawFrame, parseSrt: parseSrt, buildOutSrt: buildOutSrt,
-                    seek: seek, srcToOut: srcToOut, outDur: outDur, tidy: tidy,
-                    player: V, canvas: cv, bindFileInputs: true };
+  window.SHORTS = {
+    S: S,
+    addFiles: addFiles,
+    buildPieces: buildPieces,
+    renderAll: renderAll,
+    seekOut: seekOut,
+    seekSrc: seekSrc,
+    drawFrame: drawFrame,
+    doExport: doExport,
+    planObject: planObject,
+    applyPlan: applyPlan,
+    buildOutSrt: buildOutSrt,
+    parseSrt: parseSrt,
+    srcToOut: srcToOut,
+    outToPiece: outToPiece,
+    clipOutDur: clipOutDur,
+    clipStart: clipStart,
+    setZoom: setZoom,
+    canvas: cv
+  };
 })();
 </script>
 
