@@ -405,6 +405,142 @@ input[type=color]::-webkit-color-swatch{border:0;border-radius:4px}
     .json-grid,.help-grid{grid-template-columns:1fr}
   }
 </style>
+<style id="cnV3Style">
+  /* ============================================================
+     v3 · 프로젝트 허브(메인) · 프로젝트별 설정 · 슬라이드 드래그 순서 변경
+     v2 스타일은 그대로 두고 여기서만 확장합니다.
+     ============================================================ */
+
+  /* ---------- 상단 프로젝트 이동 ---------- */
+  .navbtn{
+    height:32px;border-radius:8px;border:1px solid var(--line);background:#fff;
+    color:var(--ink-2);font-family:inherit;font-size:12px;font-weight:700;
+    display:inline-flex;align-items:center;gap:6px;padding:0 10px;white-space:nowrap;transition:.12s;
+  }
+  .navbtn:hover{background:var(--soft);color:var(--ink);border-color:var(--line-2)}
+  .navbtn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+  /* ---------- 프로젝트 허브 ---------- */
+  #hub{
+    position:fixed;inset:0;z-index:70;display:flex;flex-direction:column;overflow:hidden;
+    background:radial-gradient(1200px 620px at 10% -12%,#F8FAF6 0%,#EDF0EB 52%,#E3E7E2 100%);
+  }
+  #hub[hidden]{display:none}
+  #hubTop{
+    flex:0 0 64px;display:flex;align-items:center;gap:11px;padding:0 22px;
+    background:rgba(255,255,255,.92);border-bottom:1px solid var(--line);
+    backdrop-filter:blur(8px);z-index:2;
+  }
+  .hub-brand{display:flex;flex-direction:column;line-height:1.2;min-width:0}
+  .hub-brand .hname{font-size:14px;font-weight:800;letter-spacing:-.3px}
+  .hub-brand .hsub{font-size:11px;font-weight:700;color:var(--ink-3);letter-spacing:.2px}
+  #hubBody{flex:1;overflow:auto;padding:26px 22px 64px;-webkit-overflow-scrolling:touch}
+  .hub-wrap{max-width:1240px;margin:0 auto}
+  .hub-head{display:flex;align-items:flex-end;gap:10px;margin:0 0 16px}
+  .hub-head h1{font-size:20px;margin:0;letter-spacing:-.5px}
+  .hub-head .cnt{font-size:12px;font-weight:700;color:var(--ink-3);padding-bottom:3px}
+  .pj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:18px}
+  .pj-card{
+    background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;
+    box-shadow:var(--sh1);display:flex;flex-direction:column;gap:8px;transition:.14s;
+  }
+  .pj-card:hover{box-shadow:var(--sh2);border-color:var(--line-2);transform:translateY(-1px)}
+  .pj-prev{
+    position:relative;border-radius:9px;overflow:hidden;background:var(--soft-2);
+    display:flex;align-items:center;justify-content:center;padding:8px 0;height:206px;cursor:pointer;
+  }
+  .pj-thumb{position:relative;overflow:hidden;background:#fff;box-shadow:0 3px 12px rgba(16,24,40,.12);border-radius:2px;flex:0 0 auto}
+  .pj-thumb-inner{position:absolute;left:0;top:0;transform-origin:top left}
+  .pj-name{
+    font-size:13px;font-weight:800;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;
+    text-overflow:ellipsis;cursor:pointer;padding:0 2px;
+  }
+  .pj-name:hover{color:var(--accent)}
+  .pj-meta{display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:10.5px;font-weight:600;color:var(--ink-3);padding:0 2px}
+  .pj-meta .tag{background:var(--soft);border-radius:5px;padding:1px 5px;color:var(--ink-2)}
+  .pj-acts{display:flex;gap:5px;margin-top:auto;padding-top:2px}
+  .pj-acts .open{flex:1;justify-content:center}
+  .pj-acts svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  .pj-new{
+    border:1.5px dashed var(--line-2);background:rgba(255,255,255,.55);border-radius:14px;
+    min-height:216px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;
+    color:var(--ink-2);font-family:inherit;font-size:12.5px;font-weight:700;transition:.14s;
+  }
+  .pj-new:hover{border-color:var(--accent);color:var(--accent);background:#F7FCF9}
+  .pj-new .plus{width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:21px;color:var(--ink-2);line-height:1}
+  .pj-new:hover .plus{border-color:var(--accent);color:var(--accent)}
+  .hub-foot{margin-top:26px;font-size:11.5px;color:var(--ink-3);line-height:1.75}
+  .hub-foot b{color:var(--ink-2)}
+
+  /* ---------- 프로젝트 설정 모달 ---------- */
+  .set-wrap{display:flex;flex-direction:column;gap:15px}
+  .set-lbl{display:block;font-size:11.5px;font-weight:700;color:var(--ink-2);margin-bottom:6px}
+  .set-input{
+    width:100%;height:38px;border:1px solid var(--line-2);border-radius:9px;
+    padding:0 11px;font-size:13px;background:#fff;
+  }
+  .set-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(31,122,85,.13)}
+  .fmt-pick{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+  .fmt-pick button{
+    height:54px;border:1.5px solid var(--line);border-radius:10px;background:#fff;
+    font-family:inherit;font-size:12px;font-weight:700;color:var(--ink-2);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:.12s;
+  }
+  .fmt-pick button small{font-size:9.5px;font-weight:600;color:var(--ink-3)}
+  .fmt-pick button:hover{border-color:var(--line-2);color:var(--ink)}
+  .fmt-pick button.on{border-color:var(--ink);color:var(--ink);box-shadow:0 0 0 2px rgba(20,23,28,.06)}
+  .theme-pick{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+  .theme-pick button{
+    border:1.5px solid var(--line);border-radius:10px;background:#fff;padding:8px 4px;
+    display:flex;flex-direction:column;align-items:center;gap:5px;font-family:inherit;
+    font-size:10.5px;font-weight:700;color:var(--ink-2);transition:.12s;
+  }
+  .theme-pick .sw{display:flex;gap:2px}
+  .theme-pick .sw i{width:9px;height:15px;border-radius:2px;display:block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.07)}
+  .theme-pick button:hover{border-color:var(--line-2);color:var(--ink)}
+  .theme-pick button.on{border-color:var(--ink);color:var(--ink);box-shadow:0 0 0 2px rgba(20,23,28,.06)}
+  .set-check{display:flex;gap:7px;align-items:flex-start;font-size:11.5px;line-height:1.55;color:var(--ink-2);cursor:pointer}
+  .set-check input{width:14px;height:14px;margin-top:1px;accent-color:#15181D;flex:0 0 auto}
+
+  /* ---------- 슬라이드 끌어서 순서 변경 ---------- */
+  #thumbs{position:relative;touch-action:pan-y}
+  .thumb{cursor:grab}
+  .thumb:active{cursor:grabbing}
+  .thumb .grip{
+    position:absolute;right:9px;bottom:8px;display:none;line-height:16px;padding:0 4px;
+    border-radius:6px;background:rgba(20,23,28,.5);color:#fff;font-size:10.5px;letter-spacing:1px;
+  }
+  .thumb:hover .grip,.thumb.is-grip .grip{display:block}
+  .thumb.is-drag-src{display:none}
+  .thumb-ph{
+    border-radius:9px;border:1.6px dashed var(--sel);background:#F3F3FF;flex:0 0 auto;
+    box-sizing:border-box;
+  }
+  .thumb-ghost{
+    position:fixed;z-index:900;margin:0;pointer-events:none;opacity:.97;border-radius:9px;
+    padding:5px;background:#fff;border:1.5px solid var(--sel);box-shadow:0 16px 38px rgba(15,23,42,.26);
+    box-sizing:border-box;
+  }
+  body.thumb-dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
+
+  @media (max-width:1080px){
+    #hubTop{flex:0 0 56px;padding:0 12px;gap:8px}
+    #hubBody{padding:18px 12px 44px}
+    .pj-grid{grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:12px}
+    .pj-card{padding:8px;border-radius:12px}
+    .pj-prev{height:166px}
+    .pj-new{min-height:170px}
+    .hub-head h1{font-size:17px}
+    #btnHub,#btnProjSet{display:none}
+  }
+  @media (max-width:520px){
+    .pj-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .pj-meta{font-size:10px}
+    .fmt-pick,.theme-pick{grid-template-columns:repeat(2,1fr)}
+    #hubSample{display:none}
+    #hubTop .navbtn{font-size:11.5px;padding:0 9px}
+  }
+</style>
 </head>
 <body>
 <div id="lockScreen" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
@@ -424,6 +560,29 @@ input[type=color]::-webkit-color-swatch{border:0;border-radius:4px}
   </form>
 </div>
 
+<div id="hub" hidden>
+  <header id="hubTop">
+    <div class="logo">▦</div>
+    <div class="hub-brand">
+      <div class="hname">카드뉴스 스튜디오</div>
+      <div class="hsub">프로젝트</div>
+    </div>
+    <div class="topspacer"></div>
+    <button class="navbtn" id="hubSample" title="예시 카드뉴스 3장으로 새 프로젝트 만들기">예시로 시작</button>
+    <button class="btn primary" id="hubNew">＋ 새 프로젝트</button>
+  </header>
+  <div id="hubBody">
+    <div class="hub-wrap">
+      <div class="hub-head">
+        <h1>내 프로젝트</h1>
+        <span class="cnt" id="hubCount"></span>
+      </div>
+      <div class="pj-grid" id="pjGrid"></div>
+      <p class="hub-foot">프로젝트는 이 브라우저에 자동 저장됩니다. 다른 기기로 옮기거나 백업하려면 작업 화면의 <b>JSON</b> 버튼으로 내보내세요.<br>작업 화면 왼쪽의 슬라이드 카드를 위아래로 끌면 페이지 순서가 바뀝니다(모바일은 카드를 잠시 길게 누른 뒤 끌기).</p>
+    </div>
+  </div>
+</div>
+
 <div id="app">
   <header id="topbar">
     <div class="brand">
@@ -438,6 +597,9 @@ input[type=color]::-webkit-color-swatch{border:0;border-radius:4px}
       <button data-fmt="4:5">4:5<small>1080×1350</small></button>
       <button data-fmt="9:16">9:16<small>1080×1920</small></button>
     </div>
+    <button class="navbtn" id="btnHub" title="프로젝트 목록으로 (메인)">
+      <svg viewBox="0 0 20 20"><rect x="3" y="3" width="6" height="6" rx="1.6"/><rect x="11" y="3" width="6" height="6" rx="1.6"/><rect x="3" y="11" width="6" height="6" rx="1.6"/><rect x="11" y="11" width="6" height="6" rx="1.6"/></svg>프로젝트</button>
+    <button class="btn icon" id="btnProjSet" title="프로젝트 설정" aria-label="프로젝트 설정">⚙</button>
     <div class="topspacer"></div>
     <div class="topactions">
       <button class="btn icon" id="btnUndo" title="실행취소 (Ctrl+Z)" aria-label="실행취소">↶</button>
@@ -533,6 +695,9 @@ input[type=color]::-webkit-color-swatch{border:0;border-radius:4px}
     </button>
     <button type="button" data-mv="props">
       <svg viewBox="0 0 20 20"><path d="M4 6h12M4 10h12M4 14h7"/><circle cx="14.5" cy="14" r="1.8"/></svg>편집
+    </button>
+    <button type="button" data-mv="hub">
+      <svg viewBox="0 0 20 20"><rect x="3" y="3" width="6" height="6" rx="1.6"/><rect x="11" y="3" width="6" height="6" rx="1.6"/><rect x="3" y="11" width="6" height="6" rx="1.6"/><rect x="11" y="11" width="6" height="6" rx="1.6"/></svg>프로젝트
     </button>
   </nav>
 </div>
@@ -727,7 +892,8 @@ function cacheDom() {
    'thumbs', 'slideCount', 'stageScroll', 'stageWrap', 'stageInner', 'bgLayer', 'elsLayer', 'guides',
    'selBox', 'zoomVal', 'zoomIn', 'zoomOut', 'zoomFit', 'propsBody', 'tabs', 'addBar', 'imgInput',
    'fontInput', 'bgInput', 'modalRoot', 'modal', 'toast', 'busy', 'busyText', 'stageCol',
-   'btnMore', 'mobileBar'
+   'btnMore', 'mobileBar',
+   'hub', 'hubTop', 'hubBody', 'hubCount', 'pjGrid', 'hubNew', 'hubSample', 'btnHub', 'btnProjSet'
   ].forEach(id => dom[id] = document.getElementById(id));
 }
 
@@ -922,10 +1088,15 @@ function renderThumbs() {
     s.els.forEach(el => inner.appendChild(elNode(el, false)));
     box.appendChild(inner);
     const num = document.createElement('div'); num.className = 'num'; num.textContent = i + 1;
+    const grip = document.createElement('div'); grip.className = 'grip'; grip.textContent = '≡'; grip.title = '끌어서 순서 바꾸기';
     const del = document.createElement('button'); del.className = 'del'; del.textContent = '×'; del.title = '슬라이드 삭제';
     del.addEventListener('click', e => { e.stopPropagation(); deleteSlide(i); });
-    t.appendChild(box); t.appendChild(num); t.appendChild(del);
-    t.addEventListener('click', () => selectSlide(i));
+    t.appendChild(box); t.appendChild(num); t.appendChild(grip); t.appendChild(del);
+    t.setAttribute('aria-label', (i + 1) + '번 슬라이드' + (i === state.slideIndex ? ' (선택됨)' : ''));
+    t.addEventListener('click', () => {
+      if (Date.now() - (state._thumbClickAt || 0) < 400) return;
+      selectSlide(i);
+    });
     frag.appendChild(t);
   });
   dom.thumbs.innerHTML = '';
@@ -1739,32 +1910,33 @@ function onPropsClick(e) {
 }
 
 /* ---------------- 프리셋 적용 ---------------- */
+function applyPresetToSlide(s, p) {
+  s.bg = Object.assign({}, clone(p.bg), { overlay: s.bg.overlay || 0, src: s.bg.src || '' });
+  if (p.bg.type === 'gradient') s.bg.color = s.bg.color || '#111820';
+  const texts = s.els.filter(e => e.type === 'text').slice().sort((a, b) => b.size - a.size);
+  texts.forEach((e, i) => {
+    const isBadge = e.boxColor && e.boxColor !== 'transparent' && e.pad > 4;
+    if (isBadge) {
+      e.boxColor = p.badgeBg;
+      e.color = p.badgeText;
+      return;
+    }
+    if (i === 0) { e.font = p.titleFont; e.color = p.titleColor; }
+    else if (i === 1 && e.size >= 30) { e.font = p.bodyFont; e.color = p.subColor; }
+    else { e.font = p.bodyFont; e.color = p.bodyColor; }
+  });
+  s.els.filter(e => e.type === 'shape').forEach(e => {
+    const thin = (e.h || 0) <= 14 || (e.w || 0) <= 14;   // 구분선·포인트 라인은 강조색 유지
+    if (e.stroke && e.strokeWidth > 0) e.stroke = p.accent;
+    else if (e.fill && e.fill !== 'transparent') e.fill = thin ? p.accent : p.shapeFill;
+    else e.stroke = p.accent;
+  });
+}
 function applyPreset(key, all) {
   const p = PRESETS[key];
   if (!p) return;
   const targets = all ? state.project.slides : [curSlide()];
-  targets.forEach(s => {
-    s.bg = Object.assign({}, clone(p.bg), { overlay: s.bg.overlay || 0, src: s.bg.src || '' });
-    if (p.bg.type === 'gradient') s.bg.color = s.bg.color || '#111820';
-    const texts = s.els.filter(e => e.type === 'text').slice().sort((a, b) => b.size - a.size);
-    texts.forEach((e, i) => {
-      const isBadge = e.boxColor && e.boxColor !== 'transparent' && e.pad > 4;
-      if (isBadge) {
-        e.boxColor = p.badgeBg;
-        e.color = p.badgeText;
-        return;
-      }
-      if (i === 0) { e.font = p.titleFont; e.color = p.titleColor; }
-      else if (i === 1 && e.size >= 30) { e.font = p.bodyFont; e.color = p.subColor; }
-      else { e.font = p.bodyFont; e.color = p.bodyColor; }
-    });
-    s.els.filter(e => e.type === 'shape').forEach(e => {
-      const thin = (e.h || 0) <= 14 || (e.w || 0) <= 14;   // 구분선·포인트 라인은 강조색 유지
-      if (e.stroke && e.strokeWidth > 0) e.stroke = p.accent;
-      else if (e.fill && e.fill !== 'transparent') e.fill = thin ? p.accent : p.shapeFill;
-      else e.stroke = p.accent;
-    });
-  });
+  targets.forEach(s => applyPresetToSlide(s, p));
   state.theme = key;
   pushHistory(); renderAll();
   toast('프리셋 적용 · ' + p.name + (all ? ' (전체 슬라이드)' : ''));
@@ -2248,9 +2420,8 @@ function openJsonModal() {
     if (!txt) { toast('JSON을 붙여넣어 주세요.', true); return; }
     try {
       const proj = normalizeProject(txt, state.project.format);
-      state.project = proj;
+      adoptProject(proj);
       state.slideIndex = 0; state.selId = null; state.editing = null;
-      state.customFonts = state.customFonts;
       resetHistory(); renderAll(); closeModal();
       toast(`${proj.slides.length}장의 카드뉴스를 불러왔습니다.`);
       requestAnimationFrame(() => { setZoom(fitZoom(), true); });
@@ -2268,14 +2439,20 @@ function openJsonModal() {
     toast('.json 파일로 저장했습니다.');
   });
   $('#jsonSample').addEventListener('click', () => {
-    state.project = sampleProject(); state.slideIndex = 0; state.selId = null; state.theme = 'editorial';
+    state.theme = 'editorial';
+    adoptProject(sampleProject());
+    state.slideIndex = 0; state.selId = null;
     resetHistory(); renderAll(); closeModal();
     requestAnimationFrame(() => { setZoom(fitZoom(), true); });
     toast('예시 카드뉴스 3장을 불러왔습니다.');
   });
   $('#jsonBlank').addEventListener('click', () => {
     const f = FORMATS[state.project.format];
-    state.project = { app: 'cardnews-studio', version: 1, title: '새 카드뉴스', format: state.project.format, slides: [{ id: uid('sl'), bg: { type: 'solid', color: '#FFFFFF', c1: '#F5F1E6', c2: '#E7EADB', angle: 160, src: '', overlay: 0 }, els: [] }] };
+    const theme = PRESETS[state.theme] ? state.theme : 'editorial';
+    adoptProject({
+      app: 'cardnews-studio', version: 3, title: '새 카드뉴스', format: state.project.format, theme,
+      slides: [defaultSlide(state.project.format || '4:5', theme)]
+    });
     state.slideIndex = 0; state.selId = null;
     resetHistory(); renderAll(); closeModal();
     toast('빈 프로젝트를 열었습니다.');
@@ -2304,9 +2481,11 @@ function openHelp() {
       <div>
         <h4>만드는 순서</h4>
         <ol>
+          <li>메인(<b>프로젝트</b>)에서 새 프로젝트를 만들고 이름·비율·테마를 정합니다.</li>
           <li>위 도구 막대에서 <b>텍스트·이미지·도형</b>을 추가합니다.</li>
           <li>요소를 <b>드래그</b>해 옮기고, <b>모서리 핸들</b>로 크기를 바꿉니다.</li>
           <li>글자는 <b>더블클릭</b>하면 캔버스에서 바로 고칠 수 있습니다.</li>
+          <li>왼쪽 슬라이드 카드를 <b>위아래로 끌어</b> 페이지 순서를 바꿉니다(모바일은 길게 눌렀다 끌기).</li>
           <li>오른쪽 <b>배경</b> 탭에서 색·그라데이션·이미지와 프리셋을 적용합니다.</li>
           <li><b>PNG 내보내기</b>로 1080px 원본 해상도 이미지를 저장합니다.</li>
         </ol>
@@ -2322,6 +2501,8 @@ function openHelp() {
           <div><b>다시실행</b><span>Ctrl + Shift + Z</span></div>
           <div><b>선택 해제</b><span>Esc</span></div>
         </div>
+        <h4 style="margin-top:16px">프로젝트</h4>
+        <p class="mini">상단 <b>프로젝트</b> 버튼으로 메인 화면에 돌아가 다른 카드뉴스를 열거나 새로 만들 수 있습니다. <b>⚙</b> 버튼은 지금 프로젝트의 이름·비율·테마를 바꿉니다. 작업은 이 브라우저에 프로젝트별로 자동 저장되고, 예전 단일 작업 데이터는 첫 프로젝트로 그대로 옴겨집니다.</p>
         <h4 style="margin-top:16px">폰트·이미지</h4>
         <p class="mini">폰트 탭에서 .ttf/.otf/.woff 파일을 올리면 목록에 바로 추가됩니다. 이미지는 도구 막대의 <b>이미지</b> 버튼이나 캔버스로 <b>끌어다 놓기</b>로 넣을 수 있습니다.</p>
       </div>
@@ -2774,24 +2955,663 @@ function setView(v) {
 }
 
 /* =========================================================================
-   저장 (localStorage 자동 저장)
+   저장 · 프로젝트 라이브러리 (localStorage 자동 저장, 여러 프로젝트)
    ========================================================================= */
+const LIB_KEY = 'cardnews-projects-v1';
+const V1_KEY = 'cardnews-studio-v1';
+const library = { version: 3, activeId: null, projects: [], migrated: false };
+
+function makeId(p) { return (p || 'p') + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+function defaultSlide(format, theme) {
+  const f = FORMATS[format] || FORMATS['4:5'];
+  const t = PRESETS[theme] || PRESETS.editorial;
+  const bg = Object.assign(clone(t.bg), { src: '', overlay: 0 });
+  if (!bg.c1) bg.c1 = bg.color;
+  if (!bg.c2) bg.c2 = bg.color;
+  const y = Math.round(f.h * .14);
+  return {
+    id: uid('sl'), bg, els: [
+      textEl({
+        x: Math.round(f.w * .084), y: y, w: Math.round(f.w * .832),
+        text: '제목을 입력하세요', font: t.titleFont, size: 84, weight: 700,
+        lh: 1.24, ls: -1.5, color: t.titleColor
+      }),
+      textEl({
+        x: Math.round(f.w * .084), y: y + 236, w: Math.round(f.w * .832),
+        text: '본문을 입력하세요', font: t.bodyFont, size: 36, weight: 400,
+        lh: 1.66, color: t.bodyColor
+      })
+    ]
+  };
+}
+
+function makeProject(opts) {
+  const o = opts || {};
+  const format = FORMATS[o.format] ? o.format : '4:5';
+  const theme = PRESETS[o.theme] ? o.theme : 'editorial';
+  const now = Date.now();
+  return {
+    id: makeId('p'),
+    title: String(o.title || '').trim() || '새 카드뉴스',
+    format, theme, createdAt: now, updatedAt: now,
+    app: 'cardnews-studio', version: 3,
+    slides: (o.slides && o.slides.length) ? o.slides : [defaultSlide(format, theme)]
+  };
+}
+
+function normalizeProjectRecord(p) {
+  if (!p || typeof p !== 'object') return null;
+  if (!p.id) p.id = makeId('p');
+  if (!p.title) p.title = '제목 없는 카드뉴스';
+  if (!FORMATS[p.format]) p.format = '4:5';
+  if (!PRESETS[p.theme]) p.theme = 'editorial';
+  if (!Array.isArray(p.slides) || !p.slides.length) p.slides = [defaultSlide(p.format, p.theme)];
+  p.slides.forEach(s => {
+    if (!s.id) s.id = uid('sl');
+    s.els = (s.els || []).map(e => {
+      if (e.type === 'text') return textEl(e);
+      if (e.type === 'image') return imageEl(e);
+      return shapeEl(e);
+    });
+    if (!s.bg) s.bg = { type: 'solid', color: '#ffffff', c1: '#ffffff', c2: '#000000', angle: 135, src: '', overlay: 0 };
+  });
+  p.createdAt = p.createdAt || Date.now();
+  p.updatedAt = p.updatedAt || Date.now();
+  return p;
+}
+
+function writeLibrary() {
+  try {
+    localStorage.setItem(LIB_KEY, JSON.stringify({
+      version: 3, activeId: library.activeId,
+      projects: library.projects
+    }));
+    state._quotaWarned = false;
+    return true;
+  } catch (e) {
+    if (!state._quotaWarned) {
+      state._quotaWarned = true;
+      toast('브라우저 저장 공간이 부족합니다. JSON으로 백업해 주세요.', true);
+    }
+    return false;
+  }
+}
+
+function loadLibrary() {
+  let data = null;
+  try {
+    const raw = localStorage.getItem(LIB_KEY);
+    if (raw) data = JSON.parse(raw);
+  } catch (e) { data = null; }
+
+  library.projects = [];
+  library.activeId = null;
+  library.migrated = false;
+
+  if (data && Array.isArray(data.projects) && data.projects.length) {
+    data.projects.forEach(p => { const n = normalizeProjectRecord(p); if (n) library.projects.push(n); });
+    library.activeId = data.activeId || (library.projects[0] && library.projects[0].id) || null;
+  }
+
+  if (!library.projects.length) {
+    // v2까지의 단일 작업 데이터가 있으면 첫 번째 프로젝트로 옮깁니다.
+    let legacy = null;
+    try { const raw = localStorage.getItem(V1_KEY); if (raw) legacy = JSON.parse(raw); } catch (e) { legacy = null; }
+    if (legacy && Array.isArray(legacy.slides) && legacy.slides.length) {
+      const p = normalizeProjectRecord({
+        id: makeId('p'), title: legacy.title || '나의 카드뉴스', format: legacy.format,
+        theme: 'editorial', slides: legacy.slides
+      });
+      p.migratedFromV2 = true;
+      library.projects.push(p);
+      library.activeId = p.id;
+      library.migrated = true;
+    } else {
+      const sample = sampleProject();
+      const p = makeProject({ title: '나의 카드뉴스', format: sample.format || '4:5', theme: 'editorial', slides: sample.slides });
+      library.projects.push(p);
+      library.activeId = p.id;
+    }
+    writeLibrary();
+  }
+
+  if (!library.projects.some(p => p.id === library.activeId)) library.activeId = library.projects[0].id;
+  return library;
+}
+
+function activeProject() { return library.projects.find(p => p.id === library.activeId) || null; }
+
 function scheduleSave() {
   clearTimeout(state.saveTimer);
-  state.saveTimer = setTimeout(() => {
-    try { localStorage.setItem('cardnews-studio-v1', snapshot()); }
-    catch (e) { /* 용량 초과 등은 무시 */ }
-  }, 700);
+  state.saveTimer = setTimeout(flushSave, 700);
 }
-function loadStored() {
-  try {
-    const raw = localStorage.getItem('cardnews-studio-v1');
-    if (!raw) return null;
-    const d = JSON.parse(raw);
-    if (!d || !Array.isArray(d.slides) || !d.slides.length) return null;
-    if (!FORMATS[d.format]) d.format = '4:5';
-    return d;
-  } catch (e) { return null; }
+function flushSave() {
+  clearTimeout(state.saveTimer);
+  const p = state.project;
+  if (!p || !Array.isArray(p.slides) || !p.slides.length) return;
+  p.updatedAt = Date.now();
+  const i = library.projects.findIndex(x => x.id === p.id);
+  if (i < 0) library.projects.unshift(p); else library.projects[i] = p;
+  library.activeId = p.id;
+  writeLibrary();
+}
+
+/* JSON 불러오기·예시 복원처럼 state.project를 통째로 바꿀 때 id를 이어받습니다. */
+function adoptProject(proj) {
+  const old = state.project;
+  proj.id = (old && old.id) || makeId('p');
+  proj.theme = PRESETS[proj.theme] ? proj.theme : (PRESETS[state.theme] ? state.theme : 'editorial');
+  proj.createdAt = (old && old.createdAt) || Date.now();
+  proj.updatedAt = Date.now();
+  state.project = proj;
+  state.theme = proj.theme;
+  const i = library.projects.findIndex(x => x.id === proj.id);
+  if (i >= 0) library.projects[i] = proj;
+  scheduleSave();
+  return proj;
+}
+
+/* =========================================================================
+   v3 · 프로젝트 허브 (메인 화면)
+   ========================================================================= */
+function fmtDate(ts) {
+  const d = new Date(ts || Date.now());
+  if (isNaN(d.getTime())) return '';
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  if (d.toDateString() === now.toDateString()) return '오늘 ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  if (d.getFullYear() === now.getFullYear()) return (d.getMonth() + 1) + '월 ' + d.getDate() + '일';
+  return d.getFullYear() + '. ' + (d.getMonth() + 1) + '. ' + d.getDate() + '.';
+}
+
+function projectPreview(p, maxW, maxH) {
+  const f = FORMATS[p.format] || FORMATS['4:5'];
+  const W = Math.min(maxW, Math.max(48, Math.floor(maxH * f.w / f.h)));
+  const z = W / f.w;
+  const box = document.createElement('div');
+  box.className = 'pj-thumb';
+  box.style.width = W + 'px';
+  box.style.height = Math.round(f.h * z) + 'px';
+  const inner = document.createElement('div');
+  inner.className = 'pj-thumb-inner';
+  inner.style.width = f.w + 'px';
+  inner.style.height = f.h + 'px';
+  inner.style.transform = 'scale(' + z + ')';
+  const s = p.slides && p.slides[0];
+  if (s) {
+    try {
+      bgParts(s.bg).forEach(n => inner.appendChild(n));
+      (s.els || []).forEach(el => inner.appendChild(elNode(el, false)));
+    } catch (e) { /* 미리보기 실패는 카드만 비움 */ }
+  }
+  box.appendChild(inner);
+  return box;
+}
+
+function renderHub() {
+  const grid = dom.pjGrid;
+  if (!grid) return;
+  const narrow = window.matchMedia('(max-width:520px)').matches;
+  const maxW = narrow ? 146 : 208;
+  const maxH = narrow ? 150 : 190;
+  grid.innerHTML = '';
+  const list = library.projects.slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  dom.hubCount.textContent = library.projects.length + '개' + (library.migrated ? ' · 이전 작업을 첫 프로젝트로 불러왔습니다' : '');
+
+  list.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'pj-card';
+    card.dataset.pid = p.id;
+
+    const prev = document.createElement('div');
+    prev.className = 'pj-prev';
+    prev.appendChild(projectPreview(p, maxW, maxH));
+    prev.addEventListener('click', () => openProject(p.id));
+    card.appendChild(prev);
+
+    const nm = document.createElement('div');
+    nm.className = 'pj-name';
+    nm.textContent = p.title || '제목 없는 카드뉴스';
+    nm.title = nm.textContent;
+    nm.addEventListener('click', () => openProject(p.id));
+    card.appendChild(nm);
+
+    const f = FORMATS[p.format] || FORMATS['4:5'];
+    const meta = document.createElement('div');
+    meta.className = 'pj-meta';
+    meta.innerHTML = '<span class="tag">' + esc(f.key + ' ' + f.w + '×' + f.h) + '</span>' +
+      '<span>' + (p.slides ? p.slides.length : 0) + '장</span><span>·</span><span>' + esc(fmtDate(p.updatedAt)) + '</span>';
+    card.appendChild(meta);
+
+    const acts = document.createElement('div');
+    acts.className = 'pj-acts';
+    const open = document.createElement('button');
+    open.className = 'btn small primary open';
+    open.textContent = '열기';
+    open.addEventListener('click', () => openProject(p.id));
+    acts.appendChild(open);
+
+    const set = document.createElement('button');
+    set.className = 'btn small icon';
+    set.title = '프로젝트 설정';
+    set.setAttribute('aria-label', '프로젝트 설정');
+    set.innerHTML = '<svg viewBox="0 0 20 20"><path d="M3.5 6.5h13M3.5 13.5h13"/><circle cx="7.5" cy="6.5" r="2"/><circle cx="13" cy="13.5" r="2"/></svg>';
+    set.addEventListener('click', () => openProjectSettings(false, p));
+    acts.appendChild(set);
+
+    const dup = document.createElement('button');
+    dup.className = 'btn small icon';
+    dup.title = '프로젝트 복제';
+    dup.setAttribute('aria-label', '프로젝트 복제');
+    dup.innerHTML = '<svg viewBox="0 0 20 20"><rect x="7" y="7" width="9" height="9" rx="1.8"/><path d="M13 7V5.2A1.2 1.2 0 0 0 11.8 4H5.2A1.2 1.2 0 0 0 4 5.2v6.6A1.2 1.2 0 0 0 5.2 13H7"/></svg>';
+    dup.addEventListener('click', () => duplicateProject(p.id));
+    acts.appendChild(dup);
+
+    const del = document.createElement('button');
+    del.className = 'btn small icon danger';
+    del.title = '프로젝트 삭제';
+    del.setAttribute('aria-label', '프로젝트 삭제');
+    del.innerHTML = '<svg viewBox="0 0 20 20"><path d="M4 6.5h12M8 6.5V4.6h4v1.9M6 6.5l.7 9.2A1.2 1.2 0 0 0 7.9 16.8h4.2a1.2 1.2 0 0 0 1.2-1.1l.7-9.2"/></svg>';
+    del.addEventListener('click', () => confirmDeleteProject(p.id));
+    acts.appendChild(del);
+
+    card.appendChild(acts);
+    grid.appendChild(card);
+  });
+
+  const add = document.createElement('button');
+  add.className = 'pj-new';
+  add.innerHTML = '<span class="plus">＋</span><span>새 프로젝트</span>';
+  add.addEventListener('click', () => openProjectSettings(true));
+  grid.appendChild(add);
+}
+
+function showHub() {
+  flushSave();
+  renderHub();
+  if (dom.hub) dom.hub.hidden = false;
+  document.body.classList.add('hub-open');
+}
+function hideHub() {
+  if (dom.hub) dom.hub.hidden = true;
+  document.body.classList.remove('hub-open');
+}
+
+function openProject(id) {
+  flushSave();
+  const p = library.projects.find(x => x.id === id);
+  if (!p) return;
+  library.activeId = p.id;
+  state.project = p;
+  state.theme = PRESETS[p.theme] ? p.theme : 'editorial';
+  state.slideIndex = 0;
+  state.selId = null;
+  state.editing = null;
+  resetHistory();
+  hideHub();
+  renderAll();
+  updateTop();
+  if (window.matchMedia('(max-width:1080px)').matches) setView('canvas');
+  requestAnimationFrame(() => { if (state.autoFit) setZoom(fitZoom(), true); renderStage(); });
+  setTimeout(() => { if (state.autoFit) setZoom(fitZoom(), true); }, 260);
+  scheduleSave();
+  toast('프로젝트를 열었습니다 · ' + (p.title || ''));
+}
+
+function duplicateProject(id) {
+  flushSave();
+  const src = library.projects.find(x => x.id === id);
+  if (!src) return;
+  const c = normalizeProjectRecord(clone(src));
+  c.id = makeId('p');
+  c.title = (src.title || '카드뉴스') + ' 복사본';
+  c.createdAt = c.updatedAt = Date.now();
+  c.slides.forEach(s => { s.id = uid('sl'); (s.els || []).forEach(e => e.id = uid(e.type[0])); });
+  const i = library.projects.findIndex(x => x.id === id);
+  library.projects.splice(i + 1, 0, c);
+  writeLibrary();
+  renderHub();
+  toast('프로젝트를 복제했습니다.');
+}
+
+function confirmDeleteProject(id) {
+  const p = library.projects.find(x => x.id === id);
+  if (!p) return;
+  openModal('프로젝트 삭제',
+    `<p style="font-size:12.5px;line-height:1.75;margin:0">“<b>${esc(p.title || '제목 없는 카드뉴스')}</b>” 프로젝트(${p.slides.length}장)를 삭제합니다.<br>
+     이 브라우저에서 되돌릴 수 없습니다. 필요하면 먼저 작업 화면에서 <b>JSON</b>으로 내보내 두세요.</p>`,
+    [
+      { label: '취소', cls: 'subtle', close: true },
+      { label: '삭제', cls: 'danger', onClick: () => {
+        const i = library.projects.findIndex(x => x.id === id);
+        if (i < 0) return;
+        library.projects.splice(i, 1);
+        if (!library.projects.length) {
+          const np = makeProject({ title: '새 카드뉴스', format: '4:5', theme: 'editorial' });
+          library.projects.push(np);
+          library.activeId = np.id;
+        } else if (library.activeId === id) {
+          library.activeId = library.projects[0].id;
+          if (!dom.hub.hidden) { /* 허브에 머무름 */ }
+        }
+        writeLibrary();
+        closeModal();
+        renderHub();
+        toast('프로젝트를 삭제했습니다.');
+      } }
+    ]);
+}
+
+/* ---------- 프로젝트 설정 모달 (새 프로젝트 · 기존 설정) ---------- */
+let _settingsTarget = null;
+function openProjectSettings(isNew, target) {
+  const isNewP = !!isNew;
+  _settingsTarget = isNewP ? null : (target || state.project);
+  const p = _settingsTarget || state.project;
+  const cur = isNewP
+    ? { title: '', format: (state.project && state.project.format) || '4:5', theme: PRESETS[state.theme] ? state.theme : 'editorial' }
+    : { title: p.title || '', format: p.format || '4:5', theme: PRESETS[p.theme] ? p.theme : 'editorial' };
+
+  const body = `
+    <div class="set-wrap">
+      <div>
+        <span class="set-lbl">프로젝트 이름</span>
+        <input id="setTitle" class="set-input" maxlength="48" spellcheck="false"
+               placeholder="예: 11월 신제품 카드뉴스" value="${esc(cur.title)}">
+      </div>
+      <div>
+        <span class="set-lbl">캔버스 비율</span>
+        <div class="fmt-pick" id="setFmt">
+          ${Object.values(FORMATS).map(f => `<button type="button" data-fmt="${f.key}" class="${cur.format === f.key ? 'on' : ''}"><span>${esc(f.name)}</span><small>${f.w}×${f.h}</small></button>`).join('')}
+        </div>
+      </div>
+      <div>
+        <span class="set-lbl">기본 테마</span>
+        <div class="theme-pick" id="setTheme">
+          ${Object.values(PRESETS).map(t => `<button type="button" data-theme="${t.key}" class="${cur.theme === t.key ? 'on' : ''}"><span class="sw">${t.sw.map(c => `<i style="background:${c}"></i>`).join('')}</span><span>${esc(t.name)}</span></button>`).join('')}
+        </div>
+      </div>
+      ${isNewP
+        ? '<p class="mini" style="margin:0">선택한 비율·테마로 빈 카드 1장이 만들어집니다.</p>'
+        : '<label class="set-check"><input type="checkbox" id="setApplyTheme"><span>이 테마를 지금 프로젝트의 <b>모든 슬라이드</b>에 적용 (배경·글자 색). 끄면 새 슬라이드의 기본값만 바뀝니다.</span></label>'}
+    </div>`;
+
+  openModal(isNewP ? '새 프로젝트' : '프로젝트 설정', body, isNewP
+    ? [{ label: '취소', cls: 'subtle', close: true }, { label: '만들기', cls: 'primary', onClick: () => saveProjectSettings(true) }]
+    : [{ label: '취소', cls: 'subtle', close: true }, { label: '저장', cls: 'primary', onClick: () => saveProjectSettings(false) }]);
+
+  const pick = (sel, attr) => {
+    dom.modal.querySelectorAll(sel + ' button').forEach(b => b.addEventListener('click', () => {
+      dom.modal.querySelectorAll(sel + ' button').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+    }));
+  };
+  pick('#setFmt', 'data-fmt');
+  pick('#setTheme', 'data-theme');
+  const titleInput = $('#setTitle');
+  if (titleInput) titleInput.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const btn = dom.modal.querySelector('.modal-f .btn.primary');
+    if (btn) btn.click();
+  });
+  setTimeout(() => { const t = $('#setTitle'); if (t) { t.focus(); t.select(); } }, 30);
+}
+
+function saveProjectSettings(isNew) {
+  const titleEl = $('#setTitle');
+  const fmtOn = dom.modal.querySelector('#setFmt .on');
+  const themeOn = dom.modal.querySelector('#setTheme .on');
+  const title = (titleEl ? titleEl.value : '').trim();
+  const format = (fmtOn && fmtOn.dataset.fmt) || '4:5';
+  const theme = (themeOn && themeOn.dataset.theme) || 'editorial';
+
+  if (isNew) {
+    const p = makeProject({ title: title || '새 카드뉴스', format, theme });
+    library.projects.unshift(p);
+    library.activeId = p.id;
+    writeLibrary();
+    closeModal();
+    openProject(p.id);
+    return;
+  }
+
+  const p = _settingsTarget || state.project;
+  const isActive = (p === state.project);
+  p.title = title || '제목 없는 카드뉴스';
+  if (FORMATS[format]) p.format = format;
+  p.theme = theme;
+  const applyAll = $('#setApplyTheme') && $('#setApplyTheme').checked;
+  if (applyAll && PRESETS[theme]) p.slides.forEach(s => applyPresetToSlide(s, PRESETS[theme]));
+  p.updatedAt = Date.now();
+  closeModal();
+
+  if (isActive) {
+    state.theme = theme;
+    dom.projTitle.value = p.title;
+    pushHistory(); renderAll();
+    updateTop();
+    requestAnimationFrame(() => { if (state.autoFit) setZoom(fitZoom(), true); renderStage(); });
+  } else {
+    const i = library.projects.findIndex(x => x.id === p.id);
+    if (i >= 0) library.projects[i] = p;
+    writeLibrary();
+    renderHub();
+  }
+  scheduleSave();
+  toast('프로젝트 설정을 저장했습니다.');
+}
+
+/* =========================================================================
+   v3 · 슬라이드 끌어서 순서 변경 (마우스·터치)
+   ========================================================================= */
+const thumbDrag = { active: false };
+
+function thumbFromTarget(target) {
+  const t = target && target.closest ? target.closest('.thumb') : null;
+  return (t && dom.thumbs.contains(t)) ? t : null;
+}
+function thumbIndexOf(el) {
+  return Array.from(dom.thumbs.querySelectorAll('.thumb')).indexOf(el);
+}
+
+function startThumbDrag(el, x, y) {
+  if (thumbDrag.active) return;
+  const idx = thumbIndexOf(el);
+  if (idx < 0) return;
+  const r = el.getBoundingClientRect();
+  const all = dom.thumbs.querySelectorAll('.thumb');
+  const second = all[1];
+  thumbDrag.active = true;
+  thumbDrag.index = idx;
+  thumbDrag.el = el;
+  thumbDrag.grid = !!(second && Math.abs(all[0].getBoundingClientRect().left - second.getBoundingClientRect().left) > 4);
+  thumbDrag.grabDX = x - r.left;
+  thumbDrag.grabDY = y - r.top;
+
+  const ph = document.createElement('div');
+  ph.className = 'thumb-ph';
+  ph.style.width = r.width + 'px';
+  ph.style.height = r.height + 'px';
+  el.parentNode.insertBefore(ph, el.nextSibling);
+  el.classList.add('is-drag-src');
+
+  const ghost = el.cloneNode(true);
+  ghost.classList.remove('is-drag-src');
+  ghost.classList.add('thumb-ghost');
+  ghost.querySelectorAll('.del,.grip').forEach(n => n.remove());
+  ghost.style.left = r.left + 'px';
+  ghost.style.top = r.top + 'px';
+  ghost.style.width = r.width + 'px';
+  ghost.style.height = r.height + 'px';
+  document.body.appendChild(ghost);
+
+  thumbDrag.ph = ph;
+  thumbDrag.ghost = ghost;
+  document.body.classList.add('thumb-dragging');
+  try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) { /* 무시 */ }
+  moveThumbDrag(x, y);
+  requestAnimationFrame(thumbAutoScroll);
+}
+
+/* 끌고 있는 동안 목록 위·아래 가장자리에서 자동 스크롤 */
+function thumbAutoScroll() {
+  if (!thumbDrag.active) return;
+  const cr = dom.thumbs.getBoundingClientRect();
+  const x = thumbDrag.px, y = thumbDrag.py;
+  let dy = 0;
+  if (y < cr.top + 40) dy = -Math.min(20, (cr.top + 40 - y) / 2 + 5);
+  else if (y > cr.bottom - 40) dy = Math.min(20, (y - (cr.bottom - 40)) / 2 + 5);
+  if (dy) {
+    const before = dom.thumbs.scrollTop;
+    dom.thumbs.scrollTop = before + dy;
+    if (dom.thumbs.scrollTop !== before) moveThumbDrag(x, y);
+  }
+  requestAnimationFrame(thumbAutoScroll);
+}
+
+function moveThumbDrag(x, y) {
+  if (!thumbDrag.active) return;
+  thumbDrag.px = x; thumbDrag.py = y;
+  const g = thumbDrag.ghost;
+  g.style.left = (x - thumbDrag.grabDX) + 'px';
+  g.style.top = (y - thumbDrag.grabDY) + 'px';
+
+  const over = document.elementFromPoint(x, y);
+  const t = over && over.closest ? over.closest('.thumb') : null;
+  const ph0 = thumbDrag.ph;
+  if (t && t !== thumbDrag.el) {
+    const r = t.getBoundingClientRect();
+    let before;
+    if (thumbDrag.grid) {
+      if (y < r.top) before = true;
+      else if (y > r.bottom) before = false;
+      else before = x <= r.left + r.width / 2;
+    } else {
+      before = y <= r.top + r.height / 2;
+    }
+    if (before) {
+      if (t.previousElementSibling !== ph0) dom.thumbs.insertBefore(ph0, t);
+    } else if (t.nextElementSibling !== ph0) {
+      dom.thumbs.insertBefore(ph0, t.nextElementSibling);
+    }
+  } else if (!t) {
+    // 목록 바깥(위·아래)으로 끌어도 순서를 바꿀 수 있게 합니다.
+    const cr = dom.thumbs.getBoundingClientRect();
+    if (y <= cr.top + 10) {
+      if (dom.thumbs.firstElementChild !== ph0) dom.thumbs.insertBefore(ph0, dom.thumbs.firstElementChild);
+    } else if (y >= cr.bottom - 10) {
+      if (dom.thumbs.lastElementChild !== ph0) dom.thumbs.appendChild(ph0);
+    }
+  }
+}
+
+function endThumbDrag(cancelled) {
+  if (!thumbDrag.active) return;
+  const dragEl = thumbDrag.el, ph = thumbDrag.ph, ghost = thumbDrag.ghost;
+  const from = thumbDrag.index;
+  let to = from;
+
+  if (!cancelled && ph) {
+    const order = Array.from(dom.thumbs.children)
+      .filter(n => n.classList.contains('thumb') || n.classList.contains('thumb-ph'))
+      .filter(n => n !== dragEl);
+    const pi = order.indexOf(ph);
+    if (pi >= 0) to = pi;
+  }
+
+  dragEl.classList.remove('is-drag-src');
+  if (ph && ph.parentNode) ph.parentNode.removeChild(ph);
+  if (ghost && ghost.parentNode) ghost.parentNode.removeChild(ghost);
+  document.body.classList.remove('thumb-dragging');
+  thumbDrag.active = false;
+  thumbDrag.el = thumbDrag.ph = thumbDrag.ghost = null;
+  state._thumbClickAt = Date.now();
+
+  if (cancelled || to === from) return;
+  const arr = state.project.slides;
+  if (from < 0 || from >= arr.length || to < 0 || to >= arr.length) return;
+  const moved = arr.splice(from, 1)[0];
+  arr.splice(to, 0, moved);
+  if (state.slideIndex === from) state.slideIndex = to;
+  else if (from < state.slideIndex && to >= state.slideIndex) state.slideIndex--;
+  else if (from > state.slideIndex && to <= state.slideIndex) state.slideIndex++;
+  pushHistory();
+  renderAll();
+  toast('슬라이드 ' + (from + 1) + ' → ' + (to + 1) + '번째로 이동했습니다.');
+}
+
+function wireThumbDrag() {
+  if (!dom.thumbs) return;
+  let pending = null;
+  let touchRec = null;
+
+  // 마우스·펜
+  dom.thumbs.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'touch') return;
+    if (e.button !== 0) return;
+    const el = thumbFromTarget(e.target);
+    if (!el || (e.target.closest && e.target.closest('.del'))) return;
+    pending = { el, x: e.clientX, y: e.clientY };
+  });
+  window.addEventListener('pointermove', e => {
+    if (!pending || e.pointerType === 'touch') return;
+    if (!thumbDrag.active) {
+      if (Math.hypot(e.clientX - pending.x, e.clientY - pending.y) < 5) return;
+      startThumbDrag(pending.el, e.clientX, e.clientY);
+    }
+    if (thumbDrag.active) { e.preventDefault(); moveThumbDrag(e.clientX, e.clientY); }
+  }, { passive: false });
+  window.addEventListener('pointerup', e => {
+    if (_thumbLongPress) { clearTimeout(_thumbLongPress.timer); _thumbLongPress = null; }
+    if (thumbDrag.active && e.pointerType !== 'touch') endThumbDrag(false);
+    pending = null;
+  });
+  window.addEventListener('pointercancel', () => {
+    if (thumbDrag.active) endThumbDrag(true);
+    pending = null;
+  });
+
+  // 터치 (잠시 길게 누른 뒤 끌기 · 그 전에는 목록 스크롤)
+  var _thumbLongPress = null;
+  dom.thumbs.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1) {
+      if (_thumbLongPress) { clearTimeout(_thumbLongPress.timer); _thumbLongPress = null; }
+      return;
+    }
+    const el = thumbFromTarget(e.target);
+    if (!el || (e.target.closest && e.target.closest('.del'))) return;
+    const t = e.touches[0];
+    const rec = { el, x: t.clientX, y: t.clientY, timer: 0 };
+    rec.timer = setTimeout(() => {
+      if (_thumbLongPress !== rec) return;
+      startThumbDrag(el, rec.x, rec.y);
+    }, 300);
+    _thumbLongPress = rec;
+  }, { passive: true });
+  dom.thumbs.addEventListener('touchmove', e => {
+    const t = e.touches[0];
+    if (!t) return;
+    if (!thumbDrag.active) {
+      if (_thumbLongPress && Math.hypot(t.clientX - _thumbLongPress.x, t.clientY - _thumbLongPress.y) > 10) {
+        clearTimeout(_thumbLongPress.timer);
+        _thumbLongPress = null;
+      }
+      return;
+    }
+    e.preventDefault();
+    moveThumbDrag(t.clientX, t.clientY);
+  }, { passive: false });
+  const endTouch = () => {
+    if (_thumbLongPress) { clearTimeout(_thumbLongPress.timer); _thumbLongPress = null; }
+    if (thumbDrag.active) endThumbDrag(false);
+  };
+  dom.thumbs.addEventListener('touchend', endTouch);
+  dom.thumbs.addEventListener('touchcancel', () => {
+    if (_thumbLongPress) { clearTimeout(_thumbLongPress.timer); _thumbLongPress = null; }
+    if (thumbDrag.active) endThumbDrag(true);
+  });
 }
 
 /* =========================================================================
@@ -2955,7 +3775,8 @@ function wire() {
         const txt = await file.text();
         try {
           const proj = normalizeProject(txt, state.project.format);
-          state.project = proj; state.slideIndex = 0; state.selId = null;
+          adoptProject(proj);
+          state.slideIndex = 0; state.selId = null;
           resetHistory(); renderAll();
           requestAnimationFrame(() => { setZoom(fitZoom(), true); });
           toast(proj.slides.length + '장 카드뉴스를 불러왔습니다.');
@@ -3023,13 +3844,17 @@ function wire() {
   if (dom.mobileBar) {
     dom.mobileBar.addEventListener('click', e => {
       const b = e.target.closest('[data-mv]');
-      if (b) setView(b.dataset.mv);
+      if (!b) return;
+      if (b.dataset.mv === 'hub') { showHub(); return; }
+      setView(b.dataset.mv);
     });
   }
   if (dom.btnMore) {
     dom.btnMore.addEventListener('click', e => {
       const r = e.currentTarget.getBoundingClientRect();
       showMenu(Math.max(8, r.right - 212), r.bottom + 6, [
+        { label: '프로젝트 목록 (메인)', fn: showHub },
+        { label: '프로젝트 설정', fn: () => openProjectSettings(false) },
         { label: '실행취소', hint: 'Ctrl+Z', fn: undo },
         { label: '다시실행', hint: 'Ctrl+Shift+Z', fn: redo },
         { label: 'JSON 불러오기 · 내보내기', fn: openJsonModal },
@@ -3037,6 +3862,21 @@ function wire() {
       ]);
     });
   }
+
+  /* ---------- v3: 프로젝트 허브 · 설정 · 슬라이드 드래그 ---------- */
+  if (dom.btnHub) dom.btnHub.addEventListener('click', showHub);
+  if (dom.btnProjSet) dom.btnProjSet.addEventListener('click', () => openProjectSettings(false));
+  if (dom.hubNew) dom.hubNew.addEventListener('click', () => openProjectSettings(true));
+  if (dom.hubSample) dom.hubSample.addEventListener('click', () => {
+    flushSave();
+    const sp = sampleProject();
+    const p = makeProject({ title: '예시 카드뉴스', format: sp.format || '4:5', theme: 'editorial', slides: sp.slides });
+    library.projects.unshift(p);
+    library.activeId = p.id;
+    writeLibrary();
+    openProject(p.id);
+  });
+  wireThumbDrag();
   window.addEventListener('resize', () => {
     const narrow = window.matchMedia('(max-width:1080px)').matches;
     if (narrow !== wire._narrow) {
@@ -3112,19 +3952,10 @@ function showMenu(x, y, items) {
 function boot() {
   cacheDom();
   aiLoad();
-  const stored = loadStored();
-  state.project = stored || sampleProject();
-  state.theme = 'editorial';
-
-  // 누락 필드 보정
-  state.project.slides.forEach(s => {
-    s.els = (s.els || []).map(e => {
-      if (e.type === 'text') return textEl(e);
-      if (e.type === 'image') return imageEl(e);
-      return shapeEl(e);
-    });
-    if (!s.bg) s.bg = { type: 'solid', color: '#ffffff', c1: '#ffffff', c2: '#000000', angle: 135, src: '', overlay: 0 };
-  });
+  loadLibrary();
+  const active = activeProject() || library.projects[0];
+  state.project = active;
+  state.theme = PRESETS[active.theme] ? active.theme : 'editorial';
   if (!FORMATS[state.project.format]) state.project.format = '4:5';
 
   resetHistory();
@@ -3132,6 +3963,11 @@ function boot() {
   renderStage(); renderThumbs(); renderProps(); updateTop();
   state.tab = 'el';
   if (window.matchMedia('(max-width:1080px)').matches) setView('canvas');
+
+  // 진입하면 프로젝트 허브(메인)부터 보여줍니다.
+  renderHub();
+  if (dom.hub) dom.hub.hidden = false;
+  document.body.classList.add('hub-open');
 
   requestAnimationFrame(() => {
     setZoom(fitZoom(), true);
@@ -3141,15 +3977,21 @@ function boot() {
     if (state.autoFit) { setZoom(fitZoom(), true); }
   }, 350);
 
+  // 로그인 없이 같은 탭에서 다시 열 때를 위해 허브 상태를 다시 계산
+  window.addEventListener('beforeunload', () => { try { flushSave(); } catch (e) {} });
+
   // 디버그/검증용 (읽기 전용 정보)
   window.__CN = {
     state,
-    version: '2.0',
+    version: '3.0',
     exportShape,
     normalizeProject,
     renderSlideCanvas,
     ai: { prompt: aiPromptText, generate: aiGenerate, key: aiKeyGet },
     setView,
+    library,
+    hub: { show: showHub, hide: hideHub, render: renderHub, open: openProject, settings: openProjectSettings },
+    drag: { start: startThumbDrag, move: moveThumbDrag, end: endThumbDrag, current: thumbDrag },
     get project() { return state.project; }
   };
 }
