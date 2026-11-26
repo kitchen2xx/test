@@ -85,7 +85,7 @@ header.top {
 
 /* ---------------- tab bar ---------------- */
 .tabbar {
-  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px;
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px;
   background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
   padding: 6px; position: sticky; top: 0; z-index: 30;
   box-shadow: 0 8px 24px rgba(0,0,0,.35);
@@ -106,6 +106,7 @@ header.top {
 .tabbar button i svg { display: block; width: 15px; height: 15px; }
 .tabbar button:hover { color: var(--txt); }
 @media (max-width: 560px) {
+  .tabbar { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
   .tabbar button { font-size: 12px; padding: 9px 2px; gap: 4px; flex-direction: column; }
   .tabbar button i { width: 22px; height: 22px; }
 }
@@ -369,6 +370,10 @@ label.chk { display: inline-flex; align-items: center; gap: 6px; font-size: 12px
 .stickTabs .btn { flex: 1; }
 .stickTabs .btn.on { border-color: rgba(255,210,74,.75); background: #2A2313; color: #FFD24A; }
 .stickGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+@media (max-width: 340px) {
+  .stickGrid { grid-template-columns: repeat(3, 1fr); }
+  .stickPick img { width: 46px; height: 46px; }
+}
 .stickPick { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 4px; }
 .stickPick img { width: 54px; height: 54px; object-fit: contain; pointer-events: none; }
 .stickPick span { font-size: 11px; color: var(--txt); }
