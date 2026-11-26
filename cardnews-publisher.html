@@ -651,6 +651,8 @@ input[type=color]::-webkit-color-swatch{border:0;border-radius:4px}
           <svg viewBox="0 0 20 20"><path d="M3.5 10h13"/></svg>구분선</button>
         <button class="tool" data-add="badge" title="배지 (글자 배경)">
           <svg viewBox="0 0 20 20"><rect x="2.5" y="6" width="15" height="8" rx="4"/></svg>배지</button>
+        <button class="tool" data-add="stones" title="보석 큐빅 글씨 (라이언스톤 레터링)">
+          <svg viewBox="0 0 20 20"><path d="M10 2.8l4.6 3.5 1.4 5.5L10 17 4 11.8l1.4-5.5z"/><path d="M5.6 7.1h8.8M4.1 11.8h11.8M10 2.8L7.9 11.8 10 17l2.1-5.2z"/></svg>보석</button>
         <span class="vr"></span>
         <button class="tool" data-add="ai" title="AI 이미지 프롬프트 · 생성">
           <svg viewBox="0 0 20 20"><path d="M10 3.2l1.6 3.6L15 8.4l-3.4 1.6L10 13.6 8.4 10 5 8.4l3.4-1.6z"/><path d="M15.2 13.4l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7z"/></svg>AI</button>
@@ -807,7 +809,7 @@ function textEl(o) {
     text: '텍스트를 입력하세요', font: 'Pretendard', size: 40, weight: 400,
     color: '#14171C', ls: 0, lh: 1.42, align: 'left',
     boxColor: 'transparent', pad: 0, boxRadius: 0,
-    opacity: 1
+    opacity: 1, stones: null
   }, o || {});
 }
 function shapeEl(o) {
@@ -971,7 +973,26 @@ function elNode(el, interactive) {
     n.style.padding = (el.pad || 0) + 'px';
     n.style.background = (el.boxColor && el.boxColor !== 'transparent') ? el.boxColor : 'transparent';
     n.style.borderRadius = (el.boxRadius || 0) + 'px';
-    n.textContent = el.text == null ? '' : el.text;
+    const sc = stoneOf(el) ? getStoneCanvas(el) : null;
+    if (sc) {
+      n.classList.add('el-stone');
+      n.textContent = '';
+      n.style.height = sc.h + 'px';
+      n.style.overflow = 'visible';
+      const cv = document.createElement('canvas');
+      cv.className = 'stone-img';
+      cv.width = sc.canvas.width; cv.height = sc.canvas.height;
+      cv.getContext('2d').drawImage(sc.canvas, 0, 0);
+      cv.style.position = 'absolute';
+      cv.style.left = (-sc.m) + 'px';
+      cv.style.top = (-sc.m) + 'px';
+      cv.style.width = (sc.w + sc.m * 2) + 'px';
+      cv.style.height = (sc.h + sc.m * 2) + 'px';
+      cv.style.pointerEvents = 'none';
+      n.appendChild(cv);
+    } else {
+      n.textContent = el.text == null ? '' : el.text;
+    }
   } else if (el.type === 'image') {
     n.classList.add('el-img');
     n.style.height = Math.max(1, el.h || 1) + 'px';
@@ -1236,7 +1257,7 @@ function startDrag(e, el, mode, dir) {
   const onUp = () => {
     moveListeners(false, { move: onMove, up: onUp });
     hideGuides();
-    if (st.moved) { pushHistory(); renderProps(); renderThumbsSoon(); scheduleSave(); }
+    if (st.moved) { pushHistory(); if (stoneOf(el)) renderStage(); renderProps(); renderThumbsSoon(); scheduleSave(); }
     state.drag = null;
   };
   moveListeners(true, { move: onMove, up: onUp });
@@ -1329,6 +1350,14 @@ function beginEdit(el) {
   if (el.type !== 'text') return;
   const n = dom.elsLayer.querySelector('[data-id="' + el.id + '"]');
   if (!n) return;
+  if (stoneOf(el)) {
+    // 편집하는 동안에는 큐빅 대신 실제 글자를 보여 줍니다 (끝나면 다시 큐빅으로)
+    const cv = n.querySelector('.stone-img');
+    if (cv) cv.remove();
+    n.style.height = 'auto';
+    n.style.overflow = 'visible';
+    n.textContent = el.text == null ? '' : el.text;
+  }
   state.editing = el.id;
   state.selId = el.id;
   n.contentEditable = 'true';
@@ -1587,6 +1616,42 @@ function renderProps() {
   else renderFontTab();
 }
 
+function stoneSectionHtml(el) {
+  const S = stoneOf(el);
+  let h = `<div class="sect"><div class="sect-h">💎 보석 큐빅 레터링</div>`;
+  if (!S) {
+    h += `<button class="btn small" data-action="stones-toggle" style="width:100%;justify-content:center">보석 큐빅 글씨로 만들기</button>
+      <p class="mini">글자를 보석 큐빅으로 한 알씩 붙인 라이언스톤 레터링으로 바꿉니다. 한글·영문·숫자 모두 되고, 미리보기와 내보낸 PNG가 똑같이 나옵니다.</p>`;
+  } else {
+    h += `<div class="segbtns" style="margin-bottom:9px">
+        <button data-action="stones-style" data-v="filled" class="${S.style !== 'line' ? 'on' : ''}">채움 (한글 추천)</button>
+        <button data-action="stones-style" data-v="line" class="${S.style === 'line' ? 'on' : ''}">외곽선</button>
+      </div>`;
+    h += ctrlRange('큐빅 크기', 'el', 'stones.size', 4, 40, 1, S.size, 'px');
+    h += ctrlRange('밀도', 'el', 'stones.density', 35, 100, 1, S.density, '%');
+    h += ctrlRange('흩뿌림', 'el', 'stones.chaos', 0, 100, 1, S.chaos, '%');
+    h += ctrlRange('별 · 진주', 'el', 'stones.star', 0, 40, 1, S.star, '%');
+    h += ctrlRange('하트 · 꽃', 'el', 'stones.heart', 0, 40, 1, S.heart, '%');
+    h += `<div class="ctl-h" style="margin:12px 0 7px"><span>색상 테마</span></div><div class="chips">`;
+    Object.keys(STONE_THEMES).forEach(k => {
+      const th = STONE_THEMES[k];
+      const bg = k === 'custom'
+        ? (S.color || '#E0409B')
+        : 'linear-gradient(120deg,' + th.sw.slice(0, 3).join(',') + ')';
+      h += `<button class="chip ${S.theme === k ? 'on' : ''}" data-action="stones-theme" data-v="${k}"><i style="background:${bg}"></i>${th.name}</button>`;
+    });
+    h += `</div>`;
+    if (S.theme === 'custom') h += ctrlColor('내 색상', 'el', 'stones.color', S.color || '#E0409B');
+    h += `<div class="actrow" style="margin-top:10px">
+        <button class="btn small" data-action="stones-shuffle" style="flex:1;justify-content:center">🔀 셔플 · 다시 뽑기</button>
+        <button class="btn small" data-action="stones-toggle">끄기</button>
+      </div>`;
+    h += `<p class="mini">배치는 정해진 씨앗으로 계산되어 미리보기와 PNG가 같습니다. 셔플을 누르면 새 배치를 뽑습니다. 캔버스에서 <b style="display:inline">더블클릭</b>하면 편집하는 동안에는 보통 글자로 보입니다.</p>`;
+  }
+  h += `</div>`;
+  return h;
+}
+
 function renderElTab() {
   const el = selEl();
   if (!el) {
@@ -1657,6 +1722,7 @@ function renderElTab() {
       </div>
       ${ctrlColor('글자색', 'el', 'color', el.color)}
     </div>`;
+    h += stoneSectionHtml(el);
     const hasBox = el.boxColor && el.boxColor !== 'transparent';
     h += `<div class="sect"><div class="sect-h">배경 박스 (배지)</div>
       ${ctrlToggle('배경 박스 사용', 'el', 'boxColorToggle', hasBox)}
@@ -1732,7 +1798,12 @@ function renderBgTab() {
 }
 
 function renderFontTab() {
-  let h = `<div class="sect"><div class="sect-h">내장 무료 폰트</div>
+  const selTxt = selEl() && selEl().type === 'text' ? selEl() : null;
+  let h = `<div class="sect"><div class="sect-h">💎 보석 큐빅 레터링</div>
+    <button class="btn small" data-action="stones-pick" style="width:100%;justify-content:center;margin-bottom:7px">${selTxt ? (stoneOf(selTxt) ? '선택한 글자 · 보석 큐빅 설정 열기' : '선택한 글자를 보석 큐빅으로') : '새 보석 큐빅 글씨 추가'}</button>
+    <p class="mini">손으로 하나씩 붙인 듯한 라이언스톤 글씨입니다. 한글·영문·숫자 모두 되고, <b>요소</b> 탭에서 큐빅 크기·밀도·흩뿌림·별/진주·하트/꽃 비율·색상 테마를 조절한 뒤 <b>셔플</b>로 배치를 다시 뽑습니다.</p>
+  </div>`;
+  h += `<div class="sect"><div class="sect-h">내장 무료 폰트</div>
     <p class="mini">글자를 선택한 상태에서 폰트를 누르면 바로 적용됩니다. 아무것도 선택하지 않으면 새 텍스트의 기본 글꼴이 됩니다.</p>`;
   FONTS.forEach(f => {
     const on = (selEl() && selEl().type === 'text' && selEl().font === f.name) || (!selEl() && state.defaultFont === f.name);
@@ -1804,6 +1875,12 @@ function applyControl(t) {
   if (c) {
     const lbl = c.querySelector('.val');
     if (lbl && t.type === 'range') lbl.textContent = t.value + (t.dataset.unit || '');
+  }
+  const selNow = selEl();
+  if (key && (key.indexOf('stones.') === 0 || (key === 'text' && selNow && stoneOf(selNow)))) {
+    scheduleStoneRefresh(key === 'text' ? 160 : 100);
+    scheduleSave();
+    return;
   }
   renderStage();
   renderThumbsSoon();
@@ -1878,6 +1955,45 @@ function onPropsClick(e) {
       const name = b.dataset.font;
       state.customFonts = state.customFonts.filter(f => f.name !== name);
       renderProps(); toast('폰트를 목록에서 제거했습니다.');
+      return;
+    }
+    case 'stones-pick': {
+      if (el && el.type === 'text') {
+        if (stoneOf(el)) { state.tab = 'el'; renderProps(); }
+        else enableStones(el);
+      } else addStonesText();
+      return;
+    }
+    case 'stones-add': addStonesText(); return;
+    case 'stones-toggle': {
+      if (!el || el.type !== 'text') { toast('먼저 글자를 선택해 주세요.', true); return; }
+      if (stoneOf(el)) {
+        el.stones = Object.assign({}, el.stones, { on: false });
+        pushHistory(); renderAll();
+        toast('보석 큐빅을 껐습니다. 보통 글자로 돌아왔습니다.');
+      } else enableStones(el);
+      return;
+    }
+    case 'stones-style': {
+      if (el && stoneOf(el)) {
+        el.stones.style = b.dataset.v === 'line' ? 'line' : 'filled';
+        pushHistory(); renderAll();
+      }
+      return;
+    }
+    case 'stones-theme': {
+      if (el && stoneOf(el)) {
+        el.stones.theme = b.dataset.v;
+        pushHistory(); renderAll();
+      }
+      return;
+    }
+    case 'stones-shuffle': {
+      if (el && stoneOf(el)) {
+        el.stones.seed = (Math.random() * 2147483647) | 0;
+        pushHistory(); renderAll();
+        toast('새 배치를 뽑았습니다');
+      }
       return;
     }
     case 'ai-style':
@@ -1990,6 +2106,424 @@ function wrapText(el, maxW) {
   return out;
 }
 
+/* =========================================================================
+   v3.1 · 보석 큐빅(라이언스톤) 레터링 엔진
+   글자를 캔버스에 그려 마스크로 쓰고, 윤곽(외곽선) 또는 내부(채움)를
+   샘플링해 큐빅을 한 알 한 알 붙입니다. 배치·색은 시드로 고정되어
+   미리보기(DOM 캔버스)와 PNG 내보내기가 정확히 같은 결과를 냅니다.
+   ========================================================================= */
+const STONE_THEMES = {
+  real: {
+    name: '리얼 멀티컬러',
+    sw: ['#E23E57', '#E0409B', '#7B4FE0', '#2E9BD6', '#3CB44B', '#F2B32B'],
+    colors: ['#E23E57', '#EF4B7A', '#E0409B', '#D63AC0', '#9C46D8', '#7B4FE0', '#4E6FE0', '#3B9BD6',
+             '#26B6C4', '#2FB98A', '#4CB84A', '#A8C93A', '#F2C02B', '#F08A2A', '#FF6B4A', '#F6EFF8', '#FFFFFF']
+  },
+  crystal: {
+    name: '크리스탈·파스텔',
+    sw: ['#FFFFFF', '#F3EEFF', '#E3F3FA', '#FFE8F1'],
+    colors: ['#FFFFFF', '#FBF8FF', '#F1ECFB', '#E8F2FB', '#FDEEF4', '#EAF7F1', '#FFF6E6', '#EFEFF3', '#F7E9FF']
+  },
+  dusty: {
+    name: '더스티 핑크',
+    sw: ['#C77B8E', '#A8546B', '#E8C7CF'],
+    colors: ['#C77B8E', '#B26377', '#A8546B', '#8E4A5E', '#D9A0AE', '#E8C7CF', '#F2DCE1', '#BF6F80', '#F7EBEE']
+  },
+  lilac: {
+    name: '라일락·블루',
+    sw: ['#B7A6E8', '#6F86D6', '#D8D2F5'],
+    colors: ['#B7A6E8', '#A493E0', '#8FA8E8', '#6F86D6', '#5B6FC9', '#C9BDF0', '#D8D2F5', '#9FC3EA', '#EDE9FB']
+  },
+  custom: { name: '내 색상', sw: ['#E0409B'], colors: [] }
+};
+function stoneDefaults() {
+  return {
+    on: true, style: 'filled', size: 16, density: 88, chaos: 8,
+    star: 8, heart: 8, theme: 'real', color: '#E0409B',
+    seed: (Math.random() * 2147483647) | 0
+  };
+}
+function stoneOf(el) { return (el && el.type === 'text' && el.stones && el.stones.on) ? el.stones : null; }
+function mulberry32(a) {
+  a = (a >>> 0) || 1;
+  return function () {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function hexToRgb(h) {
+  let s = String(h || '').replace('#', '').trim();
+  if (s.length === 3) s = s[0] + s[0] + s[1] + s[1] + s[2] + s[2];
+  s = (s + '000000').slice(0, 6);
+  return [parseInt(s.slice(0, 2), 16) || 0, parseInt(s.slice(2, 4), 16) || 0, parseInt(s.slice(4, 6), 16) || 0];
+}
+function mixHex(hex, target, t) {
+  const a = hexToRgb(hex), b = hexToRgb(target);
+  return '#' + a.map((v, i) => clamp(Math.round(v + (b[i] - v) * t), 0, 255).toString(16).padStart(2, '0')).join('');
+}
+const lighten = (h, t) => mixHex(h, '#ffffff', t);
+const darken = (h, t) => mixHex(h, '#000000', t);
+
+function stonePalette(S) {
+  if (S.theme === 'custom') {
+    const c = /^#[0-9a-f]{6}$/i.test(S.color || '') ? S.color : '#E0409B';
+    return [c, lighten(c, .12), lighten(c, .26), darken(c, .12), lighten(c, .42)];
+  }
+  const th = STONE_THEMES[S.theme] || STONE_THEMES.real;
+  return th.colors;
+}
+
+function stoneMetrics(el) {
+  const pad = el.pad || 0;
+  const maxW = Math.max(10, el.w - pad * 2);
+  const lines = wrapText(el, maxW);
+  const lhPx = el.size * (el.lh || 1.4);
+  return { lines, lhPx, pad, maxW, boxH: Math.max(2, Math.round(lines.length * lhPx + pad * 2)) };
+}
+
+/* 글자 마스크를 만들어 알파값을 읽습니다 */
+function stoneMask(el, m) {
+  const w = Math.max(2, Math.round(el.w));
+  const h = Math.max(2, Math.round(m.boxH));
+  const cv = document.createElement('canvas');
+  cv.width = w; cv.height = h;
+  const ctx = cv.getContext('2d', { willReadFrequently: true });
+  ctx.font = elFont(el);
+  if (HAS_LS) ctx.letterSpacing = (el.ls || 0) + 'px';
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = el.align === 'center' ? 'center' : el.align === 'right' ? 'right' : 'left';
+  const ax = el.align === 'center' ? el.w / 2 : el.align === 'right' ? el.w - m.pad : m.pad;
+  const mm = ctx.measureText('가Ag');
+  const asc = mm.fontBoundingBoxAscent || el.size * .88;
+  const desc = mm.fontBoundingBoxDescent || el.size * .16;
+  const half = (m.lhPx - (asc + desc)) / 2;
+  ctx.textBaseline = 'alphabetic';
+  m.lines.forEach((ln, i) => {
+    if (ln === '') return;
+    ctx.fillText(ln, ax, m.pad + i * m.lhPx + half + asc);
+  });
+  if (HAS_LS) ctx.letterSpacing = '0px';
+  let data;
+  try { data = ctx.getImageData(0, 0, w, h).data; }
+  catch (e) { data = new Uint8ClampedArray(w * h * 4); }
+  return { data, w, h };
+}
+
+/* 글자 잉크까지의 거리(안쪽 깊이) — 큐빅이 획 밖으로 너무 나가지 않게 */
+function inkDistance(mask) {
+  const w = mask.w, h = mask.h, data = mask.data, INF = 1e6;
+  const dt = new Float32Array(w * h);
+  for (let i = 0, n = w * h; i < n; i++) dt[i] = data[i * 4 + 3] >= 128 ? INF : 0;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const i = y * w + x; if (dt[i] === 0) continue;
+    let d = dt[i];
+    if (x > 0) d = Math.min(d, dt[i - 1] + 1);
+    if (y > 0) {
+      d = Math.min(d, dt[i - w] + 1);
+      if (x > 0) d = Math.min(d, dt[i - w - 1] + 1.414);
+      if (x < w - 1) d = Math.min(d, dt[i - w + 1] + 1.414);
+    }
+    dt[i] = d;
+  }
+  for (let y = h - 1; y >= 0; y--) for (let x = w - 1; x >= 0; x--) {
+    const i = y * w + x; if (dt[i] === 0) continue;
+    let d = dt[i];
+    if (x < w - 1) d = Math.min(d, dt[i + 1] + 1);
+    if (y < h - 1) {
+      d = Math.min(d, dt[i + w] + 1);
+      if (x < w - 1) d = Math.min(d, dt[i + w + 1] + 1.414);
+      if (x > 0) d = Math.min(d, dt[i + w - 1] + 1.414);
+    }
+    dt[i] = d;
+  }
+  return dt;
+}
+
+/* 큐빅이 붙을 좌표를 뽑습니다 (외곽선 = 윤곽 픽셀, 채움 = 내부 격자) */
+function stonePoints(el, mask) {
+  const S = el.stones;
+  const dia = clamp(Number(S.size) || 16, 4, 48);
+  const dens = clamp(Number(S.density) || 82, 30, 100) / 100;
+  const spacing = dia * (1.30 - 0.54 * dens);       // 밀도 100% ≈ 0.76dia, 30% ≈ 1.14dia
+  const chaos = clamp(Number(S.chaos) || 0, 0, 100) / 100;
+  const w = mask.w, h = mask.h, data = mask.data;
+  const A = (x, y) => (x < 0 || y < 0 || x >= w || y >= h) ? 0 : data[((y | 0) * w + (x | 0)) * 4 + 3];
+  const rnd = mulberry32((Number(S.seed) || 1) >>> 0);
+  const pts = [];
+  const minD2 = Math.pow(spacing * 0.80, 2);
+  const cell = Math.max(2, spacing);
+  const cw = Math.ceil(w / cell) + 3, chh = Math.ceil(h / cell) + 3;
+  const buckets = new Array(cw * chh);
+  function accept(x, y) {
+    const gx = ((x / cell) | 0) + 1, gy = ((y / cell) | 0) + 1;
+    for (let ix = gx - 1; ix <= gx + 1; ix++) {
+      const base = ix * chh;
+      for (let iy = gy - 1; iy <= gy + 1; iy++) {
+        const b = buckets[base + iy];
+        if (!b) continue;
+        for (let k = 0; k < b.length; k += 2) {
+          const dx = b[k] - x, dy = b[k + 1] - y;
+          if (dx * dx + dy * dy < minD2) return false;
+        }
+      }
+    }
+    const idx = gx * chh + gy;
+    (buckets[idx] || (buckets[idx] = [])).push(x, y);
+    return true;
+  }
+
+  if (S.style === 'line') {
+    const cand = [];
+    for (let y = 1; y < h - 1; y++) {
+      for (let x = 1; x < w - 1; x++) {
+        if (A(x, y) < 128) continue;
+        if (A(x - 1, y) >= 128 && A(x + 1, y) >= 128 && A(x, y - 1) >= 128 && A(x, y + 1) >= 128) continue;
+        cand.push(y * w + x);
+      }
+    }
+    for (let i = cand.length - 1; i > 0; i--) {
+      const j = (rnd() * (i + 1)) | 0;
+      const t = cand[i]; cand[i] = cand[j]; cand[j] = t;
+    }
+    for (let i = 0; i < cand.length; i++) {
+      const x = cand[i] % w, y = (cand[i] / w) | 0;
+      const jx = (rnd() - .5) * chaos * dia * .6, jy = (rnd() - .5) * chaos * dia * .6;
+      if (accept(x + jx, y + jy)) pts.push([x + jx, y + jy]);
+    }
+  } else {
+    // 채움: 행마다 위상을 바꾼 엇갈린 격자로 글자 잉크를 따라 붙입니다
+    let bx0 = w, by0 = h, bx1 = 0, by1 = 0;
+    for (let y = 0; y < h; y += 2) {
+      for (let x = 0; x < w; x += 2) {
+        if (data[(y * w + x) * 4 + 3] < 120) continue;
+        if (x < bx0) bx0 = x; if (x > bx1) bx1 = x;
+        if (y < by0) by0 = y; if (y > by1) by1 = y;
+      }
+    }
+    if (bx1 <= bx0 || by1 <= by0) return { pts, dia, spacing };
+    const probe = dia * 0.18;                    // 글자 획 밖으로 너무 나가지 않게
+    const dt = inkDistance(mask);
+    const deep = (x, y) => {
+      if (x < 0 || y < 0 || x >= w || y >= h) return false;
+      return dt[(y | 0) * w + (x | 0)] >= probe;
+    };
+    // 행마다 위상을 바꾼 엇갈린 격자 — 빈틈 없이 붙지만 줄무늬는 남지 않게
+    const dy = spacing * 0.86;
+    let row = 0;
+    for (let y = dy * .5; y < h; y += dy, row++) {
+      const off = rnd() * spacing;
+      for (let x = off - spacing; x < w + spacing; x += spacing) {
+        const px = x + (rnd() - .5) * spacing * .34;
+        const py = y + (rnd() - .5) * dy * .34;
+        if (A(px, py) < 170 || !deep(px, py)) continue;
+        if (accept(px, py)) pts.push([px, py]);
+      }
+      if (pts.length > 9000) break;
+    }
+  }
+  // 흩뿌림 — 완성된 배치를 조금씩 어긋나게 (0 = 단정, 100 = 손으로 대강)
+  if (chaos > 0) {
+    const amp = chaos * spacing * 0.45;
+    for (let i = 0; i < pts.length; i++) {
+      pts[i][0] += (rnd() - .5) * 2 * amp;
+      pts[i][1] += (rnd() - .5) * 2 * amp;
+    }
+  }
+  return { pts, dia, spacing };
+}
+
+/* --- 큐빅 한 알 --- */
+function starPath(ctx, cx, cy, r) {
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const rr = (i % 2) ? r * .45 : r;
+    const a = -Math.PI / 2 + i * Math.PI / 5;
+    const x = cx + Math.cos(a) * rr, y = cy + Math.sin(a) * rr;
+    if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+  }
+  ctx.closePath();
+}
+function heartPath(ctx, cx, cy, r) {
+  const s = r * .98;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy + s * .86);
+  ctx.bezierCurveTo(cx - s * 1.16, cy + s * .04, cx - s * .68, cy - s * .92, cx, cy - s * .26);
+  ctx.bezierCurveTo(cx + s * .68, cy - s * .92, cx + s * 1.16, cy + s * .04, cx, cy + s * .86);
+  ctx.closePath();
+}
+function drawStoneAt(ctx, x, y, r, color, kind, rnd) {
+  r = Math.max(1.6, r);
+  // 접착제 그림자 — 손으로 붙인 느낌
+  ctx.beginPath();
+  ctx.ellipse(x + r * .07, y + r * .18, r * .96, r * .88, 0, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(52,32,48,.10)';
+  ctx.fill();
+
+  if (kind === 'star') {
+    const g = ctx.createRadialGradient(x - r * .3, y - r * .35, r * .1, x, y, r * 1.1);
+    g.addColorStop(0, lighten(color, .7)); g.addColorStop(.5, color); g.addColorStop(1, darken(color, .28));
+    starPath(ctx, x, y, r * 1.16);
+    ctx.fillStyle = g; ctx.fill();
+    ctx.lineWidth = Math.max(.5, r * .12); ctx.strokeStyle = lighten(color, .55); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x - r * .12, y - r * .14, r * .22, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fill();
+    return;
+  }
+  if (kind === 'heart') {
+    const g = ctx.createRadialGradient(x - r * .3, y - r * .4, r * .1, x, y, r * 1.1);
+    g.addColorStop(0, lighten(color, .55)); g.addColorStop(.55, color); g.addColorStop(1, darken(color, .3));
+    heartPath(ctx, x, y, r * 1.02);
+    ctx.fillStyle = g; ctx.fill();
+    ctx.lineWidth = Math.max(.45, r * .1); ctx.strokeStyle = lighten(color, .4); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(x - r * .34, y - r * .34, r * .24, r * .15, -.6, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.fill();
+    return;
+  }
+  if (kind === 'pearl') {
+    const g = ctx.createRadialGradient(x - r * .34, y - r * .4, r * .08, x + r * .1, y + r * .1, r * 1.05);
+    g.addColorStop(0, '#FFFFFF');
+    g.addColorStop(.45, lighten(color, .64));
+    g.addColorStop(.82, lighten(color, .3));
+    g.addColorStop(1, darken(color, .12));
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x - r * .3, y - r * .36, r * .3, r * .19, -.6, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,.92)'; ctx.fill();
+    return;
+  }
+
+  // 라운드 큐빅 — 판면(facet)이 각지게 잡히도록 납짜으로 칠합니다
+  const g = ctx.createRadialGradient(x - r * .26, y - r * .30, r * .10, x + r * .04, y + r * .10, r * 1.0);
+  g.addColorStop(0, lighten(color, .20));
+  g.addColorStop(.55, color);
+  g.addColorStop(1, darken(color, .13));
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
+
+  if (r >= 3) {
+    // 패싯 — 가운데 테이블에서 가장자리로 퍼지는 삼각면
+    const n = 8, rot = rnd() * Math.PI * 2, step = Math.PI * 2 / n;
+    for (let i = 0; i < n; i++) {
+      const a0 = rot + i * step, a1 = a0 + step, am = a0 + step / 2;
+      const lit = Math.max(0, Math.cos(am + Math.PI * .78));      // 왼쪽 위에서 빛이 들어옴
+      ctx.beginPath();
+      ctx.moveTo(x + Math.cos(am) * r * .26, y + Math.sin(am) * r * .26);
+      ctx.lineTo(x + Math.cos(a0) * r * .97, y + Math.sin(a0) * r * .97);
+      ctx.lineTo(x + Math.cos(a1) * r * .97, y + Math.sin(a1) * r * .97);
+      ctx.closePath();
+      ctx.fillStyle = lit > .2
+        ? 'rgba(255,255,255,' + (0.04 + lit * 0.15).toFixed(3) + ')'
+        : 'rgba(30,12,36,' + (0.04 + (0.2 - lit) * 0.12).toFixed(3) + ')';
+      ctx.fill();
+    }
+    // 테이블 — 가운데 팔각 면
+    ctx.beginPath();
+    for (let i = 0; i < 8; i++) {
+      const a = rot + Math.PI / 8 + i * Math.PI / 4;
+      const px = x + Math.cos(a) * r * .30, py = y + Math.sin(a) * r * .30;
+      if (i) ctx.lineTo(px, py); else ctx.moveTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(255,255,255,.22)'; ctx.fill();
+    ctx.lineWidth = Math.max(.3, r * .04); ctx.strokeStyle = 'rgba(255,255,255,.42)'; ctx.stroke();
+    // 테두리 — 얇고 은은하게
+    ctx.beginPath(); ctx.arc(x, y, r * .97, 0, Math.PI * 2);
+    ctx.lineWidth = Math.max(.3, r * .055); ctx.strokeStyle = darken(color, .30); ctx.globalAlpha = .30; ctx.stroke(); ctx.globalAlpha = 1;
+  }
+  // 하이라이트 — 작고 선명하게
+  ctx.beginPath(); ctx.ellipse(x - r * .30, y - r * .33, r * .19, r * .105, -.6, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,.92)'; ctx.fill();
+  ctx.beginPath(); ctx.arc(x + r * .26, y + r * .22, Math.max(.4, r * .075), 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.fill();
+}
+
+const stoneCache = new Map();
+function stoneKey(el) {
+  const S = el.stones || {};
+  return [el.w, el.pad, el.text, el.font, el.size, el.weight, el.ls, el.lh, el.align,
+    S.style, S.size, S.density, S.chaos, S.star, S.heart, S.theme, S.color, S.seed].join('§');
+}
+function getStoneCanvas(el) {
+  if (!stoneOf(el)) return null;
+  const k = stoneKey(el);
+  const hit = stoneCache.get(k);
+  if (hit) return hit;
+  let out = null;
+  try { out = buildStoneCanvas(el); }
+  catch (e) { console.warn('보석 큐빅 렌더 실패', e); return null; }
+  if (stoneCache.size > 20) stoneCache.clear();
+  stoneCache.set(k, out);
+  return out;
+}
+function buildStoneCanvas(el) {
+  const S = el.stones;
+  const m = stoneMetrics(el);
+  const mask = stoneMask(el, m);
+  const { pts, dia } = stonePoints(el, mask);
+  const M = Math.ceil(dia * .95) + 4;
+  const SS = 2;
+  const cv = document.createElement('canvas');
+  cv.width = Math.max(1, Math.round((mask.w + M * 2) * SS));
+  cv.height = Math.max(1, Math.round((mask.h + M * 2) * SS));
+  const ctx = cv.getContext('2d');
+  ctx.scale(SS, SS);
+  ctx.translate(M, M);
+  const rnd = mulberry32(((Number(S.seed) || 1) ^ 0x5bf03635) >>> 0);
+  const pal = stonePalette(S);
+  const starP = clamp(Number(S.star) || 0, 0, 60) / 100;
+  const heartP = clamp(Number(S.heart) || 0, 0, 60) / 100;
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i];
+    let base = pal[(rnd() * pal.length) | 0] || '#E0409B';
+    const r0 = rnd();
+    if (r0 < .06) base = '#FFFFFF';                     // 무색 크리스탈
+    else if (r0 < .10) base = lighten(base, .34);       // 파스텔 한 톡
+    else if (r0 < .16) base = darken(base, .12);
+    const rr = dia / 2 * (.82 + rnd() * .36);
+    const t = rnd();
+    let kind = 'round';
+    if (t < starP) kind = rnd() < .7 ? 'star' : 'pearl';
+    else if (t < starP + heartP) kind = rnd() < .7 ? 'heart' : 'pearl';
+    drawStoneAt(ctx, p[0], p[1], rr, base, kind, rnd);
+  }
+  return { canvas: cv, w: mask.w, h: mask.h, m: M, count: pts.length };
+}
+
+/* 편집기 미리보기 갱신을 잠깐 모아서 처리 (슬라이더·타이핑 부드럽게) */
+let _stoneTimer = 0;
+function scheduleStoneRefresh(delay) {
+  clearTimeout(_stoneTimer);
+  _stoneTimer = setTimeout(() => { try { renderStage(); renderThumbsSoon(); } catch (e) {} }, delay == null ? 110 : delay);
+}
+function enableStones(el) {
+  const prev = el.stones || {};
+  el.stones = Object.assign(stoneDefaults(), prev, {
+    on: true,
+    size: prev.size || clamp(Math.round((el.size || 40) * .045), 5, 22),
+    seed: (Math.random() * 2147483647) | 0
+  });
+  state.selId = el.id;
+  state.tab = 'el';
+  pushHistory(); renderAll();
+  toast('보석 큐빅 레터링을 켰습니다 · 셔플로 배치를 다시 뽑을 수 있어요');
+}
+function addStonesText() {
+  const s = curSlide();
+  const f = fmt();
+  const el = textEl({
+    w: Math.min(880, f.w - 160), size: 96, weight: 400, lh: 1.2, ls: 0,
+    text: '보석처럼\n반짝', font: 'Black Han Sans',
+    stones: Object.assign(stoneDefaults(), { size: 6 })
+  });
+  const p = placeNew(el.w, 220);
+  el.x = p.x; el.y = p.y;
+  s.els.push(el);
+  state.selId = el.id; state.tab = 'el';
+  pushHistory(); renderStage(); renderThumbsSoon(); renderProps();
+  toast('보석 큐빅 글씨를 추가했습니다 · 문구를 고쳐 보세요');
+}
+
 function roundPath(ctx, x, y, w, h, r) {
   r = Math.max(0, Math.min(r || 0, w / 2, h / 2));
   ctx.beginPath();
@@ -2023,6 +2557,7 @@ function drawShape(ctx, el) {
 }
 
 function drawText(ctx, el) {
+  if (stoneOf(el)) return drawStoneText(ctx, el);
   const pad = el.pad || 0;
   const maxW = Math.max(10, el.w - pad * 2);
   const lines = wrapText(el, maxW);
@@ -2051,6 +2586,20 @@ function drawText(ctx, el) {
     ctx.fillText(ln, ax, el.y + pad + i * lhPx + half + asc);
   });
   if (HAS_LS) ctx.letterSpacing = '0px';
+  ctx.restore();
+}
+
+function drawStoneText(ctx, el) {
+  const m = stoneMetrics(el);
+  const sc = getStoneCanvas(el);
+  ctx.save();
+  ctx.globalAlpha = el.opacity == null ? 1 : el.opacity;
+  if (el.boxColor && el.boxColor !== 'transparent') {
+    roundPath(ctx, el.x, el.y, el.w, m.boxH, el.boxRadius || 0);
+    ctx.fillStyle = el.boxColor;
+    ctx.fill();
+  }
+  if (sc) ctx.drawImage(sc.canvas, el.x - sc.m, el.y - sc.m, sc.w + sc.m * 2, sc.h + sc.m * 2);
   ctx.restore();
 }
 
@@ -2139,6 +2688,7 @@ async function ensureFonts() {
     });
     await Promise.race([Promise.all(jobs.map(p => p.catch(() => {}))), sleep(2600)]);
     await Promise.race([document.fonts.ready, sleep(2600)]);
+    stoneCache.clear();
   } catch (e) {}
 }
 
@@ -2322,7 +2872,8 @@ function normalizeElement(raw, f) {
     boxColor: raw.boxColor || raw.background || 'transparent',
     pad: raw.pad || raw.padding || 0,
     boxRadius: raw.boxRadius || raw.borderRadius || 0,
-    opacity: raw.opacity == null ? 1 : raw.opacity
+    opacity: raw.opacity == null ? 1 : raw.opacity,
+    stones: (raw.stones && raw.stones.on) ? Object.assign(stoneDefaults(), raw.stones) : null
   });
 }
 
@@ -2393,7 +2944,7 @@ function openJsonModal() {
     <div class="json-grid">
       <div>
         <div class="json-h">가져오기</div>
-        <p class="muted">키키가 만든 카드뉴스 JSON이나 저장해 둔 프로젝트를 붙여넣으세요. <b>slides</b> 배열이면 됩니다. <b>title·body·kicker·image</b>만 있어도 자동으로 배치합니다.</p>
+        <p class="muted">이전에 만든 카드뉴스 JSON이나 저장해 둔 프로젝트를 붙여넣으세요. <b>slides</b> 배열이면 됩니다. <b>title·body·kicker·image</b>만 있어도 자동으로 배치합니다.</p>
         <textarea id="jsonIn" class="ta" placeholder='{"format":"4:5","slides":[{"title":"제목","body":"본문"}]}' spellcheck="false"></textarea>
         <div class="json-row">
           <label class="btn small" style="cursor:pointer">파일 선택<input type="file" id="jsonFile" accept=".json,application/json" hidden></label>
@@ -2517,6 +3068,10 @@ function openHelp() {
     <div style="margin-top:18px;padding-top:14px;border-top:1px solid #E4E6EA">
       <h4>AI 이미지</h4>
       <p class="mini">오른쪽 <b>AI</b> 탭에서 주제·인물/소재·강조 문구를 넣으면 카드뉴스용 이미지 프롬프트가 자동으로 만들어집니다. <b>프롬프트 복사</b> → ChatGPT·Gemini·Midjourney에서 이미지를 만든 뒤, 같은 탭의 칸에 <b>끌어다 놓기</b>(또는 Ctrl+V)로 올리면 슬라이드에 들어갑니다. 이미지 요소를 고르면 <b>확대·좌우/상하 이동</b>으로 잘라 쓸 수 있습니다. 본인 Gemini API 키를 넣으면 페이지 안에서 바로 생성도 됩니다(키는 이 브라우저에만 저장되고 코드에 적히지 않습니다).</p>
+    </div>
+    <div style="margin-top:18px;padding-top:14px;border-top:1px solid #E4E6EA">
+      <h4>💎 보석 큐빅 글씨</h4>
+      <p class="mini">도구 막대의 <b>보석</b> 버튼으로 보석 큐빅 글씨를 새로 넣거나, 글자를 선택해 <b>요소</b> 탭의 <b>보석 큐빅 레터링</b>을 켜면 됩니다. <b>채움</b>은 글자 속을 큐빅으로 채우고(한글 추천) <b>외곽선</b>은 글자 테두리를 따라 붙입니다. 큐빅 크기·밀도·흩뿌림과 별/진주·하트/꽃 비율, 색상 테마(리얼 멀티컬러·크리스탈·더스티 핑크·라일락/블루·내 색상)를 고를 수 있고, <b>셔플</b>을 누르면 배치를 새로 뽑습니다. 미리보기와 PNG 내보내기는 같은 계산을 써서 결과가 같습니다.</p>
     </div>`, [{ label: '확인', cls: 'primary', close: true }]);
 }
 
@@ -3664,6 +4219,7 @@ function wire() {
   dom.addBar.addEventListener('click', e => {
     const b = e.target.closest('[data-add]'); if (!b) return;
     const k = b.dataset.add;
+    if (k === 'stones') { addStonesText(); return; }
     if (k === 'text' || k === 'title' || k === 'badge') addText(k);
     else if (k === 'image') { state.fileIntent = { kind: 'insert', target: state.ai.target }; dom.imgInput.click(); }
     else if (k === 'ai') {
@@ -3984,21 +4540,40 @@ function boot() {
     if (state.autoFit) { setZoom(fitZoom(), true); }
   }, 350);
 
+  // 폰트가 늦게 도착하면 큐빅 배치를 다시 그립니다 (마스크가 대체 폰트로 만들어질 수 있음)
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+      stoneCache.clear();
+      try { if (state.project) renderStage(); } catch (e) {}
+    }).catch(() => {});
+  }
+
   // 로그인 없이 같은 탭에서 다시 열 때를 위해 허브 상태를 다시 계산
   window.addEventListener('beforeunload', () => { try { flushSave(); } catch (e) {} });
 
   // 디버그/검증용 (읽기 전용 정보)
   window.__CN = {
     state,
-    version: '3.0',
+    version: '3.1',
     exportShape,
     normalizeProject,
     renderSlideCanvas,
     ai: { prompt: aiPromptText, generate: aiGenerate, key: aiKeyGet },
     setView,
     library,
+    render: () => { renderStage(); renderThumbsSoon(); renderProps(); },
     hub: { show: showHub, hide: hideHub, render: renderHub, open: openProject, settings: openProjectSettings },
     drag: { start: startThumbDrag, move: moveThumbDrag, end: endThumbDrag, current: thumbDrag },
+    stones: {
+      themes: STONE_THEMES,
+      defaults: stoneDefaults,
+      add: addStonesText,
+      enable: enableStones,
+      canvas: el => getStoneCanvas(el),
+      points: el => { const m = stoneMetrics(el); return stonePoints(el, stoneMask(el, m)); },
+      mask: el => stoneMask(el, stoneMetrics(el)),
+      clear: () => stoneCache.clear()
+    },
     get project() { return state.project; }
   };
 }
